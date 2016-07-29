@@ -1,0 +1,7 @@
+*.pyc
+__pycache__
+build
+celeriac.egg-info
+dist
+TODO
+

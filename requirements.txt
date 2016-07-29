@@ -1,0 +1,2 @@
+#TODO: add parsley
+celery==3.1.9
