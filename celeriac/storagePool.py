@@ -18,35 +18,44 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
+from .lockPool import LockPool
+
 
 class StoragePool(object):
     """
-    A pool that carries all database connections per worker
+    A pool that carries all database connections for workers
     """
-    _database_adapters = {}
+    _storage_mapping = {}
 
-    def __init__(self, database_mapping):
-        self._database_mapping = database_mapping
-
-    @classmethod
-    def set_database_adapters(cls, database_adapters):
-        """
-        :param database_adapters: database adapters that should be used
-        """
-        cls._database_adapters = database_adapters
-
-    @property
-    def database_mapping(self):
-        """
-        :return: current database mapping for nodes
-        """
-        return self._database_mapping
-
-    def get(self, flow_name, task_name, task_id):
-        # TODO: implement
-        raise NotImplementedError()
+    def __init__(self, id_mapping=None):
+        self._id_mapping = id_mapping if id_mapping else {}
 
     @classmethod
-    def set(cls, flow_name, task_name, task_id, result):
-        # TODO: implement
-        raise NotImplementedError()
+    def set_storage_mapping(cls, storage_mapping):
+        """
+        :param storage_mapping: database adapters that should be used for certain task in a flow flow
+        """
+        cls._storage_mapping = storage_mapping
+
+    @classmethod
+    def _connected_storage(cls, storage_name):
+        # if this raises KeyError exception it means that the flow was not configured properly - should
+        # be handled by Parsley
+        storage = cls._storage_mapping[storage_name]
+
+        if not storage.connected():
+            with LockPool.get_lock(storage):
+                if not storage.connected():
+                    # TODO: we could optimize this by limiting number of active connections
+                    storage.connect()
+
+        return storage
+
+    def get(self, storage_name, flow_name, task_name):
+        storage = self._connected_storage(storage_name)
+        return storage.retrieve(flow_name, task_name, self._id_mapping[task_name])
+
+    @classmethod
+    def set(cls, storage_name, flow_name, task_name, task_id, result):
+        storage = cls._connected_storage(storage_name)
+        storage.store(flow_name, task_name, task_id, result)
