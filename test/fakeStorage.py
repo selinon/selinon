@@ -18,10 +18,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
-from celeriac import CeleriacStorage
+from celeriac import DataStorage
 
 
-class FakeStorage(CeleriacStorage):
+class FakeStorage(DataStorage):
     """
     Fake storage helper for tests
     """
