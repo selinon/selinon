@@ -22,6 +22,7 @@ import itertools
 from celery.result import AsyncResult, states
 from .flowError import FlowError
 from .dispatcher import Dispatcher
+from .storagePool import StoragePool
 
 
 # TODO: write docstrings
@@ -58,18 +59,16 @@ class SystemState(object):
         ret = []
         for i in arr:
             ret.append(edge_node_table[i])
-            # keep index for deserialization in _items2idx()
-            ret[-1]['idx'] = i
         return ret
 
     @staticmethod
     def _items2idx(edge_node_table, arr):
+        # TODO: remove
         return [edge_node_table[item['idx']] for item in arr]
 
     def __init__(self, edge_table, flow_name, node_args = None, retry = None, state = None):
         state_dict = {} if state is None else state
 
-        self._db_connections = None
         self._get_task_instance = None
         self._is_flow = None
 
@@ -114,6 +113,7 @@ class SystemState(object):
 
     def _start_node(self, node_name, parent, args):
         if self._is_flow(node_name):
+            # TODO: should we pass id of parent?
             async_result = Dispatcher().delay(flow_name=node_name, args=None, parent=self._flow_name)
         else:
             task = self._get_task_instance(node_name)
@@ -167,13 +167,14 @@ class SystemState(object):
                 for start_nodes in itertools.product(*from_nodes.values()):
                     parent = {}
 
+                    # TODO: not list only ids
                     for start_node in start_nodes:
                         if not parent.get(start_node['name'], False):
                             parent[start_node['name']] = []
                         parent[start_node['name']].append(start_node['id'])
 
-                    # TODO: set mapping to the mapping
-                    if edge['condition'](self._db_connections):
+                    storage_pool = StoragePool(parent)
+                    if edge['condition'](storage_pool):
                         for node_name in edge['to']:
                             ar = self._start_node(node_name, parent, self._node_args)
                             record = {'name': node_name, 'id': ar.task_id, 'result': ar}
@@ -205,8 +206,8 @@ class SystemState(object):
             raise ValueError("No starting node found for flow '%s'!" % self._flow_name)
 
         for start_edge in start_edges:
-            # TODO: set mapping to the mapping
-            if start_edge['condition'](self._db_connections):
+            storage_pool = StoragePool()
+            if start_edge['condition'](storage_pool):
                 for node_name in start_edge['to']:
                     ar = self._start_node(node_name, args=self._node_args, parent=None)
                     self._active_nodes.append({'id': ar.task_id, 'name': node_name, 'result': ar})
@@ -219,8 +220,7 @@ class SystemState(object):
 
         return self._retry
 
-    def update(self, db_connections, get_task_instance, is_flow):
-        self._db_connections = db_connections
+    def update(self, get_task_instance, is_flow):
         self._get_task_instance = get_task_instance
         self._is_flow = is_flow
 
