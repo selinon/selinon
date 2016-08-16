@@ -22,7 +22,7 @@ import abc
 from .helpers import ABC
 
 
-class CeleriacStorage(ABC):
+class DataStorage(ABC):
     """
     Abstract Celeriac storage adapter that is implemented by a user
     """
