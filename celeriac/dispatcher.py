@@ -22,6 +22,7 @@ import runpy
 from .celeriacStorageTask import CeleriacStorageTask
 from .systemState import SystemState
 from .flowError import FlowError
+from .storagePool import StoragePool
 
 
 class Dispatcher(CeleriacStorageTask):
@@ -37,7 +38,7 @@ class Dispatcher(CeleriacStorageTask):
         cls._is_flow = config_module['is_flow']
         cls._edge_table = config_module['edge_table']
         cls._output_schemas = config_module['output_schemas']
-        cls._get_storage = config_module['get_storage']
+        StoragePool.set_get_storage(config_module['get_storage'])
         # we should call initialization explicitly
         config_module['init']()
 
