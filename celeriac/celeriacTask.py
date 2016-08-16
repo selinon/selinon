@@ -22,6 +22,7 @@ import abc
 import jsonschema
 from .celeriacStorageTask import CeleriacStorageTask
 from .helpers import ABC_from_parent
+from .storagePool import StoragePool
 
 
 class CeleriacTask(ABC_from_parent(CeleriacStorageTask)):
@@ -73,9 +74,8 @@ class CeleriacTask(ABC_from_parent(CeleriacStorageTask)):
         result = self.execute(flow_name, task_name, parent, args)
         self.validate_result(result)
 
-        # TODO
         if self.storage:
-            self.storage.store(flow_name=flow_name, task_name=task_name, task_id=self.task_id, result=result)
+            StoragePool.set(flow_name=flow_name, task_name=task_name, task_id=self.task_id, result=result)
         elif not self.storage and result is not None:
             # TODO: make warning that the result is discarded
             pass

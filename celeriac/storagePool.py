@@ -26,6 +26,7 @@ class StoragePool(object):
     A pool that carries all database connections for workers
     """
     _storage_mapping = {}
+    _task_mapping = {}
 
     def __init__(self, id_mapping=None):
         self._id_mapping = id_mapping if id_mapping else {}
@@ -36,6 +37,13 @@ class StoragePool(object):
         :param storage_mapping: database adapters that should be used for certain task in a flow flow
         """
         cls._storage_mapping = storage_mapping
+
+    @classmethod
+    def set_task_mapping(cls, task_mapping):
+        """
+        :param task_mapping: mapping tasks to a certain storage name
+        """
+        cls._task_mapping = task_mapping
 
     @classmethod
     def _connected_storage(cls, storage_name):
@@ -56,6 +64,7 @@ class StoragePool(object):
         return storage.retrieve(flow_name, task_name, self._id_mapping[task_name])
 
     @classmethod
-    def set(cls, storage_name, flow_name, task_name, task_id, result):
+    def set(cls, flow_name, task_name, task_id, result):
+        storage_name = cls._task_mapping[task_name]
         storage = cls._connected_storage(storage_name)
         storage.store(flow_name, task_name, task_id, result)
