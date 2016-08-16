@@ -20,10 +20,9 @@
 
 from getTaskInstance import GetTaskInstance
 from celery import Task
-from .celeriacStorageTask import CeleriacStorageTask
 
 
-class Dispatcher(CeleriacStorageTask):
+class Dispatcher(Task):
     def __init__(self):
         self._flow_name = None
         self._args = None

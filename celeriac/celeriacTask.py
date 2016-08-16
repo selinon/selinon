@@ -20,12 +20,12 @@
 
 import abc
 import jsonschema
-from .celeriacStorageTask import CeleriacStorageTask
+from celery import Task
 from .helpers import ABC_from_parent
 from .storagePool import StoragePool
 
 
-class CeleriacTask(ABC_from_parent(CeleriacStorageTask)):
+class CeleriacTask(ABC_from_parent(Task)):
     """
     A base class for user defined workers
     """
@@ -49,11 +49,26 @@ class CeleriacTask(ABC_from_parent(CeleriacStorageTask)):
         :param args: args for Celery task
         :param kwargs: kwargs for Celery task
         """
-        super(CeleriacStorageTask, self).__init__(*args, **kwargs)
+        super(CeleriacTask, self).__init__(*args, **kwargs)
         self.task_name = None
         self.task_id = None
         self.flow_name = None
         self.parent = None
+
+    @staticmethod
+    def result_by_parent_name(parent_name):
+        # TODO: implement
+        pass
+
+    @staticmethod
+    def result_by_parent_id(parent_id):
+        # TODO: implement
+        pass
+
+    @staticmethod
+    def result_by_parent(parent):
+        # TODO: implement
+        pass
 
     @classmethod
     def validate_result(cls, result):

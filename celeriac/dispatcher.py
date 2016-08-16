@@ -19,13 +19,13 @@
 # ####################################################################
 
 import runpy
-from .celeriacStorageTask import CeleriacStorageTask
+from celery import Task
 from .systemState import SystemState
 from .flowError import FlowError
 from .storagePool import StoragePool
 
 
-class Dispatcher(CeleriacStorageTask):
+class Dispatcher(Task):
     """
     Celeriac Dispatcher worker implementation
     """
