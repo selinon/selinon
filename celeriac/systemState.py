@@ -23,6 +23,7 @@ from celery.result import AsyncResult, states
 from .flowError import FlowError
 from .dispatcher import Dispatcher
 from .storagePool import StoragePool
+from .trace import Trace
 
 
 # TODO: write docstrings
@@ -91,6 +92,7 @@ class SystemState(object):
             if node['result'].successful():
                 ret.append(node)
             elif node['result'].state == states.FAILURE:
+                Trace.log("Node '%s' has failed in flow '%s'" % (node['name'], self._flow_name))
                 # TODO: Implement fallback
                 failure_nodes.append(node)
             else:
@@ -99,7 +101,9 @@ class SystemState(object):
         # We wait until all active nodes finish and then we raise an exception since we want to keep dispatcher alive
         # until there is anything active
         if len(new_active_nodes) == 0 and len(failure_nodes) > 0:
-            raise FlowError("Nodes '%s' failed" % [(node['name'], node['id']) for node in failure_nodes])
+            err_str = "Nodes '%s' failed" % [(node['name'], node['id']) for node in failure_nodes]
+            Trace.log(err_str)
+            raise FlowError(err_str)
 
         # keep failure nodes for the next iteration in case we still have something to do
         self._active_nodes = new_active_nodes + failure_nodes
@@ -112,11 +116,13 @@ class SystemState(object):
             # know whether it was run by another flow
             # TODO: this should be revisited due to args passing - we should introduce 'propagate_args' for task to
             # propagate arguments to subflows, we will need it
+            Trace.log("Running subflow '%s' from flow '%s'" % (node_name, self._flow_name))
             async_result = Dispatcher().delay(flow_name=node_name, args=None)
         else:
             task = self._get_task_instance(node_name)
+            Trace.log("Running task '%s' from flow '%s', parent: %s, args: %s"
+                      % (node_name, self._flow_name, parent, args))
             async_result = task.delay(task_name=node_name, flow_name=self._flow_name, parent=parent, args=args)
-
         return async_result
 
     def _update_waiting_edges(self, node_name):

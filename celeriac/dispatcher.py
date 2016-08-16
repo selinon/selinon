@@ -23,6 +23,7 @@ from celery import Task
 from .systemState import SystemState
 from .flowError import FlowError
 from .storagePool import StoragePool
+from .trace import Trace
 
 
 class Dispatcher(Task):
@@ -69,13 +70,13 @@ class Dispatcher(Task):
         raise NotImplementedError()
 
     @classmethod
-    def set_trace(cls, trace_func):
+    def trace_by_func(cls, trace_func):
         """
         Set tracing function for Dispatcher
         :param trace_func: a function that should be used to trace dispatcher actions
         """
         # TODO: use trace in sources
-        cls._trace = trace_func
+        Trace.trace_by_func(trace_func)
 
     def run(self, flow_name, args=None, retry=None, state=None):
         """
@@ -93,11 +94,16 @@ class Dispatcher(Task):
             # force max_retries to 0 so we are not scheduled and marked as FAILED
             raise self.retry(max_retries=0, exc=flow_error)
 
+        state_dict = system_state.to_dict()
+
         if retry:
             kwargs = {
                 'flow': flow_name,
                 'args': system_state.node_args,
                 'retry': retry,
-                'state': system_state.to_dict()
+                'state': state_dict
             }
+            Trace.log("Dispatcher will retry in %ds" % retry)
             self.retry(kwargs=kwargs, retry=retry)
+        else:
+            Trace.log("Finished flow '%s', finished nodes: %s" % (flow_name, state_dict['finished_nodes']))
