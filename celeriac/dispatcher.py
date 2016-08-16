@@ -75,7 +75,6 @@ class Dispatcher(Task):
         Set tracing function for Dispatcher
         :param trace_func: a function that should be used to trace dispatcher actions
         """
-        # TODO: use trace in sources
         Trace.trace_by_func(trace_func)
 
     def run(self, flow_name, args=None, retry=None, state=None):
