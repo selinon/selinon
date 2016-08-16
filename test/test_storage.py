@@ -67,8 +67,7 @@ class TestStorageAccess(unittest.TestCase):
             def retrieve(self, flow_name, task_name, task_id):
                 assert(flow_name == 'flow1')
                 assert(task_name == 'Task1')
-                # TODO: there shouldn't be a list
-                assert(task_id[0] == task1.task_id)
+                assert(task_id == task1.task_id)
                 return 0xDEADBEEF
 
         def _cond_access(db):

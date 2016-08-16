@@ -162,11 +162,9 @@ class SystemState(object):
                 for start_nodes in itertools.product(*from_nodes.values()):
                     parent = {}
 
-                    # TODO: not list only ids
                     for start_node in start_nodes:
-                        if not parent.get(start_node['name'], False):
-                            parent[start_node['name']] = []
-                        parent[start_node['name']].append(start_node['id'])
+                        assert(start_node['name'] not in parent)
+                        parent[start_node['name']] = start_node['id']
 
                     storage_pool = StoragePool(parent)
                     if edge['condition'](storage_pool):
