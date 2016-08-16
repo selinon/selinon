@@ -42,7 +42,6 @@ class CeleriacTask(ABC_from_parent(Task)):
     output_schema = None
     max_retries = None
     time_limit = None
-    get_storage = None
 
     def __init__(self, *args, **kwargs):
         """
