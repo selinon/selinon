@@ -19,11 +19,9 @@
 # ####################################################################
 
 import unittest
-from celeriac import Dispatcher
 from celeriac import FlowError
 from getTaskInstance import GetTaskInstance
 from isFlow import IsFlow
-from fakeStorage import FakeStorage
 
 from celery.result import AsyncResult
 from celeriac import SystemState
@@ -39,6 +37,10 @@ def _cond_false(x):
 
 class TestSystemState(unittest.TestCase):
 
+    def setUp(self):
+        AsyncResult.clear()
+        GetTaskInstance.clear()
+
     def test_simple1(self):
         #
         # flow1:
@@ -48,10 +50,7 @@ class TestSystemState(unittest.TestCase):
         #       |
         #     Task2
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1'], 'to': ['Task2'], 'condition': _cond_true},
                       {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
@@ -59,7 +58,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -70,7 +69,7 @@ class TestSystemState(unittest.TestCase):
 
         # Run without change at first
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNone(system_state.node_args)
@@ -85,7 +84,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_result(task1.task_id, 1)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -103,7 +102,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_result(task2.task_id, 1)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         # All tasks done
@@ -123,10 +122,7 @@ class TestSystemState(unittest.TestCase):
         #           |
         #         Task3
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
                       'flow1': [{'from': ['Task1', 'Task2'], 'to': ['Task3'], 'condition': _cond_true},
                                 {'from': [], 'to': ['Task1', 'Task2'], 'condition': _cond_true}]
@@ -134,7 +130,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -150,7 +146,7 @@ class TestSystemState(unittest.TestCase):
         task2 = get_task_instance.task_by_name('Task2')[0]
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -164,7 +160,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task2.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -185,7 +181,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_result(task1.task_id, "some result of task1 that shouldn't be propagated")
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -206,7 +202,7 @@ class TestSystemState(unittest.TestCase):
         task3 = get_task_instance.task_by_name('Task3')[0]
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -227,7 +223,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
@@ -251,10 +247,7 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Each time only one task instance finishes
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1'], 'to': ['Task3'], 'condition': _cond_true},
                       {'from': ['Task2'], 'to': ['Task3'], 'condition': _cond_true},
@@ -263,7 +256,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -280,7 +273,7 @@ class TestSystemState(unittest.TestCase):
         task2 = get_task_instance.task_by_name('Task2')[0]
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -295,7 +288,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task1.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -315,7 +308,7 @@ class TestSystemState(unittest.TestCase):
         task3_0 = get_task_instance.task_by_name('Task3')[0]
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -335,7 +328,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task2.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -356,7 +349,7 @@ class TestSystemState(unittest.TestCase):
         task3_1 = get_task_instance.task_by_name('Task3')[1]
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -377,7 +370,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3_1.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -398,7 +391,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3_0.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
@@ -423,10 +416,7 @@ class TestSystemState(unittest.TestCase):
         #   Task1 and Task2 finish at the same time
         #   Both instances of Task3 finish at the same time
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1'], 'to': ['Task3'], 'condition': _cond_true},
                       {'from': ['Task2'], 'to': ['Task3'], 'condition': _cond_true},
@@ -435,7 +425,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -454,7 +444,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task2.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -478,7 +468,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3_1.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
@@ -499,10 +489,7 @@ class TestSystemState(unittest.TestCase):
         #               |
         #             Task4
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1', 'Task2', 'Task3'], 'to': ['Task4'], 'condition': _cond_true},
                       {'from': [], 'to': ['Task1', 'Task2', 'Task3'], 'condition': _cond_true}]
@@ -510,7 +497,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -528,7 +515,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task1.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -544,7 +531,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -561,7 +548,7 @@ class TestSystemState(unittest.TestCase):
         task4 = get_task_instance.task_by_name('Task4')[0]
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -578,7 +565,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task4.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
@@ -605,10 +592,7 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   The condition will fail
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1', 'Task2', 'Task3'], 'to': ['Task4'], 'condition': _cond_false},
                       {'from': [], 'to': ['Task1', 'Task2', 'Task3'], 'condition': _cond_true}]
@@ -616,7 +600,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -636,7 +620,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
@@ -661,10 +645,7 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Task3 finishes before Task2
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3'], 'condition': _cond_true},
                       {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
@@ -672,7 +653,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -687,7 +668,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change first
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -706,7 +687,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_result(task1.task_id, 0xDEADBEEF)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -721,7 +702,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -739,7 +720,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -754,7 +735,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change so far
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -772,7 +753,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task2.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
@@ -797,10 +778,7 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Task2 and Task3 finish at the same time
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3'], 'condition': _cond_true},
                       {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
@@ -808,7 +786,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -827,7 +805,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_result(task1.task_id, 0xDEADBEEF)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -847,7 +825,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
@@ -872,10 +850,7 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Child tasks do not finish at the same time
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3', 'Task4'], 'condition': _cond_true},
                       {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
@@ -883,7 +858,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -903,7 +878,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_result(task1.task_id, task1_result)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -922,7 +897,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task2.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -941,7 +916,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -960,7 +935,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task4.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
@@ -987,10 +962,7 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Child tasks finish at the same time
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3', 'Task4'], 'condition': _cond_true},
                       {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
@@ -998,7 +970,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -1018,7 +990,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_result(task1.task_id, task1_result)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1041,7 +1013,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task4.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
@@ -1071,10 +1043,7 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Task1 and Task2 finish at the same time, Task3 afterwards. Task4, Task5 and Task6 finish at the same time
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1', 'Task2', 'Task3'], 'to': ['Task4', 'Task5', 'Task6'], 'condition': _cond_true},
                       {'from': [], 'to': ['Task1', 'Task2', 'Task3'], 'condition': _cond_true}]
@@ -1082,7 +1051,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -1100,7 +1069,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1123,7 +1092,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task2.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1141,7 +1110,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1162,7 +1131,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1187,7 +1156,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task6.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
@@ -1219,10 +1188,7 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Task1, Task2 and Task3 finish at the same time; Task4, Task5 finish at the same time, then Task6
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1', 'Task2', 'Task3'], 'to': ['Task4', 'Task5', 'Task6'], 'condition': _cond_true},
                       {'from': [], 'to': ['Task1', 'Task2', 'Task3'], 'condition': _cond_true}]
@@ -1230,7 +1196,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -1255,7 +1221,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1276,7 +1242,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task4.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1299,7 +1265,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task6.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
@@ -1329,10 +1295,7 @@ class TestSystemState(unittest.TestCase):
         #   Task2 finishes before Task3 in the first iteration
         #   Task3 finishes before Task2 in the second iteration
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3'], 'condition': _cond_true},
                       {'from': ['Task3'], 'to': ['Task1'], 'condition': _cond_true},
@@ -1341,7 +1304,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -1356,7 +1319,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change so far
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1374,7 +1337,7 @@ class TestSystemState(unittest.TestCase):
         # There was no Result set for Task1
         with self.assertRaises(KeyError):
             system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-            system_state.update(db, get_task_instance, is_flow)
+            system_state.update(get_task_instance, is_flow)
 
         # Task1 has finished
         task1 = get_task_instance.task_by_name('Task1')[-1]
@@ -1384,7 +1347,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_result(task1.task_id, task1_result)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1399,7 +1362,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1417,7 +1380,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task2.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1432,7 +1395,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1450,7 +1413,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1468,7 +1431,7 @@ class TestSystemState(unittest.TestCase):
         # The next iteration
         # No change first
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1489,7 +1452,7 @@ class TestSystemState(unittest.TestCase):
         # We do not set task result, since it should be propagated from the first run of Task1
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1510,7 +1473,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1533,7 +1496,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3_1.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1554,7 +1517,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1578,7 +1541,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task2_1.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1599,7 +1562,7 @@ class TestSystemState(unittest.TestCase):
 
         # Once more with no change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1636,10 +1599,7 @@ class TestSystemState(unittest.TestCase):
         #      With Task1_1 from the first iteration and Task2 from the first iteration
         #      With Task1_1 from the first iteration and Task2 from the second iteration
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1', 'Task2'], 'to': ['Task3'], 'condition': _cond_true},
                       {'from': ['Task3'], 'to': ['Task2'], 'condition': _cond_true},
@@ -1648,7 +1608,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -1663,7 +1623,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1681,7 +1641,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task1.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1696,7 +1656,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1714,7 +1674,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task2.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1729,7 +1689,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change so far
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1747,7 +1707,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task3.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1763,7 +1723,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1782,7 +1742,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task2_1.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        system_state.update(db, get_task_instance, is_flow)
+        system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1824,10 +1784,7 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #    Result of Task1 is propagated to Task2 but *NOT* to flow1
         #
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1'], 'to': ['flow2'], 'condition': _cond_true},
                       {'from': ['flow2'], 'to': ['Task2'], 'condition': _cond_true},
@@ -1837,7 +1794,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -1850,7 +1807,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1868,7 +1825,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_result(task1.task_id, task1_result)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1888,7 +1845,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1911,7 +1868,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(flow2.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1931,7 +1888,7 @@ class TestSystemState(unittest.TestCase):
 
         # No change
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -1950,7 +1907,7 @@ class TestSystemState(unittest.TestCase):
         AsyncResult.set_finished(task2.task_id)
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
@@ -1976,10 +1933,7 @@ class TestSystemState(unittest.TestCase):
         #
         # Note:
         #   Task1 will fail
-        AsyncResult.clear()
-        GetTaskInstance.clear()
         get_task_instance = GetTaskInstance()
-        db = FakeStorage(None)
         edge_table = {
             'flow1': [{'from': ['Task1'], 'to': ['Task2'], 'condition': _cond_true},
                       {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
@@ -1987,7 +1941,7 @@ class TestSystemState(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
 
         system_state = SystemState(edge_table, 'flow1')
-        retry = system_state.update(db, get_task_instance, is_flow)
+        retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
         self.assertEqual(retry, SystemState._start_retry)
@@ -2002,6 +1956,6 @@ class TestSystemState(unittest.TestCase):
 
         with self.assertRaises(FlowError):
             system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
-            system_state.update(db, get_task_instance, is_flow)
+            system_state.update(get_task_instance, is_flow)
 
 
