@@ -68,16 +68,12 @@ class CeleriacTask(ABC_from_parent(CeleriacStorageTask)):
         jsonschema.validate(result, cls.output_schema)
 
     def run(self, task_name, flow_name, parent, args):
-        self.task_name = task_name
-        self.flow_name = flow_name
-        self.parent = parent
-        self.task_id = str(self.request.id)
-
         # we are passing args as one argument explicitly for now not to have troubles with *args and **kwargs mapping
         # since we depend on previous task and the result can be anything
-        result = self.execute(args)
+        result = self.execute(flow_name, task_name, parent, args)
         self.validate_result(result)
 
+        # TODO
         if self.storage:
             self.storage.store(flow_name=flow_name, task_name=task_name, task_id=self.task_id, result=result)
         elif not self.storage and result is not None:
@@ -85,10 +81,11 @@ class CeleriacTask(ABC_from_parent(CeleriacStorageTask)):
             pass
 
     @abc.abstractmethod
-    def execute(self, flow_name, parent, args):
+    def execute(self, flow_name, task_name, parent, args):
         """
         Celeriac task entrypoint
         :param flow_name: a name of a flow that triggered this task
+        :param task_name: name of the task
         :param parent: mapping to parent tasks
         :param args: task arguments
         :return: data that should be stored to a storage
