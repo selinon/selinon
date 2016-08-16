@@ -29,16 +29,14 @@ class Dispatcher(CeleriacStorageTask):
     """
     Celeriac Dispatcher worker implementation
     """
-    # TODO: use a database mapper
-    _db_connections = {}
-
     @classmethod
     def _set_config(cls, config_module):
         cls._get_task_instance = config_module['get_task_instance']
         cls._is_flow = config_module['is_flow']
         cls._edge_table = config_module['edge_table']
         cls._output_schemas = config_module['output_schemas']
-        StoragePool.set_get_storage(config_module['get_storage'])
+        StoragePool.set_storage_mapping(config_module['storage2instance_mapping'])
+        StoragePool.set_task_mapping(config_module['task2storage_mapping'])
         # we should call initialization explicitly
         config_module['init']()
 
@@ -90,7 +88,7 @@ class Dispatcher(CeleriacStorageTask):
         """
         try:
             system_state = SystemState(self._edge_table, flow_name, args, retry, state)
-            retry = system_state.update(self._db_connections, self._get_task_instance, self._is_flow)
+            retry = system_state.update(self._get_task_instance, self._is_flow)
         except FlowError as flow_error:
             # force max_retries to 0 so we are not scheduled and marked as FAILED
             raise self.retry(max_retries=0, exc=flow_error)
