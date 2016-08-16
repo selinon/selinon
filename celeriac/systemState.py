@@ -108,8 +108,11 @@ class SystemState(object):
 
     def _start_node(self, node_name, parent, args):
         if self._is_flow(node_name):
-            # TODO: should we pass id of parent?
-            async_result = Dispatcher().delay(flow_name=node_name, args=None, parent=self._flow_name)
+            # do not pass parent, a subflow should be treated as a black box - a standalone flow that does not need to
+            # know whether it was run by another flow
+            # TODO: this should be revisited due to args passing - we should introduce 'propagate_args' for task to
+            # propagate arguments to subflows, we will need it
+            async_result = Dispatcher().delay(flow_name=node_name, args=None)
         else:
             task = self._get_task_instance(node_name)
             async_result = task.delay(task_name=node_name, flow_name=self._flow_name, parent=parent, args=args)
