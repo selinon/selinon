@@ -59,7 +59,8 @@ class StoragePool(object):
 
         return storage
 
-    def get(self, storage_name, flow_name, task_name):
+    def get(self, flow_name, task_name):
+        storage_name = self._task_mapping[task_name]
         storage = self._connected_storage(storage_name)
         return storage.retrieve(flow_name, task_name, self._id_mapping[task_name])
 

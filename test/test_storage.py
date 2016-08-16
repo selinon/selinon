@@ -72,7 +72,7 @@ class TestStorageAccess(unittest.TestCase):
                 return 0xDEADBEEF
 
         def _cond_access(db):
-            return db.get('Storage1', 'flow1', 'Task1') == 0xDEADBEEF
+            return db.get('flow1', 'Task1') == 0xDEADBEEF
 
         get_task_instance = GetTaskInstance()
         edge_table = {
@@ -93,6 +93,7 @@ class TestStorageAccess(unittest.TestCase):
         AsyncResult.set_result(task1.task_id, 1)
 
         StoragePool.set_storage_mapping({'Storage1': MyStorage(None)})
+        StoragePool.set_task_mapping({'Task1': 'Storage1'})
 
         system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
         system_state.update(get_task_instance, is_flow)
@@ -136,7 +137,7 @@ class TestStorageAccess(unittest.TestCase):
                 raise NotImplementedError()
 
         def _cond_access(db):
-            return db.get('Storage1', 'flow1', 'Task1') == 0xDEADBEEF
+            return db.get('flow1', 'Task1') == 0xDEADBEEF
 
         get_task_instance = GetTaskInstance()
         edge_table = {
@@ -158,6 +159,7 @@ class TestStorageAccess(unittest.TestCase):
 
         storage_config = {'foo': 'bar'}
         StoragePool.set_storage_mapping({'Storage1': MyStorage(storage_config)})
+        StoragePool.set_task_mapping({'Task1': 'Storage1'})
 
         with self.assertRaises(ConnectionError):
             system_state = SystemState(edge_table, 'flow1', state=state_dict, node_args=system_state.node_args)
