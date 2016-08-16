@@ -61,11 +61,6 @@ class SystemState(object):
             ret.append(edge_node_table[i])
         return ret
 
-    @staticmethod
-    def _items2idx(edge_node_table, arr):
-        # TODO: remove
-        return [edge_node_table[item['idx']] for item in arr]
-
     def __init__(self, edge_table, flow_name, node_args = None, retry = None, state = None):
         state_dict = {} if state is None else state
 
