@@ -46,6 +46,11 @@ class StoragePool(object):
         cls._task_mapping = task_mapping
 
     @classmethod
+    def get_storage_by_task_name(cls, task_name):
+        storage_name = cls._task_mapping[task_name]
+        return cls._connected_storage(storage_name)
+
+    @classmethod
     def _connected_storage(cls, storage_name):
         # if this raises KeyError exception it means that the flow was not configured properly - should
         # be handled by Parsley
@@ -60,12 +65,10 @@ class StoragePool(object):
         return storage
 
     def get(self, flow_name, task_name):
-        storage_name = self._task_mapping[task_name]
-        storage = self._connected_storage(storage_name)
+        storage = self.get_storage_by_task_name(task_name)
         return storage.retrieve(flow_name, task_name, self._id_mapping[task_name])
 
     @classmethod
     def set(cls, flow_name, task_name, task_id, result):
-        storage_name = cls._task_mapping[task_name]
-        storage = cls._connected_storage(storage_name)
+        storage = cls.get_storage_by_task_name(task_name)
         storage.store(flow_name, task_name, task_id, result)
