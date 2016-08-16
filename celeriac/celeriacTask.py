@@ -54,8 +54,6 @@ class CeleriacTask(ABC_from_parent(CeleriacStorageTask)):
         self.task_id = None
         self.flow_name = None
         self.parent = None
-        # TODO: db connections initialization
-        self._db_connections = {}
 
     @classmethod
     def validate_result(cls, result):
