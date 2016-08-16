@@ -5,4 +5,5 @@ from .systemState import SystemState
 from .flowError import FlowError
 from .celeriacStorageTask import CeleriacStorageTask
 from .version import celeriac_version
-from .celeriacStorage import CeleriacStorage
+from .dataStorage import DataStorage
+from .storagePool import StoragePool
