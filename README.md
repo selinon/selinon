@@ -25,11 +25,11 @@ In the flow "flow2" we start node Task4 on condition that is always true (we sta
 
 The second flow is slightly more complex. We (always) start with Task1. Task1 will transparently store results in Storage1. After Task1 finishes, Dispatcher checks results of Task1 in Storage1 and if condition ```result['foo'] == 'bar'``` is evaluated as True, Dispatcher starts nodes Task2 and flow2. After both Task2 and flow2 finish, Dispatcher starts Task3. If the condition ```result['foo'] == bar``` is met, Task1 is started recursively again. Results of all tasks are stored in database named "Storage1" except for results computed in subflow "flow2", where "Storage2" is used.
 
-A YAML configuration file is available in [examples/example.yml](examples/example.yml). Refer to [Parsley](https::/github.com/fridex/Parsley) for more information on how to define and use YAML configuration files or plot flow graphs.
+A YAML configuration file is available in [examples/example.yml](examples/example.yml). Refer to [Parsley](https://github.com/fridex/Parsley) for more information on how to define and use YAML configuration files or plot flow graphs.
 
 ### Conditions
 
-Conditions are made of predicates that can be nested as desired using logical operators - `and`, `or` and `not`. See [Parsley](https::/github.com/fridex/Parsley) for more info.
+Conditions are made of predicates that can be nested as desired using logical operators - `and`, `or` and `not`. See [Parsley](https://github.com/fridex/Parsley) for more info.
 
 ### Starting Nodes
 
