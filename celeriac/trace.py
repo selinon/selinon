@@ -87,7 +87,9 @@ class Trace(object):
         """
         Trace by using Python's logging
         """
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO,
+                            format='%(asctime)s.%(msecs)d %(levelname)s: %(message)s',
+                            datefmt="%Y-%m-%d %H:%M:%S")
         cls._trace_func = _logging_trace_func
 
     @classmethod
