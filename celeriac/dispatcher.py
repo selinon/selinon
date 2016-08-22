@@ -136,4 +136,7 @@ class Dispatcher(Task):
                                                })
             self.retry(kwargs=kwargs, retry=retry)
         else:
-            Trace.log(Trace.FLOW_END, {'flow_name': flow_name, 'dispatcher_id': self.request.id})
+            Trace.log(Trace.FLOW_END, {'flow_name': flow_name,
+                                       'dispatcher_id': self.request.id,
+                                       'finished_nodes': state_dict['finished_nodes']})
+            return state_dict['finished_nodes']

@@ -77,7 +77,7 @@ class Trace(object):
     DISPATCHER_RETRY = 13                         # flow_name, dispatcher_id, retry, state_dict, args
 
     # Signalize flow end
-    FLOW_END = 14                                 # flow_name, dispatcher_id
+    FLOW_END = 14                                 # flow_name, dispatcher_id, finished_nodes
 
     def __init__(self):
         raise NotImplementedError()
