@@ -151,7 +151,6 @@ class SystemState(object):
         ret = []
         failed_nodes = sorted(self._failed_nodes.items())
 
-        # TODO: remove from active nodes
         for i in range(len(failed_nodes), 0, -1):
             for combination in itertools.combinations(failed_nodes, i):
                 failure_nodes = self._failures[self._flow_name]
