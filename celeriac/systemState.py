@@ -123,9 +123,7 @@ class SystemState(object):
         if self._is_flow(node_name):
             # do not pass parent, a subflow should be treated as a black box - a standalone flow that does not need to
             # know whether it was run by another flow
-            # TODO: this should be revisited due to args passing - we should introduce 'propagate_args' for task to
-            # propagate arguments to subflows, we will need it
-            async_result = Dispatcher().delay(flow_name=node_name, args=None)
+            async_result = Dispatcher().delay(flow_name=node_name, args=args)
             Trace.log(Trace.SUBFLOW_SCHEDULE, {'flow_name': self._flow_name,
                                                'dispatcher_id': self._dispatcher_id,
                                                'child_flow_name': node_name,
