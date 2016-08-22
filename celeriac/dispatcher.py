@@ -101,7 +101,7 @@ class Dispatcher(Task):
                                             'state': state})
         try:
             system_state = SystemState(self.request.id, flow_name, args, retry, state)
-            retry = system_state.update(self._get_task_instance, self._is_flow)
+            retry = system_state.update()
         except FlowError as flow_error:
             Trace.log(Trace.FLOW_FAILURE, {'flow_name': flow_name,
                                            'dispatcher_id': self.request.id,
