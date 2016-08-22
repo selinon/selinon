@@ -77,6 +77,13 @@ class Dispatcher(Task):
         """
         Trace.trace_by_func(trace_func)
 
+    @classmethod
+    def trace_by_logging(cls):
+        """
+        Use Python's logging for tracing
+        """
+        Trace.trace_by_logging()
+
     def run(self, flow_name, args=None, retry=None, state=None):
         """
         Dispatcher entry-point - run each time a dispatcher is scheduled
