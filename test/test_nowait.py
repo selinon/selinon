@@ -58,7 +58,7 @@ class TestNodeFailures(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
         nowait_nodes = {'flow1': ['Task1']}
 
-        system_state = SystemState(edge_table, None, nowait_nodes, 'flow1')
+        system_state = SystemState(id(self), edge_table, None, nowait_nodes, 'flow1')
         retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
@@ -85,7 +85,7 @@ class TestNodeFailures(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
         nowait_nodes = {'flow1': ['flow2']}
 
-        system_state = SystemState(edge_table, None, nowait_nodes, 'flow1')
+        system_state = SystemState(id(self), edge_table, None, nowait_nodes, 'flow1')
         retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
@@ -116,7 +116,7 @@ class TestNodeFailures(unittest.TestCase):
         is_flow = IsFlow(edge_table.keys())
         nowait_nodes = {'flow1': ['Task3']}
 
-        system_state = SystemState(edge_table, None, nowait_nodes, 'flow1')
+        system_state = SystemState(id(self), edge_table, None, nowait_nodes, 'flow1')
         retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
@@ -135,7 +135,7 @@ class TestNodeFailures(unittest.TestCase):
         AsyncResult.set_finished(task1.task_id)
         AsyncResult.set_result(task1.task_id, None)
 
-        system_state = SystemState(edge_table, None, nowait_nodes, 'flow1', state=state_dict, node_args=system_state.node_args)
+        system_state = SystemState(id(self), edge_table, None, nowait_nodes, 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 

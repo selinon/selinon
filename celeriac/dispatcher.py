@@ -86,24 +86,47 @@ class Dispatcher(Task):
         :param state: the current system state
         :raises: FlowError
         """
+
+        Trace.log(Trace.DISPATCHER_WAKEUP, {'flow_name': flow_name,
+                                            'dispatcher_id': self.request.id,
+                                            'args': args,
+                                            'retry': retry,
+                                            'state': state})
         try:
-            system_state = SystemState(self._edge_table, self._failures, self._nowait_nodes, flow_name,
-                                       args, retry, state)
+            system_state = SystemState(self.request.id,
+                                       self._edge_table,
+                                       self._failures,
+                                       self._nowait_nodes,
+                                       flow_name, args, retry, state)
             retry = system_state.update(self._get_task_instance, self._is_flow)
         except FlowError as flow_error:
+            Trace.log(Trace.FLOW_FAILURE, {'flow_name': flow_name,
+                                           'dispatcher_id': self.request.id,
+                                           'what': str(flow_error)})
             # force max_retries to 0 so we are not scheduled and marked as FAILED
             raise self.retry(max_retries=0, exc=flow_error)
+        except Exception as exc:
+            Trace.log(Trace.DISPATCHER_FAILURE, {'flow_name': flow_name,
+                                                 'dispatcher_id': self.request.id,
+                                                 'what': str(exc)})
+            raise
 
         state_dict = system_state.to_dict()
+        node_args = system_state.node_args
 
         if retry:
             kwargs = {
                 'flow': flow_name,
-                'args': system_state.node_args,
+                'args': node_args,
                 'retry': retry,
                 'state': state_dict
             }
-            Trace.log("Dispatcher will retry in %ds" % retry)
+            Trace.log(Trace.DISPATCHER_RETRY, {'flow_name': flow_name,
+                                               'dispatcher_id': self.request.id,
+                                               'retry': retry,
+                                               'state_dict': state_dict,
+                                               'args': node_args
+                                               })
             self.retry(kwargs=kwargs, retry=retry)
         else:
-            Trace.log("Finished flow '%s', finished nodes: %s" % (flow_name, state_dict['finished_nodes']))
+            Trace.log(Trace.FLOW_END, {'flow_name': flow_name, 'dispatcher_id': self.request.id})

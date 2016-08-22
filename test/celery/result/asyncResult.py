@@ -60,6 +60,9 @@ class AsyncResult(object):
     def successful(self):
         return self._finished_mapping[self._id] == states.SUCCESS
 
+    def failed(self):
+        return self._finished_mapping[self._id] == states.FAILURE
+
     @property
     def result(self):
         return self._result_mapping[self._id]

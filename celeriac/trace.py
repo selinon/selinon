@@ -21,19 +21,63 @@
 import logging
 
 
-def _default_trace_func(msg):
-    pass
-
-
-def _logging_trace_func(msg):
-    logging.info(msg)
+def _default_trace_func(event, msg_dict):
+    logging.info("" % msg_dict)
 
 
 class Trace(object):
     """
-    Trace dispatcher work
+    Trace Dispatcher work
     """
     _trace_func = _default_trace_func
+
+    # TODO: make this nice for Sphinx (?)
+    # Logged event                                # msg_dict.keys()
+    ################################################################################
+    # Signalize Dispatcher run by Celery - each time a Dispatcher is started/retried
+    DISPATCHER_WAKEUP = 0                         # flow_name, dispatcher_id, args, retry, state
+
+    # Signalize a flow start - called when starting nodes are run
+    FLOW_START = 1                                # flow_name, dispatcher_id, args
+
+    # Signalize a task scheduling by Dispatcher
+    TASK_SCHEDULE = 2                             # flow_name, task_name, task_id, parent, args
+
+    # Signalize task start by Celery
+    TASK_START = 3                                # flow_name, task_name, task_id, parent, args
+
+    # Signalize subflow start by Dispatcher
+    SUBFLOW_SCHEDULE = 4                          # flow_name, dispatcher_id, child_flow_name, child_dispatcher_id, args
+
+    # Signalize end of task from CeleriacTask
+    TASK_END = 5                                  # flow_name, task_name, task_id, parent, args, storage
+
+    # Signalize a node success from dispatcher
+    NODE_SUCCESSFUL = 6                           # flow_name, dispatcher_id, node_name, node_id
+
+    # Signalize that the result of task was discarded
+    TASK_DISCARD_RESULT = 7                       # flow_name, task_name, task_id, parent, args, result
+
+    # Signalize task failure from CeleriacTask
+    TASK_FAILURE = 8                              # flow_name, task_name, task_id, parent, args, what
+
+    # Signalize when a flow ends because of error in nodes without fallback
+    FLOW_FAILURE = 9                              # flow_name, dispatcher_id, what
+
+    # Signalize unexpected dispatcher failure - this should not occur (e.g. bug, database connection error, ...)
+    DISPATCHER_FAILURE = 10                       # flow_name, dispatcher_id, what
+
+    # Signalize a node failure from dispatcher
+    NODE_FAILURE = 11                             # flow_name, dispatcher_id, node_name, node_id, what
+
+    # Signalize fallback evaluation
+    FALLBACK_START = 12                           # flow_name, dispatcher_id, nodes, fallback
+
+    # Signalize Dispatcher retry
+    DISPATCHER_RETRY = 13                         # flow_name, dispatcher_id, retry, state_dict, args
+
+    # Signalize flow end
+    FLOW_END = 14                                 # flow_name, dispatcher_id
 
     def __init__(self):
         raise NotImplementedError()
@@ -55,10 +99,44 @@ class Trace(object):
         cls._trace_func = func
 
     @classmethod
-    def log(cls, msg):
+    def log(cls, event, msg_dict):
         """
         Trace work
-        :param msg: message to be printed
+        :param event: tracing event
+        :param msg_dict: message to be printed
         """
-        cls._trace_func(msg)
+        cls._trace_func(event, msg_dict)
+
+
+def _logging_trace_func(event, msg_dict):
+    if event == Trace.DISPATCHER_WAKEUP:
+        logging.info("Dispatcher woken up: %s" % msg_dict)
+    elif event == Trace.FLOW_START:
+        logging.info("Flow started: %s" % msg_dict)
+    elif event == Trace.TASK_SCHEDULE:
+        logging.info("Scheduled a new task: %s" % msg_dict)
+    elif event == Trace.TASK_START:
+        logging.info("Task has been started: %s" % msg_dict)
+    elif event == Trace.SUBFLOW_SCHEDULE:
+        logging.info("Scheduled a new subflow: %s" % msg_dict)
+    elif event == Trace.TASK_END:
+        logging.info("Task has successfully finished: %s" % msg_dict)
+    elif event == Trace.NODE_SUCCESSFUL:
+        logging.info("Node in flow successfully finished: %s" % msg_dict)
+    elif event == Trace.TASK_DISCARD_RESULT:
+        logging.warning("Result of task has been discarded: %s" % msg_dict)
+    elif event == Trace.TASK_FAILURE:
+        logging.info("Task has failed: %s" % msg_dict)
+    elif event == Trace.FLOW_FAILURE:
+        logging.info("Flow has failed: %s" % msg_dict)
+    elif event == Trace.DISPATCHER_FAILURE:
+        logging.info("Dispatcher failed: %s" % msg_dict)
+    elif event == Trace.NODE_FAILURE:
+        logging.info("Node has failed: %s" % msg_dict)
+    elif event == Trace.FALLBACK_START:
+        logging.info("Fallback is going to be started started: %s" % msg_dict)
+    elif event == Trace.DISPATCHER_RETRY:
+        logging.info("Dispatcher will be rescheduled: %s" % msg_dict)
+    elif event == Trace.FLOW_END:
+        logging.info("Flow has successfully ended: %s" % msg_dict)
 

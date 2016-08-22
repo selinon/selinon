@@ -63,13 +63,15 @@ class SystemState(object):
             ret.append(edge_node_table[i])
         return ret
 
-    def __init__(self, edge_table, failures, nowait_nodes, flow_name, node_args = None, retry = None, state = None):
+    def __init__(self, dispatcher_id, edge_table, failures, nowait_nodes, flow_name, node_args = None, retry = None,
+                 state = None):
         state_dict = {} if state is None else state
 
         self._get_task_instance = None
         self._is_flow = None
 
         self._edge_table = edge_table
+        self._dispatcher_id = dispatcher_id
         self._failures = failures
         self._flow_name = flow_name
         self._node_args = node_args
@@ -94,9 +96,17 @@ class SystemState(object):
         new_active_nodes = []
         for node in self._active_nodes:
             if node['result'].successful():
+                Trace.log(Trace.NODE_SUCCESSFUL, {'flow_name': self._flow_name,
+                                                  'dispatcher_id': self._dispatcher_id,
+                                                  'node_name': node['name'],
+                                                  'node_id': node['id']})
                 ret.append(node)
-            elif node['result'].state == states.FAILURE:
-                Trace.log("Node '%s' has failed in flow '%s'" % (node['name'], self._flow_name))
+            elif node['result'].failed():
+                Trace.log(Trace.NODE_FAILURE, {'flow_name': self._flow_name,
+                                               'dispatcher_id': self._dispatcher_id,
+                                               'node_name': node['name'],
+                                               'node_id': node['id'],
+                                               'what': node['result'].result})
                 # We keep track of failed nodes to handle failures once all nodes finish
                 if node['name'] not in self._failed_nodes:
                     self._failed_nodes[node['name']] = []
@@ -115,14 +125,21 @@ class SystemState(object):
             # know whether it was run by another flow
             # TODO: this should be revisited due to args passing - we should introduce 'propagate_args' for task to
             # propagate arguments to subflows, we will need it
-            Trace.log("Running subflow '%s' from flow '%s'" % (node_name, self._flow_name))
             async_result = Dispatcher().delay(flow_name=node_name, args=None)
+            Trace.log(Trace.SUBFLOW_SCHEDULE, {'flow_name': self._flow_name,
+                                               'dispatcher_id': self._dispatcher_id,
+                                               'child_flow_name': node_name,
+                                               'child_dispatcher_id': async_result.task_id,
+                                               'args': args})
         else:
             task = self._get_task_instance(node_name)
-            Trace.log("Running task '%s' from flow '%s', parent: %s, args: %s"
-                      % (node_name, self._flow_name, parent, args))
             async_result = task.delay(task_name=node_name, flow_name=self._flow_name, parent=parent, args=args)
-
+            Trace.log(Trace.TASK_SCHEDULE, {'flow_name': self._flow_name,
+                                            'dispatcher_id': self._dispatcher_id,
+                                            'task_name': node_name,
+                                            'task_id': async_result.task_id,
+                                            'parent': parent,
+                                            'args': args})
         record = {'name': node_name, 'id': async_result.task_id, 'result': async_result}
 
         if node_name not in self._nowait_nodes.get(self._flow_name, {}):
@@ -149,23 +166,37 @@ class SystemState(object):
 
                 if isinstance(failure_node['fallback'], list) and len(failure_node['fallback']) > 0:
                     parent = {}
+                    traced_nodes_arr = []
+
                     for node in combination:
+                        traced_nodes_arr.append((node[0], self._failed_nodes[node[0]],))
                         parent[node[0]] = self._failed_nodes[node[0]].pop(0)
                         if len(self._failed_nodes[node[0]]) == 0:
                             del self._failed_nodes[node[0]]
 
+                    Trace.log(Trace.FALLBACK_START, {'flow_name': self._flow_name,
+                                                     'dispatcher_id': self._dispatcher_id,
+                                                     'nodes': traced_nodes_arr,
+                                                     'fallback': failure_node['fallback']})
+
                     for node in failure_node['fallback']:
-                        # TODO: make record append transparent
                         record = self._start_node(node, parent, self._node_args)
                         ret.append(record)
 
                     # wait for fallback to finish in order to avoid time dependent flow evaluation
                     return ret
                 elif failure_node['fallback'] is True:
+                    traced_nodes_arr = []
                     for node in combination:
+                        traced_nodes_arr.append((node[0], self._failed_nodes[node[0]],))
                         self._failed_nodes[node[0]].pop(0)
                         if len(self._failed_nodes[node[0]]) == 0:
                             del self._failed_nodes[node[0]]
+
+                    Trace.log(Trace.FALLBACK_START, {'flow_name': self._flow_name,
+                                                     'dispatcher_id': self._dispatcher_id,
+                                                     'nodes': traced_nodes_arr,
+                                                     'fallback': True})
                     # continue with fallback in other combinations, nothing started
 
         return ret
@@ -245,6 +276,9 @@ class SystemState(object):
         return self._retry
 
     def _start_and_update_retry(self):
+        Trace.log(Trace.FLOW_START, {'flow_name': self._flow_name,
+                                     'dispatcher_id': self._dispatcher_id,
+                                     'args': self._node_args})
         start_edges = [edge for edge in self._edge_table[self._flow_name] if len(edge['from']) == 0]
         if len(start_edges) == 0:
             # This should not occur since parsley raises exception if such occurs, but just to be sure...

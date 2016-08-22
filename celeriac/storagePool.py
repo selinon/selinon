@@ -46,9 +46,23 @@ class StoragePool(object):
         cls._task_mapping = task_mapping
 
     @classmethod
+    def get_storage_name_by_task_name(cls, task_name, graceful=False):
+        """
+        :param task_name: name of a task
+        :param graceful: return None instead of raising an exception
+        :return: storage name for task
+        """
+        try:
+            return cls._task_mapping[task_name]
+        except KeyError:
+            if graceful:
+                return None
+            else:
+                raise
+
+    @classmethod
     def get_storage_by_task_name(cls, task_name):
-        storage_name = cls._task_mapping[task_name]
-        return cls._connected_storage(storage_name)
+        return cls._connected_storage(cls.get_storage_name_by_task_name(task_name))
 
     @classmethod
     def _connected_storage(cls, storage_name):

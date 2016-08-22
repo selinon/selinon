@@ -23,6 +23,7 @@ import jsonschema
 from celery import Task
 from .helpers import ABC_from_parent
 from .storagePool import StoragePool
+from .trace import Trace
 
 
 class CeleriacTask(ABC_from_parent(Task)):
@@ -92,14 +93,39 @@ class CeleriacTask(ABC_from_parent(Task)):
     def run(self, task_name, flow_name, parent, args):
         # we are passing args as one argument explicitly for now not to have troubles with *args and **kwargs mapping
         # since we depend on previous task and the result can be anything
-        result = self.execute(flow_name, task_name, parent, args)
-        self.validate_result(result)
+        Trace.log(Trace.TASK_START, {'flow_name': flow_name,
+                                     'task_name': task_name,
+                                     'task_id': self.request.id,
+                                     'parent': parent,
+                                     'args': args})
+        try:
+            result = self.execute(flow_name, task_name, parent, args)
+            self.validate_result(result)
 
-        if self.storage:
-            StoragePool.set(flow_name=flow_name, task_name=task_name, task_id=self.task_id, result=result)
-        elif not self.storage and result is not None:
-            # TODO: make warning that the result is discarded
-            pass
+            if self.storage:
+                StoragePool.set(flow_name=flow_name, task_name=task_name, task_id=self.task_id, result=result)
+            elif not self.storage and result is not None:
+                Trace.log(Trace.TASK_DISCARD_RESULT, {'flow_name': flow_name,
+                                                      'task_name': task_name,
+                                                      'task_id': self.request.id,
+                                                      'parent': parent,
+                                                      'args': args,
+                                                      'result': result})
+        except Exception as exc:
+            Trace.log(Trace.TASK_FAILURE, {'flow_name': flow_name,
+                                           'task_name': task_name,
+                                           'task_id': self.request.id,
+                                           'parent': parent,
+                                           'args': args,
+                                           'what': exc})
+            raise
+
+        Trace.log(Trace.TASK_END, {'flow_name': flow_name,
+                                   'task_name': task_name,
+                                   'task_id': self.request.id,
+                                   'parent': parent,
+                                   'args': args,
+                                   'storage': StoragePool.get_storage_name_by_task_name(task_name, graceful=True)})
 
     @abc.abstractmethod
     def execute(self, flow_name, task_name, parent, args):
