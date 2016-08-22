@@ -32,12 +32,12 @@ class Dispatcher(Task):
     """
     @classmethod
     def _set_config(cls, config_module):
-        cls._get_task_instance = config_module['get_task_instance']
-        cls._is_flow = config_module['is_flow']
-        cls._edge_table = config_module['edge_table']
-        cls._failures = config_module['failures']
-        cls._output_schemas = config_module['output_schemas']
-        cls._nowait_nodes = config_module['nowait_nodes']
+        SystemState.get_task_instance = config_module['get_task_instance']
+        SystemState.is_flow = config_module['is_flow']
+        SystemState.edge_table = config_module['edge_table']
+        SystemState.failures = config_module['failures']
+        SystemState.nowait_nodes = config_module['nowait_nodes']
+
         StoragePool.set_storage_mapping(config_module['storage2instance_mapping'])
         StoragePool.set_task_mapping(config_module['task2storage_mapping'])
         # we should call initialization explicitly
@@ -100,11 +100,7 @@ class Dispatcher(Task):
                                             'retry': retry,
                                             'state': state})
         try:
-            system_state = SystemState(self.request.id,
-                                       self._edge_table,
-                                       self._failures,
-                                       self._nowait_nodes,
-                                       flow_name, args, retry, state)
+            system_state = SystemState(self.request.id, flow_name, args, retry, state)
             retry = system_state.update(self._get_task_instance, self._is_flow)
         except FlowError as flow_error:
             Trace.log(Trace.FLOW_FAILURE, {'flow_name': flow_name,

@@ -34,6 +34,14 @@ class SystemState(object):
     # do not pass this retry countdown
     _max_retry = 120
 
+    # Set transparently by Dispatcher
+    get_task_instance = None
+    is_flow = None
+    edge_table = None
+    failures = None
+    output_schemas = None
+    nowait_nodes = None
+
     @property
     def node_args(self):
         """
@@ -63,24 +71,18 @@ class SystemState(object):
             ret.append(edge_node_table[i])
         return ret
 
-    def __init__(self, dispatcher_id, edge_table, failures, nowait_nodes, flow_name, node_args = None, retry = None,
+    def __init__(self, dispatcher_id, flow_name, node_args = None, retry = None,
                  state = None):
         state_dict = {} if state is None else state
 
-        self._get_task_instance = None
-        self._is_flow = None
-
-        self._edge_table = edge_table
         self._dispatcher_id = dispatcher_id
-        self._failures = failures
         self._flow_name = flow_name
         self._node_args = node_args
-        self._nowait_nodes = nowait_nodes
         self._active_nodes = self._instantiate_active_nodes(state_dict.get('active_nodes', []))
         self._finished_nodes = state_dict.get('finished_nodes', {})
         self._failed_nodes = state_dict.get('failed_nodes', {})
         self._waiting_edges_idx = state_dict.get('waiting_edges', [])
-        self._waiting_edges = self._idxs2items(edge_table[flow_name], self._waiting_edges_idx)
+        self._waiting_edges = self._idxs2items(self.edge_table[flow_name], self._waiting_edges_idx)
         self._retry = retry if retry else self._start_retry
 
     def to_dict(self):
@@ -120,7 +122,7 @@ class SystemState(object):
         return ret
 
     def _start_node(self, node_name, parent, args):
-        if self._is_flow(node_name):
+        if self.is_flow(node_name):
             # do not pass parent, a subflow should be treated as a black box - a standalone flow that does not need to
             # know whether it was run by another flow
             async_result = Dispatcher().delay(flow_name=node_name, args=args)
@@ -130,7 +132,7 @@ class SystemState(object):
                                                'child_dispatcher_id': async_result.task_id,
                                                'args': args})
         else:
-            task = self._get_task_instance(node_name)
+            task = self.get_task_instance(node_name)
             async_result = task.delay(task_name=node_name, flow_name=self._flow_name, parent=parent, args=args)
             Trace.log(Trace.TASK_SCHEDULE, {'flow_name': self._flow_name,
                                             'dispatcher_id': self._dispatcher_id,
@@ -140,7 +142,7 @@ class SystemState(object):
                                             'args': args})
         record = {'name': node_name, 'id': async_result.task_id, 'result': async_result}
 
-        if node_name not in self._nowait_nodes.get(self._flow_name, {}):
+        if node_name not in self.nowait_nodes.get(self._flow_name, {}):
             self._active_nodes.append(record)
 
         return record
@@ -153,7 +155,7 @@ class SystemState(object):
 
         for i in range(len(failed_nodes), 0, -1):
             for combination in itertools.combinations(failed_nodes, i):
-                failure_nodes = self._failures[self._flow_name]
+                failure_nodes = self.failures[self._flow_name]
                 try:
                     failure_node = reduce(lambda n, c: n['next'][c[0]], combination[1:], failure_nodes[combination[0][0]])
                 except KeyError:
@@ -199,7 +201,7 @@ class SystemState(object):
         return ret
 
     def _update_waiting_edges(self, node_name):
-        for idx, edge in enumerate(self._edge_table[self._flow_name]):
+        for idx, edge in enumerate(self.edge_table[self._flow_name]):
             if node_name in edge['from'] and idx not in self._waiting_edges_idx:
                 self._waiting_edges.append(edge)
                 self._waiting_edges_idx.append(idx)
@@ -276,7 +278,7 @@ class SystemState(object):
         Trace.log(Trace.FLOW_START, {'flow_name': self._flow_name,
                                      'dispatcher_id': self._dispatcher_id,
                                      'args': self._node_args})
-        start_edges = [edge for edge in self._edge_table[self._flow_name] if len(edge['from']) == 0]
+        start_edges = [edge for edge in self.edge_table[self._flow_name] if len(edge['from']) == 0]
         if len(start_edges) == 0:
             # This should not occur since parsley raises exception if such occurs, but just to be sure...
             raise ValueError("No starting node found for flow '%s'!" % self._flow_name)
@@ -297,9 +299,7 @@ class SystemState(object):
 
         return self._retry
 
-    def update(self, get_task_instance, is_flow):
-        self._get_task_instance = get_task_instance
-        self._is_flow = is_flow
+    def update(self):
 
         if not self._active_nodes and not self._finished_nodes and not self._waiting_edges:
             # we are starting up

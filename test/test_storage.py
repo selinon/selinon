@@ -38,6 +38,14 @@ class TestStorageAccess(unittest.TestCase):
         GetTaskInstance.clear()
         StoragePool.set_storage_mapping({})
 
+    @staticmethod
+    def init(get_task_instance, is_flow, edge_table, failures, nowait_nodes):
+        SystemState.get_task_instance = get_task_instance
+        SystemState.is_flow = is_flow
+        SystemState.edge_table = edge_table
+        SystemState.failures = failures
+        SystemState.nowait_nodes = nowait_nodes
+
     def test_retrieve(self):
         #
         # flow1:
@@ -80,9 +88,10 @@ class TestStorageAccess(unittest.TestCase):
         }
         is_flow = IsFlow(edge_table.keys())
         nowait_nodes = dict.fromkeys(edge_table.keys(), [])
+        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
 
-        system_state = SystemState(id(self), edge_table, None, nowait_nodes, 'flow1')
-        retry = system_state.update(get_task_instance, is_flow)
+        system_state = SystemState(id(self), 'flow1')
+        retry = system_state.update()
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -95,8 +104,8 @@ class TestStorageAccess(unittest.TestCase):
         StoragePool.set_storage_mapping({'Storage1': MyStorage(None)})
         StoragePool.set_task_mapping({'Task1': 'Storage1'})
 
-        system_state = SystemState(id(self), edge_table, None, nowait_nodes, 'flow1', state=state_dict, node_args=system_state.node_args)
-        system_state.update(get_task_instance, is_flow)
+        system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
+        system_state.update()
 
         self.assertIn('Task2', get_task_instance.tasks)
 
@@ -146,9 +155,10 @@ class TestStorageAccess(unittest.TestCase):
         }
         is_flow = IsFlow(edge_table.keys())
         nowait_nodes = dict.fromkeys(edge_table.keys(), [])
+        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
 
-        system_state = SystemState(id(self), edge_table, None, nowait_nodes, 'flow1')
-        retry = system_state.update(get_task_instance, is_flow)
+        system_state = SystemState(id(self), 'flow1')
+        retry = system_state.update()
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
@@ -163,5 +173,5 @@ class TestStorageAccess(unittest.TestCase):
         StoragePool.set_task_mapping({'Task1': 'Storage1'})
 
         with self.assertRaises(ConnectionError):
-            system_state = SystemState(id(self), edge_table, None, nowait_nodes, 'flow1', state=state_dict, node_args=system_state.node_args)
-            system_state.update(get_task_instance, is_flow)
+            system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
+            system_state.update()
