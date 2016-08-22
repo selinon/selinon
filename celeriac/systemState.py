@@ -63,7 +63,7 @@ class SystemState(object):
             ret.append(edge_node_table[i])
         return ret
 
-    def __init__(self, edge_table, failures, flow_name, node_args = None, retry = None, state = None):
+    def __init__(self, edge_table, failures, nowait_nodes, flow_name, node_args = None, retry = None, state = None):
         state_dict = {} if state is None else state
 
         self._get_task_instance = None
@@ -73,6 +73,7 @@ class SystemState(object):
         self._failures = failures
         self._flow_name = flow_name
         self._node_args = node_args
+        self._nowait_nodes = nowait_nodes
         self._active_nodes = self._instantiate_active_nodes(state_dict.get('active_nodes', []))
         self._finished_nodes = state_dict.get('finished_nodes', {})
         self._failed_nodes = state_dict.get('failed_nodes', {})
@@ -121,7 +122,13 @@ class SystemState(object):
             Trace.log("Running task '%s' from flow '%s', parent: %s, args: %s"
                       % (node_name, self._flow_name, parent, args))
             async_result = task.delay(task_name=node_name, flow_name=self._flow_name, parent=parent, args=args)
-        return async_result
+
+        record = {'name': node_name, 'id': async_result.task_id, 'result': async_result}
+
+        if node_name not in self._nowait_nodes.get(self._flow_name, {}):
+            self._active_nodes.append(record)
+
+        return record
 
     def _run_fallback(self):
         # we sort it first to make evaluation dependent on alphabetical order
@@ -149,9 +156,7 @@ class SystemState(object):
 
                     for node in failure_node['fallback']:
                         # TODO: make record append transparent
-                        ar = self._start_node(node, parent, self._node_args)
-                        record = {'name': node, 'id': ar.task_id, 'result': ar}
-                        self._active_nodes.append(record)
+                        record = self._start_node(node, parent, self._node_args)
                         ret.append(record)
 
                     # wait for fallback to finish in order to avoid time dependent flow evaluation
@@ -218,9 +223,7 @@ class SystemState(object):
                     storage_pool = StoragePool(parent)
                     if edge['condition'](storage_pool):
                         for node_name in edge['to']:
-                            ar = self._start_node(node_name, parent, self._node_args)
-                            record = {'name': node_name, 'id': ar.task_id, 'result': ar}
-                            self._active_nodes.append(record)
+                            record = self._start_node(node_name, parent, self._node_args)
                             ret.append(record)
 
             node_name = node['name']
@@ -251,8 +254,8 @@ class SystemState(object):
             storage_pool = StoragePool()
             if start_edge['condition'](storage_pool):
                 for node_name in start_edge['to']:
-                    ar = self._start_node(node_name, args=self._node_args, parent=None)
-                    self._active_nodes.append({'id': ar.task_id, 'name': node_name, 'result': ar})
+                    self._start_node(node_name, args=self._node_args, parent=None)
+                    #self._active_nodes.append({'id': ar.task_id, 'name': node_name, 'result': ar})
                     # TODO: this shouldn't be called here?
                     self._update_waiting_edges(node_name)
 

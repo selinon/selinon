@@ -79,8 +79,9 @@ class TestStorageAccess(unittest.TestCase):
                       {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
         }
         is_flow = IsFlow(edge_table.keys())
+        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
 
-        system_state = SystemState(edge_table, None, 'flow1')
+        system_state = SystemState(edge_table, None, nowait_nodes, 'flow1')
         retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
@@ -94,7 +95,7 @@ class TestStorageAccess(unittest.TestCase):
         StoragePool.set_storage_mapping({'Storage1': MyStorage(None)})
         StoragePool.set_task_mapping({'Task1': 'Storage1'})
 
-        system_state = SystemState(edge_table, None, 'flow1', state=state_dict, node_args=system_state.node_args)
+        system_state = SystemState(edge_table, None, nowait_nodes, 'flow1', state=state_dict, node_args=system_state.node_args)
         system_state.update(get_task_instance, is_flow)
 
         self.assertIn('Task2', get_task_instance.tasks)
@@ -144,8 +145,9 @@ class TestStorageAccess(unittest.TestCase):
                       {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
         }
         is_flow = IsFlow(edge_table.keys())
+        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
 
-        system_state = SystemState(edge_table, None, 'flow1')
+        system_state = SystemState(edge_table, None, nowait_nodes, 'flow1')
         retry = system_state.update(get_task_instance, is_flow)
         state_dict = system_state.to_dict()
 
@@ -161,5 +163,5 @@ class TestStorageAccess(unittest.TestCase):
         StoragePool.set_task_mapping({'Task1': 'Storage1'})
 
         with self.assertRaises(ConnectionError):
-            system_state = SystemState(edge_table, None, 'flow1', state=state_dict, node_args=system_state.node_args)
+            system_state = SystemState(edge_table, None, nowait_nodes, 'flow1', state=state_dict, node_args=system_state.node_args)
             system_state.update(get_task_instance, is_flow)

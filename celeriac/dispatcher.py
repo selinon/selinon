@@ -37,6 +37,7 @@ class Dispatcher(Task):
         cls._edge_table = config_module['edge_table']
         cls._failures = config_module['failures']
         cls._output_schemas = config_module['output_schemas']
+        cls._nowait_nodes = config_module['nowait_nodes']
         StoragePool.set_storage_mapping(config_module['storage2instance_mapping'])
         StoragePool.set_task_mapping(config_module['task2storage_mapping'])
         # we should call initialization explicitly
@@ -86,7 +87,8 @@ class Dispatcher(Task):
         :raises: FlowError
         """
         try:
-            system_state = SystemState(self._edge_table, self._failures, flow_name, args, retry, state)
+            system_state = SystemState(self._edge_table, self._failures, self._nowait_nodes, flow_name,
+                                       args, retry, state)
             retry = system_state.update(self._get_task_instance, self._is_flow)
         except FlowError as flow_error:
             # force max_retries to 0 so we are not scheduled and marked as FAILED
