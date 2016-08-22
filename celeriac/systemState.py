@@ -20,7 +20,7 @@
 
 import itertools
 from functools import reduce
-from celery.result import AsyncResult, states
+from celery.result import AsyncResult
 from .flowError import FlowError
 from .dispatcher import Dispatcher
 from .storagePool import StoragePool
