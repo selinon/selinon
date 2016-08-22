@@ -19,6 +19,7 @@
 # ####################################################################
 
 import itertools
+from functools import reduce
 from celery.result import AsyncResult, states
 from .flowError import FlowError
 from .dispatcher import Dispatcher
@@ -62,17 +63,19 @@ class SystemState(object):
             ret.append(edge_node_table[i])
         return ret
 
-    def __init__(self, edge_table, flow_name, node_args = None, retry = None, state = None):
+    def __init__(self, edge_table, failures, flow_name, node_args = None, retry = None, state = None):
         state_dict = {} if state is None else state
 
         self._get_task_instance = None
         self._is_flow = None
 
         self._edge_table = edge_table
+        self._failures = failures
         self._flow_name = flow_name
         self._node_args = node_args
         self._active_nodes = self._instantiate_active_nodes(state_dict.get('active_nodes', []))
         self._finished_nodes = state_dict.get('finished_nodes', {})
+        self._failed_nodes = state_dict.get('failed_nodes', {})
         self._waiting_edges_idx = state_dict.get('waiting_edges', [])
         self._waiting_edges = self._idxs2items(edge_table[flow_name], self._waiting_edges_idx)
         self._retry = retry if retry else self._start_retry
@@ -80,6 +83,7 @@ class SystemState(object):
     def to_dict(self):
         return {'active_nodes': self._deinstantiate_active_nodes(self._active_nodes),
                 'finished_nodes': self._finished_nodes,
+                'failed_nodes': self._failed_nodes,
                 'waiting_edges': self._waiting_edges_idx
                 }
 
@@ -87,26 +91,20 @@ class SystemState(object):
         ret = []
 
         new_active_nodes = []
-        failure_nodes = []
         for node in self._active_nodes:
             if node['result'].successful():
                 ret.append(node)
             elif node['result'].state == states.FAILURE:
                 Trace.log("Node '%s' has failed in flow '%s'" % (node['name'], self._flow_name))
-                # TODO: Implement fallback
-                failure_nodes.append(node)
+                # We keep track of failed nodes to handle failures once all nodes finish
+                if node['name'] not in self._failed_nodes:
+                    self._failed_nodes[node['name']] = []
+                self._failed_nodes[node['name']].append(node['id'])
             else:
                 new_active_nodes.append(node)
 
-        # We wait until all active nodes finish and then we raise an exception since we want to keep dispatcher alive
-        # until there is anything active
-        if len(new_active_nodes) == 0 and len(failure_nodes) > 0:
-            err_str = "Nodes '%s' failed" % [(node['name'], node['id']) for node in failure_nodes]
-            Trace.log(err_str)
-            raise FlowError(err_str)
-
         # keep failure nodes for the next iteration in case we still have something to do
-        self._active_nodes = new_active_nodes + failure_nodes
+        self._active_nodes = new_active_nodes
 
         return ret
 
@@ -124,6 +122,45 @@ class SystemState(object):
                       % (node_name, self._flow_name, parent, args))
             async_result = task.delay(task_name=node_name, flow_name=self._flow_name, parent=parent, args=args)
         return async_result
+
+    def _run_fallback(self):
+        # we sort it first to make evaluation dependent on alphabetical order
+        # TODO: use binary search when inserting to optimize from O(N*log(N)) to O(log(N))
+        failed_nodes = sorted(self._failed_nodes.items())
+
+        # TODO: remove from active nodes
+        for i in range(len(failed_nodes), 0, -1):
+            for combination in itertools.combinations(failed_nodes, i):
+                failure_nodes = self._failures[self._flow_name]
+                try:
+                    failure_node = reduce(lambda n, c: n['next'][c[0]], combination[1:], failure_nodes[combination[0][0]])
+                except KeyError:
+                    # such failure not found in the tree of permutations - this means that this flow will always fail,
+                    # but run defined fallbacks for defined failures first
+                    continue
+
+                if isinstance(failure_node['fallback'], list) and len(failure_node['fallback']) > 0:
+                    parent = {}
+                    for node in combination:
+                        parent[node[0]] = self._failed_nodes[node[0]].pop(0)
+                        if len(self._failed_nodes[node[0]]) == 0:
+                            del self._failed_nodes[node[0]]
+
+                    for node in failure_node['fallback']:
+                        # TODO: make record append transparent
+                        ar = self._start_node(node, parent, self._node_args)
+                        record = {'name': node, 'id': ar.task_id, 'result': ar}
+                        self._active_nodes.append(record)
+
+                    # wait for fallback to finish in order to avoid time dependent flow evaluation
+                    return True
+                elif failure_node['fallback'] is True:
+                    for node in combination:
+                        self._failed_nodes[node[0]].pop(0)
+                        if len(self._failed_nodes[node[0]]) == 0:
+                            del self._failed_nodes[node[0]]
+
+        return len(self._failed_nodes) == 0
 
     def _update_waiting_edges(self, node_name):
         for idx, edge in enumerate(self._edge_table[self._flow_name]):
@@ -213,6 +250,7 @@ class SystemState(object):
                 for node_name in start_edge['to']:
                     ar = self._start_node(node_name, args=self._node_args, parent=None)
                     self._active_nodes.append({'id': ar.task_id, 'name': node_name, 'result': ar})
+                    # TODO: this shouldn't be called here?
                     self._update_waiting_edges(node_name)
 
         if len(self._active_nodes) > 0:
@@ -234,6 +272,12 @@ class SystemState(object):
 
             for node in new_finished:
                 self._update_waiting_edges(node['name'])
+
+            # We wait until all active nodes finish if there are some failed nodes try to recover from failure,
+            # otherwise mark flow as failed
+            if len(self._active_nodes) == 0 and self._failed_nodes:
+                if not self._run_fallback():
+                    raise FlowError("No fallback defined for failure %s" % self._failed_nodes.keys())
 
             return self._continue_and_update_retry(new_finished)
 

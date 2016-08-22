@@ -35,6 +35,7 @@ class Dispatcher(Task):
         cls._get_task_instance = config_module['get_task_instance']
         cls._is_flow = config_module['is_flow']
         cls._edge_table = config_module['edge_table']
+        cls._failures = config_module['failures']
         cls._output_schemas = config_module['output_schemas']
         StoragePool.set_storage_mapping(config_module['storage2instance_mapping'])
         StoragePool.set_task_mapping(config_module['task2storage_mapping'])
@@ -60,9 +61,7 @@ class Dispatcher(Task):
         # TODO: add once Parsley will be available in pip; the implementation should be (not tested):
         # import tempfile
         # from parsley import System
-        # system = System.from_files(nodes_definition_file, flow_definition_files)
-        # # perform checks so we are sure that system is OK
-        # system.check()
+        # system = System.from_files(nodes_definition_file, flow_definition_files, no_check=False)
         # # we could do this in memory, but runpy does not support this
         # tmp_file = tempfile.NamedTemporaryFile(mode="rw")
         # system.dump2stream(tmp_file)
@@ -87,7 +86,7 @@ class Dispatcher(Task):
         :raises: FlowError
         """
         try:
-            system_state = SystemState(self._edge_table, flow_name, args, retry, state)
+            system_state = SystemState(self._edge_table, self._failures, flow_name, args, retry, state)
             retry = system_state.update(self._get_task_instance, self._is_flow)
         except FlowError as flow_error:
             # force max_retries to 0 so we are not scheduled and marked as FAILED
