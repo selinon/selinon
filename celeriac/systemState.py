@@ -126,6 +126,7 @@ class SystemState(object):
     def _run_fallback(self):
         # we sort it first to make evaluation dependent on alphabetical order
         # TODO: use binary search when inserting to optimize from O(N*log(N)) to O(log(N))
+        ret = []
         failed_nodes = sorted(self._failed_nodes.items())
 
         # TODO: remove from active nodes
@@ -151,16 +152,18 @@ class SystemState(object):
                         ar = self._start_node(node, parent, self._node_args)
                         record = {'name': node, 'id': ar.task_id, 'result': ar}
                         self._active_nodes.append(record)
+                        ret.append(record)
 
                     # wait for fallback to finish in order to avoid time dependent flow evaluation
-                    return True
+                    return ret
                 elif failure_node['fallback'] is True:
                     for node in combination:
                         self._failed_nodes[node[0]].pop(0)
                         if len(self._failed_nodes[node[0]]) == 0:
                             del self._failed_nodes[node[0]]
+                    # continue with fallback in other combinations, nothing started
 
-        return len(self._failed_nodes) == 0
+        return ret
 
     def _update_waiting_edges(self, node_name):
         for idx, edge in enumerate(self._edge_table[self._flow_name]):
@@ -227,9 +230,9 @@ class SystemState(object):
 
         return ret
 
-    def _continue_and_update_retry(self, new_finished):
+    def _continue_and_update_retry(self, new_finished, fallback_started):
         started = self._start_new_from_finished(new_finished)
-        if len(started) > 0:
+        if len(started) > 0 or len(fallback_started) > 0:
             self._retry = self._start_retry
         elif len(self._active_nodes) > 0:
             self._retry = min(self._retry*2, self._max_retry)
@@ -273,11 +276,13 @@ class SystemState(object):
             for node in new_finished:
                 self._update_waiting_edges(node['name'])
 
+            fallback_started = []
             # We wait until all active nodes finish if there are some failed nodes try to recover from failure,
             # otherwise mark flow as failed
             if len(self._active_nodes) == 0 and self._failed_nodes:
-                if not self._run_fallback():
+                fallback_started = self._run_fallback()
+                if len(fallback_started) == 0 and len(self._failed_nodes) > 0:
                     raise FlowError("No fallback defined for failure %s" % self._failed_nodes.keys())
 
-            return self._continue_and_update_retry(new_finished)
+            return self._continue_and_update_retry(new_finished, fallback_started)
 
