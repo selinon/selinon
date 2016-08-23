@@ -26,7 +26,8 @@ from .storagePool import StoragePool
 from .trace import Trace
 
 
-class CeleriacTask(ABC_from_parent(Task)):
+# TODO: Inherit from ABC
+class CeleriacTask(Task):
     """
     A base class for user defined workers
     """
