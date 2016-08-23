@@ -19,6 +19,7 @@
 # ####################################################################
 
 import logging
+import platform
 
 
 def _default_trace_func(event, msg_dict):
@@ -101,7 +102,8 @@ class Trace(object):
         Trace by using Python's logging
         """
         logging.basicConfig(level=logging.INFO,
-                            format='%(asctime)s.%(msecs)d %(levelname)s: %(message)s',
+                            format='DISPATCHER %10s - %(asctime)s.%(msecs)d %(levelname)s: %(message)s'
+                                   % platform.node(),
                             datefmt="%Y-%m-%d %H:%M:%S")
         cls._trace_func = _logging_trace_func
 
