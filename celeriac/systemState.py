@@ -22,7 +22,6 @@ import itertools
 from functools import reduce
 from celery.result import AsyncResult
 from .flowError import FlowError
-from .dispatcher import Dispatcher
 from .storagePool import StoragePool
 from .trace import Trace
 
@@ -122,6 +121,7 @@ class SystemState(object):
         return ret
 
     def _start_node(self, node_name, parent, args):
+        from .dispatcher import Dispatcher
         if self.is_flow(node_name):
             # do not pass parent, a subflow should be treated as a black box - a standalone flow that does not need to
             # know whether it was run by another flow

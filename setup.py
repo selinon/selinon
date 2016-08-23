@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from celeriac import celeriac_version
+from celeriac.version import celeriac_version
 from setuptools import setup, find_packages
 
 
