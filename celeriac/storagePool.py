@@ -19,7 +19,7 @@
 # ####################################################################
 
 from .lockPool import LockPool
-
+from .trace import Trace
 
 class StoragePool(object):
     """
@@ -73,6 +73,7 @@ class StoragePool(object):
         if not storage.connected():
             with LockPool.get_lock(storage):
                 if not storage.connected():
+                    Trace.log(Trace.STORAGE_CONNECT, {'storage_name': storage_name})
                     # TODO: we could optimize this by limiting number of active connections
                     storage.connect()
 
@@ -80,9 +81,17 @@ class StoragePool(object):
 
     def get(self, flow_name, task_name):
         storage = self.get_storage_by_task_name(task_name)
+        Trace.log(Trace.STORAGE_RETRIEVE, {'flow_name': flow_name,
+                                           'task_name': task_name,
+                                           'storage_name': self._task_mapping[task_name]})
         return storage.retrieve(flow_name, task_name, self._id_mapping[task_name])
 
     @classmethod
     def set(cls, flow_name, task_name, task_id, result):
         storage = cls.get_storage_by_task_name(task_name)
+        Trace.log(Trace.STORAGE_STORE, {'flow_name': flow_name,
+                                        'task_name': task_name,
+                                        'task_id': task_id,
+                                        'storage_name': cls._task_mapping[task_name],
+                                        'result': result})
         storage.store(flow_name, task_name, task_id, result)

@@ -79,6 +79,19 @@ class Trace(object):
     # Signalize flow end
     FLOW_END = 14                                 # flow_name, dispatcher_id, finished_nodes
 
+    # Signal storage connect
+    STORAGE_CONNECT = 15                          # storage_name
+
+    # Signal storage disconnect
+    # TODO: currently unused
+    STORAGE_DISCONNECT = 16                       # storage_name
+
+    # Signal storage access for reading
+    STORAGE_RETRIEVE = 17                         # flow_name, task_name, storage
+
+    # Signal storage access for writing
+    STORAGE_STORE = 18                            # flow_name, task_name, task_id, storage, result
+
     def __init__(self):
         raise NotImplementedError()
 
