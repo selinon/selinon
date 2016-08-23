@@ -23,5 +23,4 @@ clean:
 
 check:
 	@# We have to adjust CWD so we use our own Celery and modified Celeriac Dispatcher for testing
-	#cd test && python3 -m unittest -v test_systemState test_nodeFailures test_storage test_nowait test_subflow
-	cd test && python3 -m unittest -v test_subflow
+	cd test && python3 -m unittest -v test_systemState test_nodeFailures test_storage test_nowait
