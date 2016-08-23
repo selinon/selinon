@@ -3,6 +3,8 @@ TEMPFILE := $(shell mktemp -u)
 .PHONY: install clean uninstall venv check
 
 install:
+	sh ./bump-version.sh
+	pip3 install -r requirements.txt
 	python setup.py install
 
 uninstall:
