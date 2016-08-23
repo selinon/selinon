@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-from celeriac.version import celeriac_version
-from setuptools import setup, find_packages
+from celeriac import celeriac_version
+from setuptools import setup
 
 
 def get_requirements():
@@ -12,7 +12,7 @@ def get_requirements():
 setup(
     name='celeriac',
     version=celeriac_version,
-    packages=find_packages(),
+    packages=['celeriac'],
     install_requires=get_requirements(),
     author='Fridolin Pokorny',
     author_email='fpokorny@redhat.com',
