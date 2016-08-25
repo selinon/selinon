@@ -22,8 +22,8 @@ import runpy
 from celery import Task
 from .systemState import SystemState
 from .flowError import FlowError
-from .storagePool import StoragePool
 from .trace import Trace
+from .config import Config
 
 
 class Dispatcher(Task):
@@ -31,26 +31,12 @@ class Dispatcher(Task):
     Celeriac Dispatcher worker implementation
     """
     @classmethod
-    def _set_config(cls, config_module):
-        SystemState.get_task_instance = config_module['get_task_instance']
-        SystemState.is_flow = config_module['is_flow']
-        SystemState.edge_table = config_module['edge_table']
-        SystemState.failures = config_module['failures']
-        SystemState.nowait_nodes = config_module['nowait_nodes']
-
-        StoragePool.set_storage_mapping(config_module['storage2instance_mapping'])
-        StoragePool.set_task_mapping(config_module['task2storage_mapping'])
-        # we should call initialization explicitly
-        config_module['init']()
-
-    @classmethod
     def set_config_py(cls, config_code):
         """
         Set dispatcher configuration by Python config file
         :param config_code: configuration source code
         """
-        config_module = runpy.run_path(config_code)
-        cls._set_config(config_module)
+        Config.set_config_py(config_code)
 
     @classmethod
     def set_config_yaml(cls, nodes_definition_file, flow_definition_files):
@@ -59,15 +45,7 @@ class Dispatcher(Task):
         :param nodes_definition_file: definition of system nodes - YAML configuration
         :param flow_definition_files: list of flow definition files
         """
-        # TODO: add once Parsley will be available in pip; the implementation should be (not tested):
-        # import tempfile
-        # from parsley import System
-        # system = System.from_files(nodes_definition_file, flow_definition_files, no_check=False)
-        # # we could do this in memory, but runpy does not support this
-        # tmp_file = tempfile.NamedTemporaryFile(mode="rw")
-        # system.dump2stream(tmp_file)
-        # cls.set_config_code(tmp_file.name)
-        raise NotImplementedError()
+        Config.set_config_yaml(nodes_definition_file, flow_definition_files)
 
     @classmethod
     def trace_by_func(cls, trace_func):
@@ -84,10 +62,11 @@ class Dispatcher(Task):
         """
         Trace.trace_by_logging()
 
-    def run(self, flow_name, args=None, retry=None, state=None):
+    def run(self, flow_name, parent, args=None, retry=None, state=None):
         """
         Dispatcher entry-point - run each time a dispatcher is scheduled
         :param flow_name: name of the flow
+        :param parent: flow parent nodes
         :param args: arguments for workers
         :param retry: last retry countdown
         :param state: the current system state
@@ -100,7 +79,7 @@ class Dispatcher(Task):
                                             'retry': retry,
                                             'state': state})
         try:
-            system_state = SystemState(self.request.id, flow_name, args, retry, state)
+            system_state = SystemState(self.request.id, flow_name, args, retry, state, parent)
             retry = system_state.update()
         except FlowError as flow_error:
             Trace.log(Trace.FLOW_FAILURE, {'flow_name': flow_name,

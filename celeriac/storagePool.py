@@ -18,32 +18,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
+from .config import Config
 from .lockPool import LockPool
 from .trace import Trace
+
 
 class StoragePool(object):
     """
     A pool that carries all database connections for workers
     """
-    _storage_mapping = {}
-    _task_mapping = {}
-
     def __init__(self, id_mapping=None):
         self._id_mapping = id_mapping if id_mapping else {}
-
-    @classmethod
-    def set_storage_mapping(cls, storage_mapping):
-        """
-        :param storage_mapping: database adapters that should be used for certain task in a flow flow
-        """
-        cls._storage_mapping = storage_mapping
-
-    @classmethod
-    def set_task_mapping(cls, task_mapping):
-        """
-        :param task_mapping: mapping tasks to a certain storage name
-        """
-        cls._task_mapping = task_mapping
 
     @classmethod
     def get_storage_name_by_task_name(cls, task_name, graceful=False):
@@ -53,7 +38,7 @@ class StoragePool(object):
         :return: storage name for task
         """
         try:
-            return cls._task_mapping[task_name]
+            return Config.task_mapping[task_name]
         except KeyError:
             if graceful:
                 return None
@@ -68,7 +53,7 @@ class StoragePool(object):
     def _connected_storage(cls, storage_name):
         # if this raises KeyError exception it means that the flow was not configured properly - should
         # be handled by Parsley
-        storage = cls._storage_mapping[storage_name]
+        storage = Config.storage_mapping[storage_name]
 
         if not storage.connected():
             with LockPool.get_lock(storage):
@@ -83,7 +68,7 @@ class StoragePool(object):
         storage = self.get_storage_by_task_name(task_name)
         Trace.log(Trace.STORAGE_RETRIEVE, {'flow_name': flow_name,
                                            'task_name': task_name,
-                                           'storage_name': self._task_mapping[task_name]})
+                                           'storage_name': Config.task_mapping[task_name]})
         return storage.retrieve(flow_name, task_name, self._id_mapping[task_name])
 
     @classmethod
@@ -92,6 +77,6 @@ class StoragePool(object):
         Trace.log(Trace.STORAGE_STORE, {'flow_name': flow_name,
                                         'task_name': task_name,
                                         'task_id': task_id,
-                                        'storage_name': cls._task_mapping[task_name],
+                                        'storage_name': Config.task_mapping[task_name],
                                         'result': result})
         storage.store(flow_name, task_name, task_id, result)

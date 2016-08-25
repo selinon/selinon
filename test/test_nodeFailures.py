@@ -26,6 +26,7 @@ from isFlow import IsFlow
 
 from celery.result import AsyncResult
 from celeriac import SystemState
+from celeriac.config import Config
 
 
 def _cond_true(x):
@@ -43,11 +44,13 @@ class TestNodeFailures(unittest.TestCase):
 
     @staticmethod
     def init(get_task_instance, is_flow, edge_table, failures, nowait_nodes):
-        SystemState.get_task_instance = get_task_instance
-        SystemState.is_flow = is_flow
-        SystemState.edge_table = edge_table
-        SystemState.failures = failures
-        SystemState.nowait_nodes = nowait_nodes
+        Config.get_task_instance = get_task_instance
+        Config.is_flow = is_flow
+        Config.edge_table = edge_table
+        Config.failures = failures
+        Config.nowait_nodes = nowait_nodes
+        Config.propagate_parent = {}
+        Config.propagate_result = {}
 
     def test_single_failure_flow_fail(self):
         #

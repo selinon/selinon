@@ -18,48 +18,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
-import abc
 import jsonschema
-from celery import Task
-from .helpers import ABC_from_parent
 from .storagePool import StoragePool
-from .trace import Trace
 
 
-# TODO: Inherit from ABC
-class CeleriacTask(Task):
-    """
-    A base class for user defined workers
-    """
-    # Celery configuration
-    ignore_result = False
-    abstract = True
-    acks_late = True
-    track_started = True
-    name = "CeleriacTask"
+class CeleriacTask(object):
+    def __init__(self, flow_name, task_name, parent):
+        self.flow_name = flow_name
+        self.task_name = task_name
+        self.parent = parent
 
-    # Celeriac specific attributes
-    # Note: will be overwritten by configuration
-    output_schema_path = None
-    output_schema = None
-    max_retries = None
-    time_limit = None
-    # TODO: this will be adopted
-    storage = None
-
-    def __init__(self, *args, **kwargs):
-        """
-        :param args: args for Celery task
-        :param kwargs: kwargs for Celery task
-        """
-        super(CeleriacTask, self).__init__(*args, **kwargs)
-        self.task_name = None
-        self.task_id = None
-        self.flow_name = None
-        self.parent = None
-
-    @staticmethod
-    def parent_result(flow_name, parent):
+    def parent_result(self, parent):
         task_name = parent.keys()
         task_id = parent.values()
 
@@ -70,75 +39,17 @@ class CeleriacTask(Task):
         task_name = task_name[0]
 
         storage_pool = StoragePool(parent)
-        return storage_pool.get(flow_name, task_name)
+        return storage_pool.get(self.flow_name, task_name)
 
-    @staticmethod
-    def parent_all_results(flow_name, parent):
+    def parent_all_results(self, parent):
         ret = {}
 
         storage_pool = StoragePool(parent)
         for task_name in parent.keys():
-            ret[task_name] = storage_pool.get(flow_name, task_name)
+            ret[task_name] = storage_pool.get(self.flow_name, task_name)
 
         return ret
 
-    @classmethod
-    def validate_result(cls, result):
-        if cls.output_schema is None:
-            if cls.output_schema_path is None:
-                return
-
-            with open(cls.output_schema_path, "r") as f:
-                cls.output_schema = f.read()
-
-        jsonschema.validate(result, cls.output_schema)
-
-    def run(self, task_name, flow_name, parent, args):
-        # we are passing args as one argument explicitly for now not to have troubles with *args and **kwargs mapping
-        # since we depend on previous task and the result can be anything
-        Trace.log(Trace.TASK_START, {'flow_name': flow_name,
-                                     'task_name': task_name,
-                                     'task_id': self.request.id,
-                                     'parent': parent,
-                                     'args': args})
-        try:
-            result = self.execute(flow_name, task_name, parent, args)
-            self.validate_result(result)
-
-            if self.storage:
-                StoragePool.set(flow_name=flow_name, task_name=task_name, task_id=self.task_id, result=result)
-            elif not self.storage and result is not None:
-                Trace.log(Trace.TASK_DISCARD_RESULT, {'flow_name': flow_name,
-                                                      'task_name': task_name,
-                                                      'task_id': self.request.id,
-                                                      'parent': parent,
-                                                      'args': args,
-                                                      'result': result})
-        except Exception as exc:
-            Trace.log(Trace.TASK_FAILURE, {'flow_name': flow_name,
-                                           'task_name': task_name,
-                                           'task_id': self.request.id,
-                                           'parent': parent,
-                                           'args': args,
-                                           'what': exc})
-            raise
-
-        Trace.log(Trace.TASK_END, {'flow_name': flow_name,
-                                   'task_name': task_name,
-                                   'task_id': self.request.id,
-                                   'parent': parent,
-                                   'args': args,
-                                   'storage': StoragePool.get_storage_name_by_task_name(task_name, graceful=True)})
-
-    @abc.abstractmethod
-    def execute(self, flow_name, task_name, parent, args):
-        """
-        Celeriac task entrypoint
-        :param flow_name: a name of a flow that triggered this task
-        :param task_name: name of the task
-        :param parent: mapping to parent tasks
-        :param args: task arguments
-        :return: data that should be stored to a storage
-        """
+    def execute(self, args):
         pass
 

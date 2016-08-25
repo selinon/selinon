@@ -24,7 +24,7 @@ from isFlow import IsFlow
 from celery.result import AsyncResult
 from celeriac import SystemState
 from celeriac import DataStorage
-from celeriac import StoragePool
+from celeriac.config import Config
 
 
 def _cond_true(x):
@@ -36,15 +36,17 @@ class TestStorageAccess(unittest.TestCase):
     def setUp(self):
         AsyncResult.clear()
         GetTaskInstance.clear()
-        StoragePool.set_storage_mapping({})
+        Config.storage_mapping = {}
 
     @staticmethod
     def init(get_task_instance, is_flow, edge_table, failures, nowait_nodes):
-        SystemState.get_task_instance = get_task_instance
-        SystemState.is_flow = is_flow
-        SystemState.edge_table = edge_table
-        SystemState.failures = failures
-        SystemState.nowait_nodes = nowait_nodes
+        Config.get_task_instance = get_task_instance
+        Config.is_flow = is_flow
+        Config.edge_table = edge_table
+        Config.failures = failures
+        Config.nowait_nodes = nowait_nodes
+        Config.propagate_parent = {}
+        Config.propagate_result = {}
 
     def test_retrieve(self):
         #
@@ -101,8 +103,8 @@ class TestStorageAccess(unittest.TestCase):
         AsyncResult.set_finished(task1.task_id)
         AsyncResult.set_result(task1.task_id, 1)
 
-        StoragePool.set_storage_mapping({'Storage1': MyStorage(None)})
-        StoragePool.set_task_mapping({'Task1': 'Storage1'})
+        Config.storage_mapping = {'Storage1': MyStorage(None)}
+        Config.task_mapping = {'Task1': 'Storage1'}
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         system_state.update()
@@ -169,8 +171,8 @@ class TestStorageAccess(unittest.TestCase):
         AsyncResult.set_result(task1.task_id, 1)
 
         storage_config = {'foo': 'bar'}
-        StoragePool.set_storage_mapping({'Storage1': MyStorage(storage_config)})
-        StoragePool.set_task_mapping({'Task1': 'Storage1'})
+        Config.storage_mapping = {'Storage1': MyStorage(storage_config)}
+        Config.task_mapping = {'Task1': 'Storage1'}
 
         with self.assertRaises(ConnectionError):
             system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
