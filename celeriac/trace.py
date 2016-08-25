@@ -101,9 +101,9 @@ class Trace(object):
         """
         Trace by using Python's logging
         """
+        prefix = 'DISPATCHER %10s' % platform.node()
         logging.basicConfig(level=logging.INFO,
-                            format='DISPATCHER %10s - %(asctime)s.%(msecs)d %(levelname)s: %(message)s'
-                                   % platform.node(),
+                            format=prefix + ' - %(asctime)s.%(msecs)d %(levelname)s: %(message)s',
                             datefmt="%Y-%m-%d %H:%M:%S")
         cls._trace_func = _logging_trace_func
 
