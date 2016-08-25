@@ -34,12 +34,12 @@ class Dispatcher(Task):
     track_started = True
     name = "Dispatcher"
 
-    def run(self, flow_name, args=None, parent=None, retry=None, state=None):
+    def run(self, flow_name, node_args=None, parent=None, retry=None, state=None):
         """
         Dispatcher entry-point - run each time a dispatcher is scheduled
         :param flow_name: name of the flow
         :param parent: flow parent nodes
-        :param args: arguments for workers
+        :param node_args: arguments for workers
         :param retry: last retry countdown
         :param state: the current system state
         :raises: FlowError
@@ -47,11 +47,11 @@ class Dispatcher(Task):
 
         Trace.log(Trace.DISPATCHER_WAKEUP, {'flow_name': flow_name,
                                             'dispatcher_id': self.request.id,
-                                            'args': args,
+                                            'node_args': node_args,
                                             'retry': retry,
                                             'state': state})
         try:
-            system_state = SystemState(self.request.id, flow_name, args, retry, state, parent)
+            system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent)
             retry = system_state.update()
         except FlowError as flow_error:
             Trace.log(Trace.FLOW_FAILURE, {'flow_name': flow_name,
@@ -71,7 +71,7 @@ class Dispatcher(Task):
         if retry:
             kwargs = {
                 'flow': flow_name,
-                'args': node_args,
+                'node_args': node_args,
                 'retry': retry,
                 'state': state_dict
             }
@@ -79,7 +79,7 @@ class Dispatcher(Task):
                                                'dispatcher_id': self.request.id,
                                                'retry': retry,
                                                'state_dict': state_dict,
-                                               'args': node_args
+                                               'node_args': node_args
                                                })
             raise self.retry(kwargs=kwargs, retry=retry)
         else:
