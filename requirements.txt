@@ -1,3 +1,3 @@
 #TODO: add parsley
-celery==3.1.9
+celery>=4.0.0rc3
 jsonschema==2.5.1
