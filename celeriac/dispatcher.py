@@ -28,6 +28,12 @@ class Dispatcher(Task):
     """
     Celeriac Dispatcher worker implementation
     """
+    # Celery configuration
+    ignore_result = False
+    acks_late = True
+    track_started = True
+    name = "Dispatcher"
+
     def run(self, flow_name, args=None, parent=None, retry=None, state=None):
         """
         Dispatcher entry-point - run each time a dispatcher is scheduled
