@@ -25,6 +25,7 @@ from .flowError import FlowError
 from .storagePool import StoragePool
 from .trace import Trace
 from .config import Config
+from .celeriacTaskEnvelope import CeleriacTaskEnvelope
 
 
 # TODO: write docstrings
@@ -129,8 +130,9 @@ class SystemState(object):
                                                'child_dispatcher_id': async_result.task_id,
                                                'args': args})
         else:
-            task = Config.get_task_instance(node_name)
-            async_result = task.delay(task_name=node_name, flow_name=self._flow_name, parent=parent, args=args)
+            async_result = CeleriacTaskEnvelope().delay(task_name=node_name,
+                                                        flow_name=self._flow_name,
+                                                        parent=parent, args=args)
             Trace.log(Trace.TASK_SCHEDULE, {'flow_name': self._flow_name,
                                             'dispatcher_id': self._dispatcher_id,
                                             'task_name': node_name,

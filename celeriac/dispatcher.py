@@ -18,50 +18,16 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
-import runpy
 from celery import Task
 from .systemState import SystemState
 from .flowError import FlowError
 from .trace import Trace
-from .config import Config
 
 
 class Dispatcher(Task):
     """
     Celeriac Dispatcher worker implementation
     """
-    @classmethod
-    def set_config_py(cls, config_code):
-        """
-        Set dispatcher configuration by Python config file
-        :param config_code: configuration source code
-        """
-        Config.set_config_py(config_code)
-
-    @classmethod
-    def set_config_yaml(cls, nodes_definition_file, flow_definition_files):
-        """
-        Set dispatcher configuration by path to YAML configuration files
-        :param nodes_definition_file: definition of system nodes - YAML configuration
-        :param flow_definition_files: list of flow definition files
-        """
-        Config.set_config_yaml(nodes_definition_file, flow_definition_files)
-
-    @classmethod
-    def trace_by_func(cls, trace_func):
-        """
-        Set tracing function for Dispatcher
-        :param trace_func: a function that should be used to trace dispatcher actions
-        """
-        Trace.trace_by_func(trace_func)
-
-    @classmethod
-    def trace_by_logging(cls):
-        """
-        Use Python's logging for tracing
-        """
-        Trace.trace_by_logging()
-
     def run(self, flow_name, parent, args=None, retry=None, state=None):
         """
         Dispatcher entry-point - run each time a dispatcher is scheduled

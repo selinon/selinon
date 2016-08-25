@@ -18,10 +18,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
-import abc
+from .storagePool import StoragePool
 import jsonschema
 from celery import Task
-from .storagePool import StoragePool
 from .trace import Trace
 from .config import Config
 
@@ -33,34 +32,9 @@ class CeleriacTaskEnvelope(Task):
     """
     # Celery configuration
     ignore_result = False
-    abstract = True
     acks_late = True
     track_started = True
     name = "CeleriacTask"
-
-    @staticmethod
-    def parent_result(flow_name, parent):
-        task_name = parent.keys()
-        task_id = parent.values()
-
-        # parent should be {'Task': '<id>'}, but a single entry
-        assert(len(task_name) == 1)
-        assert(len(task_id) == 1)
-
-        task_name = task_name[0]
-
-        storage_pool = StoragePool(parent)
-        return storage_pool.get(flow_name, task_name)
-
-    @staticmethod
-    def parent_all_results(flow_name, parent):
-        ret = {}
-
-        storage_pool = StoragePool(parent)
-        for task_name in parent.keys():
-            ret[task_name] = storage_pool.get(flow_name, task_name)
-
-        return ret
 
     @classmethod
     def validate_result(cls, task_name, result):

@@ -1,8 +1,30 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# ####################################################################
+# Copyright (C) 2016  Fridolin Pokorny, fpokorny@redhat.com
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# ####################################################################
+
 import runpy
+from .trace import Trace
 
 
 class Config(object):
+    celery_app = None
+
     get_task_instance = None
     is_flow = None
     edge_table = None
@@ -53,4 +75,31 @@ class Config(object):
         # system.dump2stream(tmp_file)
         # cls.set_config_code(tmp_file.name)
         raise NotImplementedError()
+
+    @classmethod
+    def trace_by_func(cls, trace_func):
+        """
+        Set tracing function for Dispatcher
+        :param trace_func: a function that should be used to trace dispatcher actions
+        """
+        Trace.trace_by_func(trace_func)
+
+    @classmethod
+    def trace_by_logging(cls):
+        """
+        Use Python's logging for tracing
+        """
+        Trace.trace_by_logging()
+
+    @classmethod
+    def set_celery_app(cls, celery_app):
+        """
+        Set celery application that should be used
+        :param celery_app: celery app instance
+        """
+        from .dispatcher import Dispatcher
+        from .celeriacTaskEnvelope import CeleriacTaskEnvelope
+        cls.celery_app = celery_app
+        celery_app.tasks.register(Dispatcher())
+        celery_app.tasks.register(CeleriacTaskEnvelope())
 
