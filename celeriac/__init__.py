@@ -7,3 +7,4 @@ from .version import celeriac_version
 from .dataStorage import DataStorage
 from .storagePool import StoragePool
 from .celeriacTask import CeleriacTask
+from .config import Config
