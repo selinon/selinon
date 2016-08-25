@@ -36,7 +36,7 @@ class CeleriacTask(Task):
     abstract = True
     acks_late = True
     track_started = True
-    name = None
+    name = "CeleriacTask"
 
     # Celeriac specific attributes
     # Note: will be overwritten by configuration
