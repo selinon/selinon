@@ -44,6 +44,8 @@ class CeleriacTask(Task):
     output_schema = None
     max_retries = None
     time_limit = None
+    # TODO: this will be adopted
+    storage = None
 
     def __init__(self, *args, **kwargs):
         """
