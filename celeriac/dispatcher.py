@@ -70,8 +70,9 @@ class Dispatcher(Task):
 
         if retry:
             kwargs = {
-                'flow': flow_name,
+                'flow_name': flow_name,
                 'node_args': node_args,
+                'parent': parent,
                 'retry': retry,
                 'state': state_dict
             }
