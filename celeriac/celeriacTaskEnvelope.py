@@ -58,8 +58,9 @@ class CeleriacTaskEnvelope(Task):
             result = task.execute(args)
             self.validate_result(task_name, result)
 
-            if self.storage:
-                StoragePool.set(flow_name=flow_name, task_name=task_name, task_id=self.task_id, result=result)
+            storage = StoragePool.get_storage_by_task_name(task_name)
+            if storage:
+                storage.store(flow_name, task_name, self.request.task_id, result)
             elif not self.storage and result is not None:
                 Trace.log(Trace.TASK_DISCARD_RESULT, {'flow_name': flow_name,
                                                       'task_name': task_name,
