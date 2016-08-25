@@ -53,6 +53,16 @@ class Dispatcher(Task):
         cls._set_config(config_module)
 
     @classmethod
+    def set_config_py(cls, config_py):
+        """
+        Set dispatcher configuration by Python config file
+        :param config_py: Python config file
+        """
+        with open(config_py, 'r') as f:
+            code = f.read()
+        cls.set_config_code(code)
+
+    @classmethod
     def set_config_yaml(cls, nodes_definition_file, flow_definition_files):
         """
         Set dispatcher configuration by path to YAML configuration files
