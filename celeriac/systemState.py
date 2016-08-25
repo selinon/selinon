@@ -122,7 +122,7 @@ class SystemState(object):
 
     def _start_node(self, node_name, parent, args):
         from .dispatcher import Dispatcher
-        if self.is_flow(node_name):
+        if SystemState.is_flow(node_name):
             # do not pass parent, a subflow should be treated as a black box - a standalone flow that does not need to
             # know whether it was run by another flow
             async_result = Dispatcher().delay(flow_name=node_name, args=args)
@@ -132,7 +132,7 @@ class SystemState(object):
                                                'child_dispatcher_id': async_result.task_id,
                                                'args': args})
         else:
-            task = self.get_task_instance(node_name)
+            task = SystemState.get_task_instance(node_name)
             async_result = task.delay(task_name=node_name, flow_name=self._flow_name, parent=parent, args=args)
             Trace.log(Trace.TASK_SCHEDULE, {'flow_name': self._flow_name,
                                             'dispatcher_id': self._dispatcher_id,
@@ -214,7 +214,9 @@ class SystemState(object):
             # propagate arguments from newly finished node only if:
             #  1. we did not define node arguments in original Dispatcher() call
             #  2. the flow started only with a one single node that just finished
-            self._node_args = new_finished[0]['result'].result
+            #  3. node was not a subflow
+            if not SystemState.is_flow(new_finished[0]['name']):
+                self._node_args = new_finished[0]['result'].result
 
         for node in new_finished:
             # We could optimize this by pre-computing affected edges in pre-generated config file for each
