@@ -28,7 +28,7 @@ class Dispatcher(Task):
     """
     Celeriac Dispatcher worker implementation
     """
-    def run(self, flow_name, parent, args=None, retry=None, state=None):
+    def run(self, flow_name, args=None, parent=None, retry=None, state=None):
         """
         Dispatcher entry-point - run each time a dispatcher is scheduled
         :param flow_name: name of the flow
