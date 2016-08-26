@@ -12,7 +12,7 @@ def get_requirements():
 setup(
     name='celeriac',
     version=celeriac_version,
-    packages=['celeriac'],
+    packages=['celeriac', 'celeriac.storage'],
     install_requires=get_requirements(),
     author='Fridolin Pokorny',
     author_email='fpokorny@redhat.com',
