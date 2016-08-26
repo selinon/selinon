@@ -157,8 +157,8 @@ class SystemState(object):
 
         for i in range(len(failed_nodes), 0, -1):
             for combination in itertools.combinations(failed_nodes, i):
-                failure_nodes = Config.failures[self._flow_name]
                 try:
+                    failure_nodes = Config.failures[self._flow_name]
                     failure_node = reduce(lambda n, c: n['next'][c[0]], combination[1:], failure_nodes[combination[0][0]])
                 except KeyError:
                     # such failure not found in the tree of permutations - this means that this flow will always fail,
