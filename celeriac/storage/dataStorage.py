@@ -19,22 +19,16 @@
 # ####################################################################
 
 import abc
-from .helpers import ABC
+from ..helpers import ABC
 
 
 class DataStorage(ABC):
     """
     Abstract Celeriac storage adapter that is implemented by a user
     """
-    def __init__(self, configuration):
-        self._configuration = configuration
-
-    @property
-    def configuration(self):
-        """
-        Storage configuration as defined in YAML configuration file
-        """
-        return self._configuration
+    @abc.abstractclassmethod
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def connect(self):
@@ -44,7 +38,7 @@ class DataStorage(ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def connected(self):
+    def is_connected(self):
         """
         :return: True if connected to a resource
         """

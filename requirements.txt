@@ -1,3 +1,4 @@
 #TODO: add parsley
 celery>=4.0.0rc3
 jsonschema==2.5.1
+pymongo==3.3.0

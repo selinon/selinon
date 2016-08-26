@@ -59,9 +59,9 @@ class StoragePool(object):
         # be handled by Parsley
         storage = Config.storage_mapping[storage_name]
 
-        if not storage.connected():
+        if not storage.is_connected():
             with LockPool.get_lock(storage):
-                if not storage.connected():
+                if not storage.is_connected():
                     Trace.log(Trace.STORAGE_CONNECT, {'storage_name': storage_name})
                     # TODO: we could optimize this by limiting number of active connections
                     storage.connect()
