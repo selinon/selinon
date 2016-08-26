@@ -28,7 +28,7 @@ class DataStorage(ABC):
     """
     @abc.abstractclassmethod
     def __init__(self, *args, **kwargs):
-        raise NotImplementedError()
+        pass
 
     @abc.abstractmethod
     def connect(self):
