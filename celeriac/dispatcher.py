@@ -83,7 +83,7 @@ class Dispatcher(Task):
                                                'state_dict': state_dict,
                                                'node_args': node_args
                                                })
-            raise self.retry(kwargs=kwargs, countdown=retry)
+            raise self.retry(args=[], kwargs=kwargs, countdown=retry)
         else:
             Trace.log(Trace.FLOW_END, {'flow_name': flow_name,
                                        'dispatcher_id': self.request.id,
