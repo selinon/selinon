@@ -23,7 +23,7 @@ from getTaskInstance import GetTaskInstance
 from isFlow import IsFlow
 from celery.result import AsyncResult
 from celeriac import SystemState
-from celeriac import DataStorage
+from celeriac.storage import DataStorage
 from celeriac.config import Config
 
 
@@ -58,6 +58,9 @@ class TestStorageAccess(unittest.TestCase):
         #     Task2
         #
         class MyStorage(DataStorage):
+            def __init__(self):
+                pass
+
             def connect(self):
                 # shouldn't be called
                 raise NotImplementedError()
@@ -66,7 +69,7 @@ class TestStorageAccess(unittest.TestCase):
                 # shouldn't be called
                 raise NotImplementedError()
 
-            def connected(self):
+            def is_connected(self):
                 # return True so we can test retrieve()
                 return True
 
@@ -103,7 +106,7 @@ class TestStorageAccess(unittest.TestCase):
         AsyncResult.set_finished(task1.task_id)
         AsyncResult.set_result(task1.task_id, 1)
 
-        Config.storage_mapping = {'Storage1': MyStorage(None)}
+        Config.storage_mapping = {'Storage1': MyStorage()}
         Config.task_mapping = {'Task1': 'Storage1'}
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
@@ -126,16 +129,17 @@ class TestStorageAccess(unittest.TestCase):
         #     Task2
         #
         class MyStorage(DataStorage):
+            def __init__(self):
+                pass
+
             def connect(self):
-                # should be called, ensure that we have correct connection configuration
-                assert(self.configuration == storage_config)
-                raise ConnectionError
+                raise ConnectionError()
 
             def disconnect(self):
                 # shouldn't be called
                 raise NotImplementedError()
 
-            def connected(self):
+            def is_connected(self):
                 # return False so we can test connect()
                 return False
 
@@ -170,8 +174,7 @@ class TestStorageAccess(unittest.TestCase):
         AsyncResult.set_finished(task1.task_id)
         AsyncResult.set_result(task1.task_id, 1)
 
-        storage_config = {'foo': 'bar'}
-        Config.storage_mapping = {'Storage1': MyStorage(storage_config)}
+        Config.storage_mapping = {'Storage1': MyStorage()}
         Config.task_mapping = {'Task1': 'Storage1'}
 
         with self.assertRaises(ConnectionError):
