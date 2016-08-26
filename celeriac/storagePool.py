@@ -47,7 +47,7 @@ class StoragePool(object):
 
     @classmethod
     def get_storage_by_task_name(cls, task_name):
-        storage_name = cls.get_storage_name_by_task_name(task_name)
+        storage_name = cls.get_storage_name_by_task_name(task_name, graceful=True)
         if storage_name:
             return cls._connected_storage(storage_name)
         else:
