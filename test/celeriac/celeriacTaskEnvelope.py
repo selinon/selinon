@@ -31,6 +31,6 @@ class CeleriacTaskEnvelope(object):
     track_started = True
     name = "CeleriacTask"
 
-    def delay(self, task_name, flow_name, parent, args, retried_count=None):
-        return Config.get_task_instance(task_name, flow_name, parent, args, retried_count)
+    def delay(self, task_name, flow_name, parent, node_args, retried_count=None):
+        return Config.get_task_instance(task_name, flow_name, parent, node_args, retried_count)
 

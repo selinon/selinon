@@ -50,6 +50,6 @@ class CeleriacTask(object):
 
         return ret
 
-    def execute(self, args):
+    def execute(self, node_args):
         pass
 

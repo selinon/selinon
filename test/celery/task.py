@@ -20,14 +20,14 @@
 
 
 class Task(object):
-    def __init__(self, task_name=None, flow_name=None, parent=None, args=None, retried_count=None):
+    def __init__(self, task_name=None, flow_name=None, parent=None, node_args=None, retried_count=None):
         # TODO: We could introduce a new CeleriacTask and remove this from test/celery since CeleriacTask is
         # not Celery.Task anymore
         # In case of instantiating CeleriacTaskEnvelope or Dispatcher, we are not passing any arguments
         self._task_name = task_name
         self._flow_name = flow_name
         self._parent = parent
-        self._args = args
+        self._node_args = node_args
         self._retried_count = retried_count
 
     @property
@@ -43,8 +43,8 @@ class Task(object):
         return self._parent
 
     @property
-    def args(self):
-        return self._args
+    def node_args(self):
+        return self._node_args
 
     @property
     def task_id(self):
@@ -54,12 +54,12 @@ class Task(object):
     def task_name(self):
         return self._task_name
 
-    def delay(self, task_name, flow_name, parent, args, retried_count):
+    def delay(self, task_name, flow_name, parent, node_args, retried_count):
         # Ensure that CeleriacTaskEnvelope kept parameters consistent
         assert(self._task_name == task_name)
         assert(self._flow_name == flow_name)
         assert(self._parent == parent)
-        self._args = args
+        self._node_args = node_args
         self._retried_count = retried_count
         return self
 

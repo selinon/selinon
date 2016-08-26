@@ -25,7 +25,7 @@ from celery import Task
 class Dispatcher(Task):
     def __init__(self):
         self._flow_name = None
-        self._args = None
+        self._node_args = None
         self._retry = None
         self._state = None
         self._parent = None
@@ -35,12 +35,8 @@ class Dispatcher(Task):
         return self._flow_name
 
     @property
-    def args(self):
-        return self._args
-
-    @property
-    def args(self):
-        return self._retry
+    def node_args(self):
+        return self._node_args
 
     @property
     def state(self):
@@ -50,9 +46,9 @@ class Dispatcher(Task):
     def parent(self):
         return self._parent
 
-    def delay(self, flow_name, args=None, retry=None, state=None, parent=None):
+    def delay(self, flow_name, node_args=None, retry=None, state=None, parent=None):
         self._flow_name = flow_name
-        self._args = args
+        self._node_args = node_args
         self._retry = retry
         self._state = state
         self._parent = parent

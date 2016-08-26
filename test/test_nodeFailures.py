@@ -210,7 +210,7 @@ class TestNodeFailures(unittest.TestCase):
         self.assertEqual(state_dict['waiting_edges'][0], 0)
 
         task3 = get_task_instance.task_by_name('Task3')[0]
-        self.assertEqual(task3.args, node_args)
+        self.assertEqual(task3.node_args, node_args)
 
     def test_single_failure_flow_fallback_start2(self):
         #
@@ -278,8 +278,8 @@ class TestNodeFailures(unittest.TestCase):
         task3 = get_task_instance.task_by_name('Task3')[0]
         task4 = get_task_instance.task_by_name('Task4')[0]
 
-        self.assertEqual(task3.args, node_args)
-        self.assertEqual(task4.args, node_args)
+        self.assertEqual(task3.node_args, node_args)
+        self.assertEqual(task4.node_args, node_args)
 
         # Now let's finish Task3 and Task4 to see that they correctly continue
         AsyncResult.set_finished(task3.task_id)

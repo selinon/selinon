@@ -114,7 +114,7 @@ class SystemState(object):
 
         return ret
 
-    def _start_node(self, node_name, parent, args):
+    def _start_node(self, node_name, parent, node_args):
         from .dispatcher import Dispatcher
         if Config.is_flow(node_name):
             # do not pass parent, a subflow should be treated as a black box - a standalone flow that does not need to
@@ -123,22 +123,24 @@ class SystemState(object):
                 parent = None
             else:
                 raise NotImplementedError()
-            async_result = Dispatcher().delay(flow_name=node_name, args=args, parent=parent)
+            # TODO: Introduce propagate_node_args
+            node_args = None
+            async_result = Dispatcher().delay(flow_name=node_name, node_args=node_args, parent=parent)
             Trace.log(Trace.SUBFLOW_SCHEDULE, {'flow_name': self._flow_name,
                                                'dispatcher_id': self._dispatcher_id,
                                                'child_flow_name': node_name,
                                                'child_dispatcher_id': async_result.task_id,
-                                               'args': args})
+                                               'args': node_args})
         else:
             async_result = CeleriacTaskEnvelope().delay(task_name=node_name,
                                                         flow_name=self._flow_name,
-                                                        parent=parent, args=args)
+                                                        parent=parent, node_args=node_args)
             Trace.log(Trace.TASK_SCHEDULE, {'flow_name': self._flow_name,
                                             'dispatcher_id': self._dispatcher_id,
                                             'task_name': node_name,
                                             'task_id': async_result.task_id,
                                             'parent': parent,
-                                            'args': args})
+                                            'args': node_args})
 
         record = {'name': node_name, 'id': async_result.task_id, 'result': async_result}
 
@@ -179,7 +181,7 @@ class SystemState(object):
                                                      'fallback': failure_node['fallback']})
 
                     for node in failure_node['fallback']:
-                        record = self._start_node(node, parent=parent, args=self._node_args)
+                        record = self._start_node(node, parent=parent, node_args=self._node_args)
                         ret.append(record)
 
                     # wait for fallback to finish in order to avoid time dependent flow evaluation
@@ -255,7 +257,7 @@ class SystemState(object):
                     storage_pool = StoragePool(parent)
                     if edge['condition'](storage_pool):
                         for node_name in edge['to']:
-                            record = self._start_node(node_name, parent=parent, args=self._node_args)
+                            record = self._start_node(node_name, parent=parent, node_args=self._node_args)
                             ret.append(record)
 
             node_name = node['name']
@@ -289,7 +291,7 @@ class SystemState(object):
             storage_pool = StoragePool()
             if start_edge['condition'](storage_pool):
                 for node_name in start_edge['to']:
-                    self._start_node(node_name, args=self._node_args, parent=self._parent)
+                    self._start_node(node_name, node_args=self._node_args, parent=self._parent)
                     #self._active_nodes.append({'id': ar.task_id, 'name': node_name, 'result': ar})
                     # TODO: this shouldn't be called here?
                     self._update_waiting_edges(node_name)
