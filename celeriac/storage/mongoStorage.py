@@ -23,7 +23,7 @@ class MongoStorage(DataStorage):
 
     def connect(self):
         self.client = MongoClient(self.host, self.port)
-        self.db = self.client[self.db.name]
+        self.db = self.client[self.db_name]
         self.collection = self.db[self.collection_name]
 
     def disconnect(self):
