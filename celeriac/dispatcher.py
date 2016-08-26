@@ -32,6 +32,7 @@ class Dispatcher(Task):
     ignore_result = False
     acks_late = True
     track_started = True
+    max_retries = None
     name = "Dispatcher"
 
     def run(self, flow_name, node_args=None, parent=None, retry=None, state=None):

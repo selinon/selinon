@@ -34,7 +34,8 @@ class CeleriacTaskEnvelope(Task):
     ignore_result = False
     acks_late = True
     track_started = True
-    name = "CeleriacTask"
+    max_retries = None
+    name = "CeleriacTaskEnvelope"
 
     @classmethod
     def validate_result(cls, task_name, result):
