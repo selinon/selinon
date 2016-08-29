@@ -1802,11 +1802,11 @@ class TestSystemState(unittest.TestCase):
 
         # Check parent tasks of Task3 from the first iteration and Task3_1 from the second iteration
         self.assertEqual(task3_1.parent['Task1'], task3.parent['Task1'])
-        self.assertEqual(task3_1.parent['Task1'], task1.task_id)
+        self.assertEqual(task3_1.parent['Task1'][0], task1.task_id)
 
-        self.assertNotEqual(task3_1.parent['Task2'], task3.parent['Task2'][0])
-        self.assertEqual(task3.parent['Task2'], task2.task_id)
-        self.assertEqual(task3_1.parent['Task2'], task2_1.task_id)
+        self.assertNotEqual(task3_1.parent['Task2'][0], task3.parent['Task2'][0])
+        self.assertEqual(task3.parent['Task2'][0], task2.task_id)
+        self.assertEqual(task3_1.parent['Task2'][0], task2_1.task_id)
 
     def test_1_to_flow(self):
         #

@@ -251,8 +251,9 @@ class SystemState(object):
                     parent = {}
 
                     for start_node in start_nodes:
-                        assert(start_node['name'] not in parent)
-                        parent[start_node['name']] = start_node['id']
+                        if not parent.get(start_node['name']):
+                            parent[start_node['name']] = []
+                        parent[start_node['name']].append(start_node['id'])
 
                     storage_pool = StoragePool(parent)
                     if edge['condition'](storage_pool):
