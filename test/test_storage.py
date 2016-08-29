@@ -66,8 +66,8 @@ class TestStorageAccess(unittest.TestCase):
                 raise NotImplementedError()
 
             def disconnect(self):
-                # shouldn't be called
-                raise NotImplementedError()
+                # called on destruction
+                pass
 
             def is_connected(self):
                 # return True so we can test retrieve()
@@ -80,7 +80,7 @@ class TestStorageAccess(unittest.TestCase):
             def retrieve(self, flow_name, task_name, task_id):
                 assert(flow_name == 'flow1')
                 assert(task_name == 'Task1')
-                assert(task_id == task1.task_id)
+                assert(task_id[0] == task1.task_id)
                 return 0xDEADBEEF
 
         def _cond_access(db):
@@ -136,8 +136,8 @@ class TestStorageAccess(unittest.TestCase):
                 raise ConnectionError()
 
             def disconnect(self):
-                # shouldn't be called
-                raise NotImplementedError()
+                # called on destruction
+                pass
 
             def is_connected(self):
                 # return False so we can test connect()

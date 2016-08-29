@@ -71,3 +71,7 @@ class DataStorage(ABC):
         :param task_id: id of the task that result is going to be stored
         """
         raise NotImplementedError()
+
+    def __del__(self):
+        if self.is_connected():
+            self.disconnect()
