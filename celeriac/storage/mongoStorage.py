@@ -8,7 +8,7 @@ class MongoStorage(DataStorage):
     """
     MongoDB database Adapter
     """
-    def __init__(self, host, port, db_name, collection_name):
+    def __init__(self, db_name, collection_name, host="localhost", port=27017):
         super(MongoStorage, self).__init__()
         self.client = None
         self.collection = None
@@ -38,15 +38,19 @@ class MongoStorage(DataStorage):
 
         if len(cursor) > 0:
             raise ValueError("Multiple records with same task_id found")
+        elif len(cursor) == 0:
+            raise FileNotFoundError("Record not found in database")
 
-        ret = cursor[0]
+        record = cursor[0]
 
-        assert(flow_name == ret['flow_name'])
-        assert(flow_name == ret['task_name'])
+        assert(flow_name == record['flow_name'])
+        assert(flow_name == record['task_name'])
 
-        return ret
+        return record.get('result')
 
     def store(self, flow_name, task_name, task_id, result):
+        assert(self.is_connected())
+
         record = {
             'flow_name': flow_name,
             'task_name': task_name,
@@ -54,5 +58,6 @@ class MongoStorage(DataStorage):
             'result': result
 
         }
+
         self.collection.insert(record)
 
