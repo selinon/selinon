@@ -1204,7 +1204,7 @@ class TestSystemState(unittest.TestCase):
         self.assertEqual(len(state_dict.get('finished_nodes')), 6)
         self.assertEqual(len(state_dict.get('active_nodes')), 0)
 
-    def test_3_to_3(self):
+    def test_3_to_3_2(self):
         #
         # flow1:
         #
