@@ -46,7 +46,6 @@ class TestStorageAccess(unittest.TestCase):
         Config.failures = failures
         Config.nowait_nodes = nowait_nodes
         Config.propagate_parent = {}
-        Config.propagate_result = {}
 
     def test_retrieve(self):
         #

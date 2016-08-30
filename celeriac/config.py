@@ -31,7 +31,6 @@ class Config(object):
     failures = None
     nowait_nodes = None
     propagate_parent = None
-    propagate_finished = None
     output_schemas = None
 
     storage_mapping = None
@@ -45,7 +44,6 @@ class Config(object):
         cls.failures = config_module['failures']
         cls.nowait_nodes = config_module['nowait_nodes']
         cls.propagate_parent = config_module['propagate_parent']
-        cls.propagate_finished = config_module['propagate_finished']
         cls.output_schemas = config_module['output_schemas']
         cls.storage_mapping = config_module['storage2instance_mapping']
         cls.task_mapping = config_module['task2storage_mapping']
