@@ -160,6 +160,8 @@ def _logging_trace_func(event, msg_dict):
         logger.warning("Result of task has been discarded: %s" % msg_dict)
     elif event == Trace.TASK_FAILURE:
         logger.warning("Task has failed: %s" % msg_dict)
+    elif event == Trace.TASK_RETRY:
+        logger.warning("Task will be retried: %s" % msg_dict)
     elif event == Trace.FLOW_FAILURE:
         logger.warning("Flow has failed: %s" % msg_dict)
     elif event == Trace.DISPATCHER_FAILURE:
