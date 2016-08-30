@@ -28,25 +28,24 @@ class CeleriacTask(object):
         self.task_name = task_name
         self.parent = parent
 
-    def parent_result(self, parent):
-        task_name = parent.keys()
-        task_id = parent.values()
-
-        # parent should be {'Task': '<id>'}, but a single entry
-        assert(len(task_name) == 1)
-        assert(len(task_id) == 1)
-
-        task_name = task_name[0]
-
-        storage_pool = StoragePool(parent)
-        return storage_pool.get(self.flow_name, task_name)
+    def parent_result(self, parent_name, parent_id):
+        return StoragePool.retrieve(self.flow_name, parent_name, parent_id)
 
     def parent_all_results(self, parent):
         ret = {}
 
-        storage_pool = StoragePool(parent)
-        for task_name in parent.keys():
-            ret[task_name] = storage_pool.get(self.flow_name, task_name)
+        for task in parent.items():
+            # task[0] is task_name/flow_name
+            # task[1] is id or dict (list in case of flow)
+            if isinstance(task[1], dict):
+                for task_name, task_id in task[1].items():
+                    if task_name not in ret:
+                        ret[task_name] = []
+                    ret[task_name].append(StoragePool.retrieve(self.flow_name, task_name, task_id))
+            else:
+                if task[0] not in ret:
+                    ret[task[0]] = []
+                ret[task[0]].append(StoragePool.retrieve(self.flow_name, task[0], task[1]))
 
         return ret
 
