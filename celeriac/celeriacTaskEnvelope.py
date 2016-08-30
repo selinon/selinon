@@ -76,7 +76,7 @@ class CeleriacTaskEnvelope(Task):
 
             if max_retry > retried_count and not isinstance(exc, FatalTaskError):
                 retried_count += 1
-                retry_countdown = Config.retry_countdown(task_name, 0)
+                retry_countdown = Config.retry_countdown.get(task_name, 0)
 
                 kwargs = {
                     'task_name': task_name,
