@@ -31,6 +31,7 @@ class Trace(object):
     Trace Dispatcher work
     """
     _trace_func = _default_trace_func
+    _logger = None
 
     # TODO: make this nice for Sphinx (?)
     # Logged event                                # msg_dict.keys()
@@ -98,14 +99,22 @@ class Trace(object):
         raise NotImplementedError()
 
     @classmethod
-    def trace_by_logging(cls):
+    def trace_by_logging(cls, level=logging.DEBUG):
         """
         Trace by using Python's logging
+        :param level: logging level
         """
         prefix = 'DISPATCHER %10s' % platform.node()
-        logging.basicConfig(level=logging.INFO,
-                            format=prefix + ' - %(asctime)s.%(msecs)d %(levelname)s: %(message)s',
-                            datefmt="%Y-%m-%d %H:%M:%S")
+
+        logger = logging.getLogger('celeriac_trace')
+        formatter = logging.Formatter(prefix + ' - %(asctime)s.%(msecs)d %(levelname)s: %(message)s',
+                                      datefmt="%Y-%m-%d %H:%M:%S")
+        sh = logging.StreamHandler()
+        sh.setFormatter(formatter)
+        logger.addHandler(sh)
+        logger.setLevel(level)
+
+        cls._logger = logger
         cls._trace_func = _logging_trace_func
 
     @classmethod
