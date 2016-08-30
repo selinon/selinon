@@ -49,6 +49,8 @@ class TestNodeFailures(unittest.TestCase):
         Config.edge_table = edge_table
         Config.failures = failures
         Config.nowait_nodes = nowait_nodes
+        Config.propagate_finished = {}
+        Config.propagate_node_args = {}
         Config.propagate_parent = {}
 
     def test_nowait_task(self):

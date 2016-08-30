@@ -30,6 +30,8 @@ class Config(object):
     edge_table = None
     failures = None
     nowait_nodes = None
+    propagate_finished = None
+    propagate_node_args = None
     propagate_parent = None
     output_schemas = None
 
@@ -43,6 +45,8 @@ class Config(object):
         cls.edge_table = config_module['edge_table']
         cls.failures = config_module['failures']
         cls.nowait_nodes = config_module['nowait_nodes']
+        cls.propagate_finished = config_module['propagate_finished']
+        cls.propagate_node_args = config_module['propagate_node_args']
         cls.propagate_parent = config_module['propagate_parent']
         cls.output_schemas = config_module['output_schemas']
         cls.storage_mapping = config_module['storage2instance_mapping']

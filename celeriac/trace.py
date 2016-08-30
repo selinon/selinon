@@ -48,7 +48,8 @@ class Trace(object):
     TASK_START = 3                                # flow_name, task_name, task_id, parent, args
 
     # Signalize subflow start by Dispatcher
-    SUBFLOW_SCHEDULE = 4                          # flow_name, dispatcher_id, child_flow_name, child_dispatcher_id, args
+    SUBFLOW_SCHEDULE = 4                          # flow_name, dispatcher_id, child_flow_name, child_dispatcher_id,
+                                                  # args, parent
 
     # Signalize end of task from CeleriacTask
     TASK_END = 5                                  # flow_name, task_name, task_id, parent, args, storage

@@ -45,6 +45,8 @@ class TestStorageAccess(unittest.TestCase):
         Config.edge_table = edge_table
         Config.failures = failures
         Config.nowait_nodes = nowait_nodes
+        Config.propagate_finished = {}
+        Config.propagate_node_args = {}
         Config.propagate_parent = {}
 
     def test_retrieve(self):
@@ -79,7 +81,7 @@ class TestStorageAccess(unittest.TestCase):
             def retrieve(self, flow_name, task_name, task_id):
                 assert(flow_name == 'flow1')
                 assert(task_name == 'Task1')
-                assert(task_id[0] == task1.task_id)
+                assert(task_id == task1.task_id)
                 return 0xDEADBEEF
 
         def _cond_access(db):

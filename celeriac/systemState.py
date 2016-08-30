@@ -117,19 +117,32 @@ class SystemState(object):
     def _start_node(self, node_name, parent, node_args):
         from .dispatcher import Dispatcher
         if Config.is_flow(node_name):
-            # do not pass parent, a subflow should be treated as a black box - a standalone flow that does not need to
-            # know whether it was run by another flow
-            if not Config.propagate_parent.get(self._flow_name, False):
-                parent = None
+            if Config.propagate_node_args.get(self._flow_name):
+                if Config.propagate_node_args.get(self._flow_name) is True or \
+                    (isinstance(Config.propagate_node_args.get(self._flow_name), list) and
+                     node_name in Config.propagate_node_args.get(self._flow_name)):
+                    node_args = node_args
+                else:
+                    node_args = None
             else:
-                raise NotImplementedError()
-            # TODO: Introduce propagate_node_args
-            node_args = None
+                node_args = None
+
+            if Config.propagate_parent.get(self._flow_name):
+                if Config.propagate_parent.get(self._flow_name) is True or \
+                    (isinstance(Config.propagate_parent.get(self._flow_name), list) and
+                     node_name in Config.propagate_parent.get(self._flow_name)):
+                    parent = parent
+                else:
+                    parent = None
+            else:
+                parent = None
+
             async_result = Dispatcher().delay(flow_name=node_name, node_args=node_args, parent=parent)
             Trace.log(Trace.SUBFLOW_SCHEDULE, {'flow_name': self._flow_name,
                                                'dispatcher_id': self._dispatcher_id,
                                                'child_flow_name': node_name,
                                                'child_dispatcher_id': async_result.task_id,
+                                               'parent': parent,
                                                'args': node_args})
         else:
             async_result = CeleriacTaskEnvelope().delay(task_name=node_name,
@@ -208,6 +221,20 @@ class SystemState(object):
                 self._waiting_edges.append(edge)
                 self._waiting_edges_idx.append(idx)
 
+    def _extend_parent_from_flow(self, parent_dict, flow_id):
+        async_result = AsyncResult(flow_id)
+        assert(async_result.successful())
+
+        for node_name, node_ids in async_result.result.items():
+            if Config.is_flow(node_name):
+                for node_id in node_ids:
+                    self._extend_parent_from_flow(parent_dict, node_id)
+            else:
+                if node_name not in parent_dict:
+                    parent_dict[node_name] = []
+                for node_id in node_ids:
+                    parent_dict[node_name].append(node_id)
+
     def _start_new_from_finished(self, new_finished):
         ret = []
 
@@ -249,13 +276,22 @@ class SystemState(object):
                 #
                 for start_nodes in itertools.product(*from_nodes.values()):
                     parent = {}
+                    storage_id_mapping = {}
 
                     for start_node in start_nodes:
-                        if not parent.get(start_node['name']):
-                            parent[start_node['name']] = []
-                        parent[start_node['name']].append(start_node['id'])
+                        if Config.is_flow(start_node['name']):
+                            propagate_finished = Config.propagate_finished.get(self._flow_name, False)
+                            if propagate_finished is True or (isinstance(propagate_finished, list) and
+                                                              start_node['name'] in propagate_finished):
+                                parent[start_node['name']] = {}
+                                self._extend_parent_from_flow(parent[start_node['name']], start_node['id'])
+                        else:
+                            parent[start_node['name']] = start_node['id']
+                            storage_id_mapping[start_node['name']] = start_node['id']
 
-                    storage_pool = StoragePool(parent)
+                    # We could also examine results of subflow, there could be passed a list of subflows with
+                    # finished_nodes to 'condition' in order to do inspection
+                    storage_pool = StoragePool(storage_id_mapping)
                     if edge['condition'](storage_pool):
                         for node_name in edge['to']:
                             record = self._start_node(node_name, parent=parent, node_args=self._node_args)
