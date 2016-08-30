@@ -136,34 +136,46 @@ class Trace(object):
 
 
 def _logging_trace_func(event, msg_dict):
+    logger = Trace._logger
+
     if event == Trace.DISPATCHER_WAKEUP:
-        logging.info("Dispatcher woken up: %s" % msg_dict)
+        logger.info("Dispatcher woken up: %s" % msg_dict)
     elif event == Trace.FLOW_START:
-        logging.info("Flow started: %s" % msg_dict)
+        logger.info("Flow started: %s" % msg_dict)
     elif event == Trace.TASK_SCHEDULE:
-        logging.info("Scheduled a new task: %s" % msg_dict)
+        logger.info("Scheduled a new task: %s" % msg_dict)
     elif event == Trace.TASK_START:
-        logging.info("Task has been started: %s" % msg_dict)
+        logger.info("Task has been started: %s" % msg_dict)
     elif event == Trace.SUBFLOW_SCHEDULE:
-        logging.info("Scheduled a new subflow: %s" % msg_dict)
+        logger.info("Scheduled a new subflow: %s" % msg_dict)
     elif event == Trace.TASK_END:
-        logging.info("Task has successfully finished: %s" % msg_dict)
+        logger.info("Task has successfully finished: %s" % msg_dict)
     elif event == Trace.NODE_SUCCESSFUL:
-        logging.info("Node in flow successfully finished: %s" % msg_dict)
+        logger.info("Node in flow successfully finished: %s" % msg_dict)
     elif event == Trace.TASK_DISCARD_RESULT:
-        logging.warning("Result of task has been discarded: %s" % msg_dict)
+        logger.warning("Result of task has been discarded: %s" % msg_dict)
     elif event == Trace.TASK_FAILURE:
-        logging.info("Task has failed: %s" % msg_dict)
+        logger.warning("Task has failed: %s" % msg_dict)
     elif event == Trace.FLOW_FAILURE:
-        logging.info("Flow has failed: %s" % msg_dict)
+        logger.warning("Flow has failed: %s" % msg_dict)
     elif event == Trace.DISPATCHER_FAILURE:
-        logging.info("Dispatcher failed: %s" % msg_dict)
+        logger.error("Dispatcher failed: %s" % msg_dict)
     elif event == Trace.NODE_FAILURE:
-        logging.info("Node has failed: %s" % msg_dict)
+        logger.warning("Node has failed: %s" % msg_dict)
     elif event == Trace.FALLBACK_START:
-        logging.info("Fallback is going to be started started: %s" % msg_dict)
+        logger.info("Fallback is going to be started started: %s" % msg_dict)
     elif event == Trace.DISPATCHER_RETRY:
-        logging.info("Dispatcher will be rescheduled: %s" % msg_dict)
+        logger.info("Dispatcher will be rescheduled: %s" % msg_dict)
     elif event == Trace.FLOW_END:
-        logging.info("Flow has successfully ended: %s" % msg_dict)
+        logger.info("Flow has successfully ended: %s" % msg_dict)
+    elif event == Trace.STORAGE_CONNECT:
+        logger.info("Requested connect to storage: %s" % msg_dict)
+    elif event == Trace.STORAGE_DISCONNECT:
+        logger.info("Requested disconnect from storage: %s" % msg_dict)
+    elif event == Trace.STORAGE_RETRIEVE:
+        logger.info("Retrieving data from storage: %s" % msg_dict)
+    elif event == Trace.STORAGE_STORE:
+        logger.info("Storing data in storage: %s" % msg_dict)
+    else:
+        logger.info("Unhandled event (%s): %s" % (event, msg_dict))
 
