@@ -83,8 +83,7 @@ class CeleriacTaskEnvelope(Task):
                     'flow_name': flow_name,
                     'parent': parent,
                     'node_args': node_args,
-                    'retried_count': retried_count,
-                    'retry_countdown': retry_countdown
+                    'retried_count': retried_count
                 }
 
                 Trace.log(Trace.TASK_RETRY, {'flow_name': flow_name,
