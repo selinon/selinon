@@ -52,6 +52,7 @@ class TestNodeFailures(unittest.TestCase):
         Config.propagate_finished = {}
         Config.propagate_node_args = {}
         Config.propagate_parent = {}
+        Config.retry_countdown = {}
 
     def test_single_failure_flow_fail(self):
         #

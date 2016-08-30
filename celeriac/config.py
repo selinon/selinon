@@ -30,6 +30,8 @@ class Config(object):
     edge_table = None
     failures = None
     nowait_nodes = None
+    max_retry = None
+    retry_countdown = None
     propagate_finished = None
     propagate_node_args = None
     propagate_parent = None
@@ -45,6 +47,8 @@ class Config(object):
         cls.edge_table = config_module['edge_table']
         cls.failures = config_module['failures']
         cls.nowait_nodes = config_module['nowait_nodes']
+        cls.max_retry = config_module['max_retry']
+        cls.retry_countdown = config_module['retry_countdown']
         cls.propagate_finished = config_module['propagate_finished']
         cls.propagate_node_args = config_module['propagate_node_args']
         cls.propagate_parent = config_module['propagate_parent']

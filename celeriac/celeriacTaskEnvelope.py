@@ -18,8 +18,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
-from .storagePool import StoragePool
 import jsonschema
+from .storagePool import StoragePool
+from .fatalTaskError import FatalTaskError
 from celery import Task
 from .trace import Trace
 from .config import Config
@@ -70,13 +71,41 @@ class CeleriacTaskEnvelope(Task):
                                                       'args': node_args,
                                                       'result': result})
         except Exception as exc:
-            Trace.log(Trace.TASK_FAILURE, {'flow_name': flow_name,
-                                           'task_name': task_name,
-                                           'task_id': self.request.id,
-                                           'parent': parent,
-                                           'args': node_args,
-                                           'what': exc})
-            raise
+            max_retry = Config.max_retry.get(task_name, 0)
+            retried_count = 0 if None else retried_count
+
+            if max_retry > retried_count and not isinstance(exc, FatalTaskError):
+                retried_count += 1
+                retry_countdown = Config.retry_countdown(task_name, 0)
+
+                kwargs = {
+                    'task_name': task_name,
+                    'flow_name': flow_name,
+                    'parent': parent,
+                    'node_args': node_args,
+                    'retried_count': retried_count,
+                    'retry_countdown': retry_countdown
+                }
+
+                Trace.log(Trace.TASK_RETRY, {'flow_name': flow_name,
+                                             'task_name': task_name,
+                                             'task_id': self.request.id,
+                                             'parent': parent,
+                                             'args': node_args,
+                                             'what': exc,
+                                             'retry_countdown': retry_countdown,
+                                             'retried_count': retried_count,
+                                             'max_retry': max_retry})
+                raise self.retry(kwargs=kwargs, countdown=retry_countdown)
+            else:
+                Trace.log(Trace.TASK_FAILURE, {'flow_name': flow_name,
+                                               'task_name': task_name,
+                                               'task_id': self.request.id,
+                                               'parent': parent,
+                                               'args': node_args,
+                                               'what': exc,
+                                               'retried_count': retried_count})
+                raise self.retry(max_retry=0, exc=exc)
 
         Trace.log(Trace.TASK_END, {'flow_name': flow_name,
                                    'task_name': task_name,

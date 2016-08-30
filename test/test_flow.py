@@ -49,6 +49,7 @@ class TestFlow(unittest.TestCase):
         Config.propagate_finished = propagate_finished
         Config.propagate_node_args = propagate_node_args
         Config.propagate_parent = propagate_parent
+        Config.retry_countdown = {}
 
     def test_simple_flow(self):
         #

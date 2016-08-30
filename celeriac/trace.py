@@ -62,38 +62,42 @@ class Trace(object):
     TASK_DISCARD_RESULT = 7                       # flow_name, task_name, task_id, parent, args, result
 
     # Signalize task failure from CeleriacTask
-    TASK_FAILURE = 8                              # flow_name, task_name, task_id, parent, args, what
+    TASK_FAILURE = 8                              # flow_name, task_name, task_id, parent, args, what, retried_count
+
+    # Signalize task retry
+    TASK_RETRY = 9                                # flow_name, task_name, task_id, parent, args, what, retried_count,
+                                                  # max_retry, retry_countdown
 
     # Signalize when a flow ends because of error in nodes without fallback
-    FLOW_FAILURE = 9                              # flow_name, dispatcher_id, what
+    FLOW_FAILURE = 10                             # flow_name, dispatcher_id, what
 
     # Signalize unexpected dispatcher failure - this should not occur (e.g. bug, database connection error, ...)
-    DISPATCHER_FAILURE = 10                       # flow_name, dispatcher_id, what
+    DISPATCHER_FAILURE = 11                       # flow_name, dispatcher_id, what
 
     # Signalize a node failure from dispatcher
-    NODE_FAILURE = 11                             # flow_name, dispatcher_id, node_name, node_id, what
+    NODE_FAILURE = 12                             # flow_name, dispatcher_id, node_name, node_id, what
 
     # Signalize fallback evaluation
-    FALLBACK_START = 12                           # flow_name, dispatcher_id, nodes, fallback
+    FALLBACK_START = 13                           # flow_name, dispatcher_id, nodes, fallback
 
     # Signalize Dispatcher retry
-    DISPATCHER_RETRY = 13                         # flow_name, dispatcher_id, retry, state_dict, args
+    DISPATCHER_RETRY = 14                         # flow_name, dispatcher_id, retry, state_dict, args
 
     # Signalize flow end
-    FLOW_END = 14                                 # flow_name, dispatcher_id, finished_nodes
+    FLOW_END = 15                                 # flow_name, dispatcher_id, finished_nodes
 
     # Signal storage connect
-    STORAGE_CONNECT = 15                          # storage_name
+    STORAGE_CONNECT = 16                          # storage_name
 
     # Signal storage disconnect
     # TODO: currently unused
-    STORAGE_DISCONNECT = 16                       # storage_name
+    STORAGE_DISCONNECT = 17                       # storage_name
 
     # Signal storage access for reading
-    STORAGE_RETRIEVE = 17                         # flow_name, task_name, storage
+    STORAGE_RETRIEVE = 18                         # flow_name, task_name, storage
 
     # Signal storage access for writing
-    STORAGE_STORE = 18                            # flow_name, task_name, task_id, storage, result
+    STORAGE_STORE = 19                            # flow_name, task_name, task_id, storage, result
 
     def __init__(self):
         raise NotImplementedError()
