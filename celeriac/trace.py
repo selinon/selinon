@@ -23,7 +23,7 @@ import platform
 
 
 def _default_trace_func(event, msg_dict):
-    logging.info("" % msg_dict)
+    pass
 
 
 class Trace(object):
