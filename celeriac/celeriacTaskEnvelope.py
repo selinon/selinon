@@ -104,7 +104,7 @@ class CeleriacTaskEnvelope(Task):
                                                'args': node_args,
                                                'what': exc,
                                                'retried_count': retried_count})
-                raise self.retry(max_retry=0, exc=exc)
+                raise self.retry(max_retries=0, exc=exc)
 
         Trace.log(Trace.TASK_END, {'flow_name': flow_name,
                                    'task_name': task_name,
