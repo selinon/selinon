@@ -28,7 +28,7 @@ def _default_trace_func(event, msg_dict):
 
 class Trace(object):
     """
-    Trace Dispatcher work
+    Trace system flow actions
     """
     _trace_func = _default_trace_func
     _logger = None
