@@ -361,7 +361,7 @@ class SystemState(object):
             if len(self._active_nodes) == 0 and self._failed_nodes:
                 fallback_started = self._run_fallback()
                 if len(fallback_started) == 0 and len(self._failed_nodes) > 0:
-                    raise FlowError("No fallback defined for failure %s" % self._failed_nodes.keys())
+                    raise FlowError("No fallback defined for failure %s" % list(self._failed_nodes.keys()))
 
             return self._continue_and_update_retry(new_finished, fallback_started)
 
