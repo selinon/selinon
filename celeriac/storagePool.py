@@ -63,7 +63,6 @@ class StoragePool(object):
             with LockPool.get_lock(storage):
                 if not storage.is_connected():
                     Trace.log(Trace.STORAGE_CONNECT, {'storage_name': storage_name})
-                    # TODO: we could optimize this by limiting number of active connections
                     storage.connect()
 
         return storage
