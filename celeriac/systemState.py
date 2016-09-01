@@ -292,7 +292,7 @@ class SystemState(object):
                     # We could also examine results of subflow, there could be passed a list of subflows with
                     # finished_nodes to 'condition' in order to do inspection
                     storage_pool = StoragePool(storage_id_mapping)
-                    if edge['condition'](storage_pool):
+                    if edge['condition'](storage_pool, self._node_args):
                         for node_name in edge['to']:
                             record = self._start_node(node_name, parent=parent, node_args=self._node_args)
                             ret.append(record)
@@ -326,7 +326,7 @@ class SystemState(object):
 
         for start_edge in start_edges:
             storage_pool = StoragePool()
-            if start_edge['condition'](storage_pool):
+            if start_edge['condition'](storage_pool, self._node_args):
                 for node_name in start_edge['to']:
                     self._start_node(node_name, node_args=self._node_args, parent=self._parent)
                     #self._active_nodes.append({'id': ar.task_id, 'name': node_name, 'result': ar})

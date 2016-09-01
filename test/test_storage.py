@@ -27,7 +27,7 @@ from celeriac.storage import DataStorage
 from celeriac.config import Config
 
 
-def _cond_true(x):
+def _cond_true(db, node_args):
     return True
 
 
@@ -85,7 +85,7 @@ class TestStorageAccess(unittest.TestCase):
                 assert(task_id == task1.task_id)
                 return 0xDEADBEEF
 
-        def _cond_access(db):
+        def _cond_access(db, node_args):
             return db.get('flow1', 'Task1') == 0xDEADBEEF
 
         get_task_instance = GetTaskInstance()
@@ -153,7 +153,7 @@ class TestStorageAccess(unittest.TestCase):
                 # shouldn't be called
                 raise NotImplementedError()
 
-        def _cond_access(db):
+        def _cond_access(db, node_args):
             return db.get('flow1', 'Task1') == 0xDEADBEEF
 
         get_task_instance = GetTaskInstance()

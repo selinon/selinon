@@ -28,11 +28,11 @@ from celeriac import SystemState
 from celeriac.config import Config
 
 
-def _cond_true(x):
+def _cond_true(db, node_args):
     return True
 
 
-def _cond_false(x):
+def _cond_false(db, node_args):
     return False
 
 

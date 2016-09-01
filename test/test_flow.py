@@ -27,7 +27,7 @@ from celeriac.storage import DataStorage
 from celeriac.config import Config
 
 
-def _cond_true(x):
+def _cond_true(db, node_args):
     return True
 
 
