@@ -2,6 +2,6 @@
 
 from .dataStorage import DataStorage
 from .mongoStorage import MongoStorage
-from .postgreStorage import PosgreStorage
+from .sqlStorage import SqlStorage
 from .redisStorage import RedisStorage
 
