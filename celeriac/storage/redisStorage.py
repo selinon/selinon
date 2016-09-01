@@ -34,6 +34,8 @@ class RedisStorage(DataStorage):
             self.conn = None
 
     def retrieve(self, flow_name, task_name, task_id):
+        assert(self.is_connected())
+
         ret = self.conn.get(task_id)
 
         if ret is None:
