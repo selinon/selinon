@@ -34,6 +34,8 @@ class MongoStorage(DataStorage):
             self.collection = None
 
     def retrieve(self, flow_name, task_name, task_id):
+        assert(self.is_connected())
+
         filtering = {'_id': 0}
         cursor = self.collection.find({'task_id': task_id}, filtering)
 
