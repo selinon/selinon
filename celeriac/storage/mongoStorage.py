@@ -27,10 +27,11 @@ class MongoStorage(DataStorage):
         self.collection = self.db[self.collection_name]
 
     def disconnect(self):
-        self.client.close()
-        self.client = None
-        self.db = None
-        self.collection = None
+        if self.is_connected():
+            self.client.close()
+            self.client = None
+            self.db = None
+            self.collection = None
 
     def retrieve(self, flow_name, task_name, task_id):
         filtering = {'_id': 0}
