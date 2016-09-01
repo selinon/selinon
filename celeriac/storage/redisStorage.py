@@ -29,8 +29,9 @@ class RedisStorage(DataStorage):
                                 charset=self.charset, errors=self.errors)
 
     def disconnect(self):
-        self.conn.connection_pool.disconnect()
-        self.conn = None
+        if self.is_connected():
+            self.conn.connection_pool.disconnect()
+            self.conn = None
 
     def retrieve(self, flow_name, task_name, task_id):
         ret = self.conn.get(task_id)
