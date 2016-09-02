@@ -18,7 +18,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
-import jsonschema
 from .storagePool import StoragePool
 
 
@@ -28,13 +27,16 @@ class CeleriacTask(object):
         self.task_name = task_name
         self.parent = parent
 
-    def parent_result(self, parent_name, parent_id):
-        return StoragePool.retrieve(self.flow_name, parent_name, parent_id)
+    def parent_task_result(self, parent_name):
+        return StoragePool.retrieve(self.flow_name, parent_name, self.parent[parent_name])
 
-    def parent_all_results(self, parent):
+    def parent_flow_result(self, flow_name, task_name, index):
+        return StoragePool.retrieve(flow_name, task_name, self.parent[flow_name][task_name][index])
+
+    def parent_all_results(self):
         ret = {}
 
-        for task in parent.items():
+        for task in self.parent.items():
             # task[0] is task_name/flow_name
             # task[1] is id or dict (list in case of flow)
             if isinstance(task[1], dict):
