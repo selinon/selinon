@@ -67,16 +67,15 @@ class StoragePool(object):
 
         return storage
 
-    def get(self, flow_name, task_name):
-        return self.retrieve(flow_name, task_name, self._id_mapping[task_name])
+    def get(self, task_name):
+        return self.retrieve(task_name, self._id_mapping[task_name])
 
     @classmethod
-    def retrieve(cls, flow_name, task_name, task_id):
+    def retrieve(cls, task_name, task_id):
         storage = cls.get_storage_by_task_name(task_name)
-        Trace.log(Trace.STORAGE_RETRIEVE, {'flow_name': flow_name,
-                                           'task_name': task_name,
+        Trace.log(Trace.STORAGE_RETRIEVE, {'task_name': task_name,
                                            'storage_name': Config.task_mapping[task_name]})
-        return storage.retrieve(flow_name, task_name, task_id)
+        return storage.retrieve(task_name, task_id)
 
     @classmethod
     def set(cls, flow_name, task_name, task_id, result):

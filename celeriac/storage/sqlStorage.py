@@ -49,7 +49,7 @@ class SqlStorage(DataStorage):
             self.session.close()
             self.session = None
 
-    def retrieve(self, flow_name, task_name, task_id):
+    def retrieve(self, task_name, task_id):
         assert(self.is_connected())
 
         record = self.session.query(Result).filter_by(task_id=task_id).one()

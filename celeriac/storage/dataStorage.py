@@ -52,10 +52,9 @@ class DataStorage(ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def retrieve(self, flow_name, task_name, task_id):
+    def retrieve(self, task_name, task_id):
         """
         Retrieve result stored in storage
-        :param flow_name: flow name that was used to store results
         :param task_name: task name that result is going to be retrieved
         :param task_id: id of the task that result is going to be retrieved
         :return: task result

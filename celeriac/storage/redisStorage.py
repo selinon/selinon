@@ -33,7 +33,7 @@ class RedisStorage(DataStorage):
             self.conn.connection_pool.disconnect()
             self.conn = None
 
-    def retrieve(self, flow_name, task_name, task_id):
+    def retrieve(self, task_name, task_id):
         assert(self.is_connected())
 
         ret = self.conn.get(task_id)
