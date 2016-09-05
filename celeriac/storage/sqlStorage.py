@@ -54,10 +54,7 @@ class SqlStorage(DataStorage):
 
         record = self.session.query(Result).filter_by(task_id=task_id).one()
 
-        assert(record.flow_name == flow_name)
         assert(record.task_name == task_name)
-        assert(record.task_id == task_id)
-
         return record.result
 
     def store(self, flow_name, task_name, task_id, result):

@@ -43,10 +43,7 @@ class RedisStorage(DataStorage):
 
         record = json.loads(ret.decode(self.charset))
 
-        assert(record.get('flow_name') == flow_name)
         assert(record.get('task_name') == task_name)
-        assert(record.get('task_id') == task_id)
-
         return record.get('result')
 
     def store(self, flow_name, task_name, task_id, result):

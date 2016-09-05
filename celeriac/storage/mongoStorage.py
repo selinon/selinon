@@ -46,9 +46,7 @@ class MongoStorage(DataStorage):
 
         record = cursor[0]
 
-        assert(flow_name == record['flow_name'])
-        assert(flow_name == record['task_name'])
-
+        assert(task_name == record['task_name'])
         return record.get('result')
 
     def store(self, flow_name, task_name, task_id, result):
