@@ -19,6 +19,7 @@
 # ####################################################################
 
 import itertools
+import json
 from functools import reduce
 from celery.result import AsyncResult
 from .flowError import FlowError
@@ -361,7 +362,15 @@ class SystemState(object):
             if len(self._active_nodes) == 0 and self._failed_nodes:
                 fallback_started = self._run_fallback()
                 if len(fallback_started) == 0 and len(self._failed_nodes) > 0:
-                    raise FlowError("No fallback defined for failure %s" % list(self._failed_nodes.keys()))
+                    # We will propagate state so we can correctly propagate parent and failed nodes in parent flow
+                    # if there is any - if not, this flow will be marked as failed
+                    # We use json.dumps so we can use json for result backend and objects are not pickled
+                    state_dict = self.to_dict()
+                    state_info = {
+                        'finished_nodes': state_dict['finished_nodes'],
+                        'failed_nodes': state_dict['failed_nodes']
+                    }
+                    raise FlowError(state_info)
 
             return self._continue_and_update_retry(new_finished, fallback_started)
 
