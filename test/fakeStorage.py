@@ -38,7 +38,7 @@ class FakeStorage(DataStorage):
         # TODO: implement
         raise NotImplementedError()
 
-    def retrieve(self, flow_name, task_name, task_id):
+    def retrieve(self, task_name, task_id):
         # TODO: implement
         raise NotImplementedError()
 

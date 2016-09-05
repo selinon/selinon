@@ -28,10 +28,10 @@ class CeleriacTask(object):
         self.parent = parent
 
     def parent_task_result(self, parent_name):
-        return StoragePool.retrieve(self.flow_name, parent_name, self.parent[parent_name])
+        return StoragePool.retrieve(parent_name, self.parent[parent_name])
 
     def parent_flow_result(self, flow_name, task_name, index):
-        return StoragePool.retrieve(flow_name, task_name, self.parent[flow_name][task_name][index])
+        return StoragePool.retrieve(task_name, self.parent[flow_name][task_name][index])
 
     def parent_all_results(self):
         ret = {}
@@ -43,11 +43,11 @@ class CeleriacTask(object):
                 for task_name, task_id in task[1].items():
                     if task_name not in ret:
                         ret[task_name] = []
-                    ret[task_name].append(StoragePool.retrieve(self.flow_name, task_name, task_id))
+                    ret[task_name].append(StoragePool.retrieve(task_name, task_id))
             else:
                 if task[0] not in ret:
                     ret[task[0]] = []
-                ret[task[0]].append(StoragePool.retrieve(self.flow_name, task[0], task[1]))
+                ret[task[0]].append(StoragePool.retrieve(task[0], task[1]))
 
         return ret
 
