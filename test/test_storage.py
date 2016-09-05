@@ -79,14 +79,13 @@ class TestStorageAccess(unittest.TestCase):
                 # shouldn't be called
                 raise NotImplementedError()
 
-            def retrieve(self, flow_name, task_name, task_id):
-                assert(flow_name == 'flow1')
+            def retrieve(self, task_name, task_id):
                 assert(task_name == 'Task1')
                 assert(task_id == task1.task_id)
                 return 0xDEADBEEF
 
         def _cond_access(db, node_args):
-            return db.get('flow1', 'Task1') == 0xDEADBEEF
+            return db.get('Task1') == 0xDEADBEEF
 
         get_task_instance = GetTaskInstance()
         edge_table = {
@@ -149,12 +148,12 @@ class TestStorageAccess(unittest.TestCase):
                 # shouldn't be called
                 raise NotImplementedError()
 
-            def retrieve(self, flow_name, task_name, task_id):
+            def retrieve(self, task_name, task_id):
                 # shouldn't be called
                 raise NotImplementedError()
 
         def _cond_access(db, node_args):
-            return db.get('flow1', 'Task1') == 0xDEADBEEF
+            return db.get('Task1') == 0xDEADBEEF
 
         get_task_instance = GetTaskInstance()
         edge_table = {
