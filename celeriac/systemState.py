@@ -65,13 +65,15 @@ class SystemState(object):
             ret.append(edge_node_table[i])
         return ret
 
-    def __init__(self, dispatcher_id, flow_name, node_args = None, retry = None, state = None, parent=None):
+    def __init__(self, dispatcher_id, flow_name, node_args = None, retry = None, state = None, parent=None,
+                 finished=None):
         state_dict = {} if state is None else state
 
         self._dispatcher_id = dispatcher_id
         self._flow_name = flow_name
         self._node_args = node_args
         self._parent = parent if parent else {}
+        self._finished = finished
         self._active_nodes = self._instantiate_active_nodes(state_dict.get('active_nodes', []))
         self._finished_nodes = state_dict.get('finished_nodes', {})
         self._failed_nodes = state_dict.get('failed_nodes', {})
@@ -87,8 +89,9 @@ class SystemState(object):
                 'waiting_edges': self._waiting_edges_idx
                 }
 
-    def _get_successful(self):
-        ret = []
+    def _get_successful_and_failed(self):
+        ret_successful = []
+        ret_failed = []
 
         new_active_nodes = []
         for node in self._active_nodes:
@@ -97,7 +100,7 @@ class SystemState(object):
                                                   'dispatcher_id': self._dispatcher_id,
                                                   'node_name': node['name'],
                                                   'node_id': node['id']})
-                ret.append(node)
+                ret_successful.append(node)
             elif node['result'].failed():
                 Trace.log(Trace.NODE_FAILURE, {'flow_name': self._flow_name,
                                                'dispatcher_id': self._dispatcher_id,
@@ -108,14 +111,15 @@ class SystemState(object):
                 if node['name'] not in self._failed_nodes:
                     self._failed_nodes[node['name']] = []
                 self._failed_nodes[node['name']].append(node['id'])
+                ret_failed.append(node['id'])
             else:
                 new_active_nodes.append(node)
 
         self._active_nodes = new_active_nodes
 
-        return ret
+        return ret_successful, ret_failed
 
-    def _start_node(self, node_name, parent, node_args):
+    def _start_node(self, node_name, parent, node_args, finished=None):
         from .dispatcher import Dispatcher
         if Config.is_flow(node_name):
             if Config.propagate_node_args.get(self._flow_name):
@@ -138,7 +142,8 @@ class SystemState(object):
             else:
                 parent = None
 
-            async_result = Dispatcher().delay(flow_name=node_name, node_args=node_args, parent=parent)
+            async_result = Dispatcher().delay(flow_name=node_name, node_args=node_args, parent=parent,
+                                              finished=finished)
             Trace.log(Trace.SUBFLOW_SCHEDULE, {'flow_name': self._flow_name,
                                                'dispatcher_id': self._dispatcher_id,
                                                'child_flow_name': node_name,
@@ -146,9 +151,8 @@ class SystemState(object):
                                                'parent': parent,
                                                'args': node_args})
         else:
-            async_result = CeleriacTaskEnvelope().delay(task_name=node_name,
-                                                        flow_name=self._flow_name,
-                                                        parent=parent, node_args=node_args)
+            async_result = CeleriacTaskEnvelope().delay(task_name=node_name, flow_name=self._flow_name,
+                                                        parent=parent, node_args=node_args, finished=finished)
             Trace.log(Trace.TASK_SCHEDULE, {'flow_name': self._flow_name,
                                             'dispatcher_id': self._dispatcher_id,
                                             'task_name': node_name,
@@ -181,11 +185,26 @@ class SystemState(object):
 
                 if isinstance(failure_node['fallback'], list) and len(failure_node['fallback']) > 0:
                     parent = {}
+                    finished = {}
                     traced_nodes_arr = []
 
                     for node in combination:
                         traced_nodes_arr.append((node[0], self._failed_nodes[node[0]],))
-                        parent[node[0]] = self._failed_nodes[node[0]].pop(0)
+
+                        if Config.is_flow(node[0]) and Config.propagate_finished:
+                            # we have to add all subsequent finished nodes to list to track info about finished
+                            task_id = self._failed_nodes[node[0]][0]
+                            # Celery stores exception that was raised in case of failure in result property
+                            # We keep there information about finished and failed nodes
+                            raw_result = str(AsyncResult(task_id).result)
+                            flow_info = json.loads(raw_result)
+                            parent[node[0]] = {}
+                            finished[node[0]] = {}
+                            self._extend_parent_finished(parent[node[0]], finished[node[0]], flow_info)
+                            self._failed_nodes[node[0]].pop(0)
+                        else:
+                            parent[node[0]] = self._failed_nodes[node[0]].pop(0)
+
                         if len(self._failed_nodes[node[0]]) == 0:
                             del self._failed_nodes[node[0]]
 
@@ -195,7 +214,8 @@ class SystemState(object):
                                                      'fallback': failure_node['fallback']})
 
                     for node in failure_node['fallback']:
-                        record = self._start_node(node, parent=parent, node_args=self._node_args)
+                        record = self._start_node(node, parent=parent, node_args=self._node_args,
+                                                  finished=finished)
                         ret.append(record)
 
                     # wait for fallback to finish in order to avoid time dependent flow evaluation
@@ -222,14 +242,39 @@ class SystemState(object):
                 self._waiting_edges.append(edge)
                 self._waiting_edges_idx.append(idx)
 
+    def _extend_parent_finished(self, parent_dict, finished_dict, flow_info):
+        for node_name, node_val in flow_info['finished_nodes'].items():
+            if Config.is_flow(node_name):
+                finished_dict[node_name] = {}
+                if node_name not in parent_dict:
+                    parent_dict[node_name] = {}
+                for node_id in node_val:
+                    raw_result = str(AsyncResult(node_id).result)
+                    child_flow_info = json.loads(raw_result)
+                    self._extend_parent_finished(parent_dict[node_name], finished_dict[node_name], child_flow_info)
+            else:
+                finished_dict[node_name] = node_val
+
+        for node_name, node_val in flow_info['failed_nodes'].items():
+            if Config.is_flow(node_name):
+                parent_dict[node_name] = {}
+                if node_name not in finished_dict:
+                    finished_dict[node_name] = {}
+                for node_id in node_val:
+                    raw_result = str(AsyncResult(node_id).result)
+                    child_flow_info = json.loads(raw_result)
+                    self._extend_parent_finished(parent_dict[node_name], finished_dict[node_name], child_flow_info)
+            else:
+                parent_dict[node_name] = node_val
+
     def _extend_parent_from_flow(self, parent_dict, flow_id):
         async_result = AsyncResult(flow_id)
-        assert(async_result.successful())
 
-        for node_name, node_ids in async_result.result.items():
+        for node_name, node_ids in async_result.result['finished_nodes'].items():
             if Config.is_flow(node_name):
+                parent_dict[node_name] = {}
                 for node_id in node_ids:
-                    self._extend_parent_from_flow(parent_dict, node_id)
+                    self._extend_parent_from_flow(parent_dict[node_name], node_id)
             else:
                 if node_name not in parent_dict:
                     parent_dict[node_name] = []
@@ -245,6 +290,7 @@ class SystemState(object):
             #  1. we did not define node arguments in original Dispatcher() call
             #  2. the flow started only with a one single node that just finished
             #  3. node was not a subflow
+            # TODO: make this configurable from YAML
             if not Config.is_flow(new_finished[0]['name']):
                 self._node_args = new_finished[0]['result'].result
 
@@ -295,7 +341,8 @@ class SystemState(object):
                     storage_pool = StoragePool(storage_id_mapping)
                     if edge['condition'](storage_pool, self._node_args):
                         for node_name in edge['to']:
-                            record = self._start_node(node_name, parent=parent, node_args=self._node_args)
+                            record = self._start_node(node_name, parent=parent, node_args=self._node_args,
+                                                      finished=self._finished)
                             ret.append(record)
 
             node_name = node['name']
@@ -305,8 +352,7 @@ class SystemState(object):
 
         return ret
 
-    def _continue_and_update_retry(self, new_finished, fallback_started):
-        started = self._start_new_from_finished(new_finished)
+    def _update_retry(self, started, fallback_started):
         if len(started) > 0 or len(fallback_started) > 0:
             self._retry = self._start_retry
         elif len(self._active_nodes) > 0:
@@ -329,9 +375,7 @@ class SystemState(object):
             storage_pool = StoragePool()
             if start_edge['condition'](storage_pool, self._node_args):
                 for node_name in start_edge['to']:
-                    self._start_node(node_name, node_args=self._node_args, parent=self._parent)
-                    #self._active_nodes.append({'id': ar.task_id, 'name': node_name, 'result': ar})
-                    # TODO: this shouldn't be called here?
+                    self._start_node(node_name, node_args=self._node_args, parent=self._parent, finished=self._finished)
                     self._update_waiting_edges(node_name)
 
         if len(self._active_nodes) > 0:
@@ -343,34 +387,39 @@ class SystemState(object):
 
     def update(self):
 
-        if not self._active_nodes and not self._finished_nodes and not self._waiting_edges:
+        if not self._active_nodes and not self._finished_nodes and not self._waiting_edges and not self._failed_nodes:
             # we are starting up
             return self._start_and_update_retry()
         else:
-            new_finished = self._get_successful()
+            new_finished, new_failed = self._get_successful_and_failed()
 
-            # Instantiate lazily now
-            if new_finished:
+            if new_finished or new_failed:
+                # Instantiate results lazily
                 self._waiting_edges = self._idxs2items(Config.edge_table[self._flow_name], self._waiting_edges_idx)
 
-            for node in new_finished:
-                self._update_waiting_edges(node['name'])
+                for node in new_finished:
+                    self._update_waiting_edges(node['name'])
 
-            fallback_started = []
-            # We wait until all active nodes finish if there are some failed nodes try to recover from failure,
-            # otherwise mark flow as failed
-            if len(self._active_nodes) == 0 and self._failed_nodes:
-                fallback_started = self._run_fallback()
-                if len(fallback_started) == 0 and len(self._failed_nodes) > 0:
-                    # We will propagate state so we can correctly propagate parent and failed nodes in parent flow
-                    # if there is any - if not, this flow will be marked as failed
-                    # We use json.dumps so we can use json for result backend and objects are not pickled
-                    state_dict = self.to_dict()
-                    state_info = {
-                        'finished_nodes': state_dict['finished_nodes'],
-                        'failed_nodes': state_dict['failed_nodes']
-                    }
-                    raise FlowError(state_info)
+                started = self._start_new_from_finished(new_finished)
 
-            return self._continue_and_update_retry(new_finished, fallback_started)
+                fallback_started = []
+                # We wait until all active nodes finish if there are some failed nodes try to recover from failure,
+                # otherwise mark flow as failed
+                if len(self._active_nodes) == 0 and self._failed_nodes:
+                    fallback_started = self._run_fallback()
+                    if len(fallback_started) == 0 and len(self._failed_nodes) > 0:
+                        # We will propagate state information so we can correctly propagate parent and failed nodes in
+                        # parent flow if there is any
+                        # We use JSON in order to use result backend with JSON configured so objects are not pickled
+                        state_dict = self.to_dict()
+                        state_info = {
+                            'finished_nodes': state_dict['finished_nodes'],
+                            'failed_nodes': state_dict['failed_nodes']
+                        }
+                        raise FlowError(json.dumps(state_info))
+
+                return self._update_retry(started, fallback_started)
+            else:
+                return self._update_retry([], [])
+
 

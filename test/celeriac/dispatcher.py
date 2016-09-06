@@ -29,6 +29,7 @@ class Dispatcher(Task):
         self._retry = None
         self._state = None
         self._parent = None
+        self._finished = None
 
     @property
     def flow_name(self):
@@ -46,11 +47,12 @@ class Dispatcher(Task):
     def parent(self):
         return self._parent
 
-    def delay(self, flow_name, node_args=None, retry=None, state=None, parent=None):
+    def delay(self, flow_name, node_args=None, parent=None, finished=None, retry=None, state=None):
         self._flow_name = flow_name
         self._node_args = node_args
         self._retry = retry
         self._state = state
         self._parent = parent
+        self._finished = finished
         GetTaskInstance.register_flow(self)
         return self

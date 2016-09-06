@@ -31,6 +31,7 @@ class CeleriacTask(object):
         return StoragePool.retrieve(parent_name, self.parent[parent_name])
 
     def parent_flow_result(self, flow_name, task_name, index):
+        # TODO: can be list
         return StoragePool.retrieve(task_name, self.parent[flow_name][task_name][index])
 
     def parent_all_results(self):

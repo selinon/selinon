@@ -47,16 +47,17 @@ class CeleriacTaskEnvelope(Task):
 
             jsonschema.validate(result, schema)
 
-    def run(self, task_name, flow_name, parent, node_args, retried_count=None):
+    def run(self, task_name, flow_name, parent, node_args, finished=None, retried_count=None):
         # we are passing args as one argument explicitly for now not to have troubles with *args and **kwargs mapping
         # since we depend on previous task and the result can be anything
         Trace.log(Trace.TASK_START, {'flow_name': flow_name,
                                      'task_name': task_name,
                                      'task_id': self.request.id,
                                      'parent': parent,
+                                     'finished': finished,
                                      'args': node_args})
         try:
-            task = Config.get_task_instance(task_name=task_name, flow_name=flow_name, parent=parent)
+            task = Config.get_task_instance(task_name=task_name, flow_name=flow_name, parent=parent, finished=finished)
             result = task.execute(node_args)
             self.validate_result(task_name, result)
 
@@ -69,6 +70,7 @@ class CeleriacTaskEnvelope(Task):
                                                       'task_id': self.request.id,
                                                       'parent': parent,
                                                       'args': node_args,
+                                                      'finished': finished,
                                                       'result': result})
         except Exception as exc:
             max_retry = Config.max_retry.get(task_name, 0)
@@ -90,6 +92,7 @@ class CeleriacTaskEnvelope(Task):
                                              'task_name': task_name,
                                              'task_id': self.request.id,
                                              'parent': parent,
+                                             'finished': finished,
                                              'args': node_args,
                                              'what': exc,
                                              'retry_countdown': retry_countdown,
@@ -101,6 +104,7 @@ class CeleriacTaskEnvelope(Task):
                                                'task_name': task_name,
                                                'task_id': self.request.id,
                                                'parent': parent,
+                                               'finished': finished,
                                                'args': node_args,
                                                'what': exc,
                                                'retried_count': retried_count})
@@ -110,6 +114,7 @@ class CeleriacTaskEnvelope(Task):
                                    'task_name': task_name,
                                    'task_id': self.request.id,
                                    'parent': parent,
+                                   'finished': finished,
                                    'args': node_args,
                                    'storage': StoragePool.get_storage_name_by_task_name(task_name, graceful=True)})
 

@@ -35,7 +35,7 @@ class Dispatcher(Task):
     max_retries = None
     name = "Dispatcher"
 
-    def run(self, flow_name, node_args=None, parent=None, retry=None, state=None):
+    def run(self, flow_name, node_args=None, parent=None, finished=None, retry=None, state=None):
         """
         Dispatcher entry-point - run each time a dispatcher is scheduled
         :param flow_name: name of the flow
@@ -49,10 +49,11 @@ class Dispatcher(Task):
         Trace.log(Trace.DISPATCHER_WAKEUP, {'flow_name': flow_name,
                                             'dispatcher_id': self.request.id,
                                             'node_args': node_args,
+                                            'finished': finished,
                                             'retry': retry,
                                             'state': state})
         try:
-            system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent)
+            system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent, finished)
             retry = system_state.update()
         except FlowError as flow_error:
             Trace.log(Trace.FLOW_FAILURE, {'flow_name': flow_name,
@@ -88,4 +89,8 @@ class Dispatcher(Task):
             Trace.log(Trace.FLOW_END, {'flow_name': flow_name,
                                        'dispatcher_id': self.request.id,
                                        'finished_nodes': state_dict['finished_nodes']})
-            return state_dict['finished_nodes']
+            return {
+                'finished_nodes': state_dict['finished_nodes'],
+                # this is always {} since we have finished, but leave it here because of failure tracking
+                'failed_nodes': state_dict['failed_nodes']
+            }

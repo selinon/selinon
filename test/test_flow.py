@@ -228,13 +228,7 @@ class TestFlow(unittest.TestCase):
         #    Not run explicitly, but result finished_nodes is:
         #         {'Task2': [<task2-id2>], 'Task4': [<task4-id1>, <task4-id2>]}
         #
-        # Since we are propagating finished, TaskX should get parent:
-        #      {'Task2': '<task2-id>',
-        #       'flow2': {'Task2': [<task2-id1>, task2-id2>],
-        #                 'Task3': [<task3-id1>, <task3-id2>],
-        #                 'Task4': [<task4-id1>, <task4-id2>]
-        #                }
-        #      }:
+        # We are propagating finished, so we should inspect parent
         #
         get_task_instance = GetTaskInstance()
         edge_table = {
@@ -278,13 +272,20 @@ class TestFlow(unittest.TestCase):
         AsyncResult.set_finished(flow2.task_id)
 
         # Create flow3 manually
-        flow3 = get_task_instance('flow3', None, None, None, None)
+        flow3 = get_task_instance('flow3', None, None, None, None, None)
         AsyncResult.set_finished(flow3.task_id)
 
-        flow2_result = {'flow3': [flow3.task_id], 'Task2': ['<task2-id1>'], 'Task3': ['<task3-id1>', '<task3-id2>']}
+        flow2_result = {'finished_nodes': {'flow3': [flow3.task_id],
+                                           'Task2': ['<task2-id1>'],
+                                           'Task3': ['<task3-id1>', '<task3-id2>']},
+                        'failed_nodes': {}
+                        }
         AsyncResult.set_result(flow2.task_id, flow2_result)
 
-        flow3_result = {'Task2': ['<task2-id2>'], 'Task4': ['<task4-id1>', '<task4-id2>']}
+        flow3_result = {'finished_nodes':
+                            {'Task2': ['<task2-id2>'], 'Task4': ['<task4-id1>', '<task4-id2>']},
+                        'failed_nodes': {}
+                        }
         AsyncResult.set_result(flow3.task_id, flow3_result)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict_1, node_args=system_state.node_args)
@@ -294,15 +295,16 @@ class TestFlow(unittest.TestCase):
 
         task_x = get_task_instance.task_by_name('TaskX')[0]
 
-        # Convert list of ids to set so we are not dependent on positioning
         self.assertIn('flow2', task_x.parent)
-        for key, val in task_x.parent['flow2'].items():
-            task_x.parent['flow2'][key] = set(val)
 
         task_x_parent = {'Task2': task2.task_id,
-                         'flow2': {'Task2': {'<task2-id1>', '<task2-id2>'},
-                                   'Task3': {'<task3-id1>', '<task3-id2>'},
-                                   'Task4': {'<task4-id1>', '<task4-id2>'}}}
+                         'flow2': {'Task2': ['<task2-id1>'],
+                                   'Task3': ['<task3-id1>', '<task3-id2>'],
+                                   'flow3': {'Task2': ['<task2-id2>'],
+                                             'Task4': ['<task4-id1>', '<task4-id2>'],
+                                             }
+                                   }
+                         }
         self.assertEqual(task_x.parent, task_x_parent)
 
     def test_propagate_node_args_true(self):
