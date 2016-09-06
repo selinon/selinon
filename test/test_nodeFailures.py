@@ -19,7 +19,6 @@
 # ####################################################################
 
 import unittest
-import json
 
 from celeriac import FlowError
 from getTaskInstance import GetTaskInstance
