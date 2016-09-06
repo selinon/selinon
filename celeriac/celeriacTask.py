@@ -22,10 +22,11 @@ from .storagePool import StoragePool
 
 
 class CeleriacTask(object):
-    def __init__(self, flow_name, task_name, parent):
+    def __init__(self, flow_name, task_name, parent, finished):
         self.flow_name = flow_name
         self.task_name = task_name
         self.parent = parent
+        self.finished = finished
 
     def parent_task_result(self, parent_name):
         return StoragePool.retrieve(parent_name, self.parent[parent_name])
