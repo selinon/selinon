@@ -18,7 +18,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
+import os
 import runpy
+import tempfile
 from .trace import Trace
 
 
@@ -66,21 +68,29 @@ class Config(object):
         cls._set_config(config_module)
 
     @classmethod
-    def set_config_yaml(cls, nodes_definition_file, flow_definition_files):
+    def set_config_yaml(cls, nodes_definition_file, flow_definition_files, config_py=None):
         """
         Set dispatcher configuration by path to YAML configuration files
         :param nodes_definition_file: definition of system nodes - YAML configuration
         :param flow_definition_files: list of flow definition files
+        :param config_py: a file that should be used for storing generated config.py
         """
-        # TODO: add once Parsley will be available in pip; the implementation should be (not tested):
-        # import tempfile
-        # from parsley import System
-        # system = System.from_files(nodes_definition_file, flow_definition_files, no_check=False)
-        # # we could do this in memory, but runpy does not support this
-        # tmp_file = tempfile.NamedTemporaryFile(mode="rw")
-        # system.dump2stream(tmp_file)
-        # cls.set_config_code(tmp_file.name)
-        raise NotImplementedError()
+        # We want to make it possible to use celeriac without parsley installed since it is neccessary to use it
+        # only here, so import it locally
+        from parsley import System
+
+        system = System.from_files(nodes_definition_file, flow_definition_files)
+
+        if not config_py:
+            tmp_f = tempfile.NamedTemporaryFile(mode="w", delete=False)
+            system.dump2stream(tmp_f)
+            tmp_f.close()
+            cls.set_config_py(tmp_f.name)
+            os.unlink(tmp_f.name)
+        else:
+            with open(config_py, "w") as f:
+                system.dump2stream(f)
+            cls.set_config_py(config_py)
 
     @classmethod
     def trace_by_func(cls, trace_func):
