@@ -1,1 +1,1 @@
-parsley_version = '0.1.0a1'
+celeriac_version = '0.1.0a1'
