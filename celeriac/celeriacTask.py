@@ -40,24 +40,6 @@ class CeleriacTask(metaclass=abc.ABCMeta):
         # TODO: can be list
         return StoragePool.retrieve(task_name, self.parent[flow_name][task_name][index])
 
-    def parent_all_results(self):
-        ret = {}
-
-        for task in self.parent.items():
-            # task[0] is task_name/flow_name
-            # task[1] is id or dict (list in case of flow)
-            if isinstance(task[1], dict):
-                for task_name, task_id in task[1].items():
-                    if task_name not in ret:
-                        ret[task_name] = []
-                    ret[task_name].append(StoragePool.retrieve(task_name, task_id))
-            else:
-                if task[0] not in ret:
-                    ret[task[0]] = []
-                ret[task[0]].append(StoragePool.retrieve(task[0], task[1]))
-
-        return ret
-
     @abc.abstractmethod
     def run(self, node_args):
         pass
