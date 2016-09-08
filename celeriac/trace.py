@@ -119,7 +119,7 @@ class Trace(object):
         logger.setLevel(level)
 
         cls._logger = logger
-        cls._trace_func = cls._logging_trace_func
+        cls._trace_func = cls.logging_trace_func
 
     @classmethod
     def trace_by_func(cls, func):
@@ -139,7 +139,7 @@ class Trace(object):
         cls._trace_func(event, msg_dict)
 
     @staticmethod
-    def _logging_trace_func(event, msg_dict):
+    def logging_trace_func(event, msg_dict):
         logger = Trace._logger
 
         if event == Trace.DISPATCHER_WAKEUP:
