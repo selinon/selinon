@@ -29,6 +29,10 @@ class CeleriacTask(metaclass=abc.ABCMeta):
         self.parent = parent
         self.finished = finished
 
+    @property
+    def storage(self):
+        return StoragePool.get_storage_by_task_name(self.task_name)
+
     def parent_task_result(self, parent_name):
         return StoragePool.retrieve(parent_name, self.parent[parent_name])
 
