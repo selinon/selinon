@@ -49,12 +49,12 @@ class StoragePool(object):
     def get_storage_by_task_name(cls, task_name):
         storage_name = cls.get_storage_name_by_task_name(task_name, graceful=True)
         if storage_name:
-            return cls._connected_storage(storage_name)
+            return cls.get_connected_storage(storage_name)
         else:
             return None
 
     @classmethod
-    def _connected_storage(cls, storage_name):
+    def get_connected_storage(cls, storage_name):
         # if this raises KeyError exception it means that the flow was not configured properly - should
         # be handled by Parsley
         storage = Config.storage_mapping[storage_name]
