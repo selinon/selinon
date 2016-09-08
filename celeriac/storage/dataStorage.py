@@ -67,6 +67,7 @@ class DataStorage(metaclass=abc.ABCMeta):
         :param flow_name: flow name in which task was executed
         :param task_name: task name that result is going to be stored
         :param task_id: id of the task that result is going to be stored
+        :param result: result that should be stored
         """
         raise NotImplementedError()
 
