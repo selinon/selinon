@@ -58,6 +58,7 @@ class CeleriacTask(metaclass=abc.ABCMeta):
 
         return ret
 
-    def execute(self, node_args):
+    @abc.abstractmethod
+    def run(self, node_args):
         pass
 

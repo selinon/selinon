@@ -58,7 +58,7 @@ class CeleriacTaskEnvelope(Task):
                                      'args': node_args})
         try:
             task = Config.get_task_instance(task_name=task_name, flow_name=flow_name, parent=parent, finished=finished)
-            result = task.execute(node_args)
+            result = task.run(node_args)
             self.validate_result(task_name, result)
 
             storage = StoragePool.get_storage_by_task_name(task_name)
