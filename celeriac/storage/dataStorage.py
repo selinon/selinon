@@ -19,10 +19,9 @@
 # ####################################################################
 
 import abc
-from ..helpers import ABC
 
 
-class DataStorage(ABC):
+class DataStorage(metaclass=abc.ABCMeta):
     """
     Abstract Celeriac storage adapter that is implemented by a user
     """

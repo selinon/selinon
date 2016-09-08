@@ -18,10 +18,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
+import abc
 from .storagePool import StoragePool
 
 
-class CeleriacTask(object):
+class CeleriacTask(metaclass=abc.ABCMeta):
     def __init__(self, flow_name, task_name, parent, finished):
         self.flow_name = flow_name
         self.task_name = task_name
