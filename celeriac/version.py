@@ -1,2 +1,1 @@
-celeriac_version = 'c53430b'
-
+parsley_version = '0.1.0a1'
