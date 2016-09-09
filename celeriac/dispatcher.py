@@ -41,6 +41,7 @@ class Dispatcher(Task):
         :param flow_name: name of the flow
         :param parent: flow parent nodes
         :param node_args: arguments for workers
+        :param finished: finished tasks in case of fallback is run, otherwise None
         :param retry: last retry countdown
         :param state: the current system state
         :raises: FlowError

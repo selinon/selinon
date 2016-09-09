@@ -23,7 +23,16 @@ from .storagePool import StoragePool
 
 
 class CeleriacTask(metaclass=abc.ABCMeta):
+    """
+    Base class for user-defined tasks
+    """
     def __init__(self, flow_name, task_name, parent, finished):
+        """
+        :param flow_name: name of flow under which this tasks runs on
+        :param task_name: name of task, note it can be aliased since we can have different task name and class name
+        :param parent: direct task's predecessors stated in flow dependency
+        :param finished: tasks that were finished in parent subflow in case task is fallback from fallback
+        """
         self.flow_name = flow_name
         self.task_name = task_name
         self.parent = parent
@@ -31,16 +40,44 @@ class CeleriacTask(metaclass=abc.ABCMeta):
 
     @property
     def storage(self):
+        """
+        :return: tasks's configured storage as stated in YAML config
+        """
         return StoragePool.get_storage_by_task_name(self.task_name)
 
     def parent_task_result(self, parent_name):
+        """
+        :param parent_name: name of parent task to retrieve result from
+        :return: result of parent task
+        """
         return StoragePool.retrieve(parent_name, self.parent[parent_name])
 
+    def finished_task_result(self, finished_name):
+        """
+        :param finished_name: name of finished node in parent subflow
+        :return: result of finished task in parent subflow
+        """
+        # TODO: we should should distinguish sub-subflows here
+        return StoragePool.retrieve(finished_name, self.finished[finished_name])
+
     def parent_flow_result(self, flow_name, task_name, index):
-        # TODO: can be list
+        """
+        Get parent subflow results; note that parent flows can return multiple results from task of same type
+        because of loops in flows
+        :param flow_name: name of parent flow
+        :param task_name: name of task in parent flow
+        :param index: index of result if more than one subflow was run
+        :return: result of task in parent subflow
+        """
+        # TODO: we should should distinguish sub-subflows here
         return StoragePool.retrieve(task_name, self.parent[flow_name][task_name][index])
 
     @abc.abstractmethod
     def run(self, node_args):
+        """
+        Task's entrypoint - user defined computation
+        :param node_args: arguments passed to flow/node
+        :return: tasks's result that will be stored in database as configured
+        """
         pass
 

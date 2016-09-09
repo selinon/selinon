@@ -22,12 +22,20 @@ from threading import Lock
 
 
 class LockPool(object):
+    """
+    Global lock pool for shared locks
+    """
     _locks = {}
     _global_lock = Lock()
 
     @classmethod
     def get_lock(cls, lock_id):
-        # TODO: we could make it more optimal by storing only locks that are used
+        """
+        Get lock for resource, exclusively
+        :param lock_id: lock_id for uniquely identify lock
+        :return: lock, can be acquired if already taken, if new, always released
+        """
+        # TODO: we could make it more optimal by storing only locks that are used and release them once unused
         with cls._global_lock:
             if not cls._locks.get(lock_id):
                 ret = Lock()

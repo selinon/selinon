@@ -25,6 +25,9 @@ from .trace import Trace
 
 
 class Config(object):
+    """
+    All user configurations generated from YAML file
+    """
     celery_app = None
 
     get_task_instance = None
@@ -44,6 +47,9 @@ class Config(object):
 
     @classmethod
     def _set_config(cls, config_module):
+        """
+        Set configuration from Python's module
+        """
         cls.get_task_instance = config_module['get_task_instance']
         cls.is_flow = config_module['is_flow']
         cls.edge_table = config_module['edge_table']

@@ -29,7 +29,7 @@ from .config import Config
 # TODO
 class CeleriacTaskEnvelope(Task):
     """
-    A base class for user defined workers
+    A Celery task that is responsible for running user defined tasks from flow
     """
     # Celery configuration
     ignore_result = False
@@ -40,6 +40,11 @@ class CeleriacTaskEnvelope(Task):
 
     @classmethod
     def validate_result(cls, task_name, result):
+        """
+        :param task_name:
+        :param result:
+        :return:
+        """
         schema_path = Config.output_schemas.get(task_name)
         if schema_path:
             with open(schema_path, "r") as f:
@@ -48,6 +53,15 @@ class CeleriacTaskEnvelope(Task):
             jsonschema.validate(result, schema)
 
     def run(self, task_name, flow_name, parent, node_args, finished=None, retried_count=None):
+        """
+        :param task_name:
+        :param flow_name:
+        :param parent:
+        :param node_args:
+        :param finished:
+        :param retried_count:
+        :return:
+        """
         # we are passing args as one argument explicitly for now not to have troubles with *args and **kwargs mapping
         # since we depend on previous task and the result can be anything
         Trace.log(Trace.TASK_START, {'flow_name': flow_name,

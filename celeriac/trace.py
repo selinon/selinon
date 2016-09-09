@@ -23,6 +23,11 @@ import platform
 
 
 def _default_trace_func(event, msg_dict):
+    """
+    Default tracing function that is used for storing results - do nothing
+    :param event: event that triggered trace point
+    :param msg_dict: a dict holding additional trace information for event
+    """
     pass
 
 
@@ -140,6 +145,11 @@ class Trace(object):
 
     @staticmethod
     def logging_trace_func(event, msg_dict):
+        """
+        Trace to Python's logging facilities
+        :param event: event that triggered trace point
+        :param msg_dict: a dict holding additional trace information for event
+        """
         logger = Trace._logger
 
         if event == Trace.DISPATCHER_WAKEUP:
