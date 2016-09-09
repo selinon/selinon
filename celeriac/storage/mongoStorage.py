@@ -62,3 +62,6 @@ class MongoStorage(DataStorage):
 
         self.collection.insert(record)
 
+        # task_id is unique here
+        return task_id
+

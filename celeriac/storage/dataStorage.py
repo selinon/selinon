@@ -68,6 +68,7 @@ class DataStorage(metaclass=abc.ABCMeta):
         :param task_name: task name that result is going to be stored
         :param task_id: id of the task that result is going to be stored
         :param result: result that should be stored
+        :return: unique ID of stored record
         """
         raise NotImplementedError()
 

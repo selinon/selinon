@@ -64,3 +64,5 @@ class SqlStorage(DataStorage):
         self.session.add(record)
         self.session.commit()
 
+        return record.id
+

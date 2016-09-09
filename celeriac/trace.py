@@ -102,7 +102,7 @@ class Trace(object):
     STORAGE_RETRIEVE = 18                         # flow_name, task_name, storage
 
     # Signal storage access for writing
-    STORAGE_STORE = 19                            # flow_name, task_name, task_id, storage, result
+    STORAGE_STORE = 19                            # flow_name, task_name, task_id, storage, result, record_id
 
     def __init__(self):
         raise NotImplementedError()

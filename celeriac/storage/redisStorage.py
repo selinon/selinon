@@ -57,4 +57,5 @@ class RedisStorage(DataStorage):
         }
 
         self.conn.set(task_id, json.dumps(record))
+        return task_id
 

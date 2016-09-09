@@ -103,9 +103,12 @@ class StoragePool(object):
         :return: result ID - a unique ID which can be used to reference task results
         """
         storage = cls.get_storage_by_task_name(task_name)
+
+        record_id = storage.store(flow_name, task_name, task_id, result)
         Trace.log(Trace.STORAGE_STORE, {'flow_name': flow_name,
                                         'task_name': task_name,
                                         'task_id': task_id,
                                         'storage_name': Config.task_mapping[task_name],
-                                        'result': result})
-        storage.store(flow_name, task_name, task_id, result)
+                                        'result': result,
+                                        'record_id': record_id})
+        return record_id
