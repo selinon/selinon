@@ -108,20 +108,22 @@ class Trace(object):
         raise NotImplementedError()
 
     @classmethod
-    def trace_by_logging(cls, level=logging.DEBUG):
+    def trace_by_logging(cls, level=logging.DEBUG, logger=None):
         """
         Trace by using Python's logging
         :param level: logging level
+        :param logger: optional logger that should be used
         """
         prefix = 'DISPATCHER %10s' % platform.node()
 
-        logger = logging.getLogger('celeriac_trace')
-        formatter = logging.Formatter(prefix + ' - %(asctime)s.%(msecs)d %(levelname)s: %(message)s',
-                                      datefmt="%Y-%m-%d %H:%M:%S")
-        sh = logging.StreamHandler()
-        sh.setFormatter(formatter)
-        logger.addHandler(sh)
-        logger.setLevel(level)
+        if not logger:
+            logger = logging.getLogger('celeriac_trace')
+            formatter = logging.Formatter(prefix + ' - %(asctime)s.%(msecs)d %(levelname)s: %(message)s',
+                                          datefmt="%Y-%m-%d %H:%M:%S")
+            sh = logging.StreamHandler()
+            sh.setFormatter(formatter)
+            logger.addHandler(sh)
+            logger.setLevel(level)
 
         cls._logger = logger
         cls._trace_func = cls.logging_trace_func
