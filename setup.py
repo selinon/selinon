@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from celeriac import celeriac_version
 from setuptools import setup

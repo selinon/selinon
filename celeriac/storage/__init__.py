@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from .dataStorage import DataStorage
 from .mongoStorage import MongoStorage

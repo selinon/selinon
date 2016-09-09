@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from sqlalchemy import create_engine, Column, Integer, Sequence, String
 from sqlalchemy.dialects.postgresql import JSONB
