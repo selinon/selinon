@@ -1,0 +1,7 @@
+celeriac
+========
+
+.. toctree::
+   :maxdepth: 4
+
+   celeriac

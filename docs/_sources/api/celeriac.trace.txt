@@ -1,0 +1,7 @@
+celeriac.trace module
+=====================
+
+.. automodule:: celeriac.trace
+    :members:
+    :undoc-members:
+    :show-inheritance:

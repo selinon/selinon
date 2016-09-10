@@ -1,0 +1,182 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>celeriac.celeriacTaskEnvelope module &#8212; Celeriac 0.1.0a1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0a1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Celeriac 0.1.0a1 documentation" href="../index.html" />
+    <link rel="up" title="celeriac package" href="celeriac.html" />
+    <link rel="next" title="celeriac.config module" href="celeriac.config.html" />
+    <link rel="prev" title="celeriac.celeriacTask module" href="celeriac.celeriacTask.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-celeriac.celeriacTaskEnvelope">
+<span id="celeriac-celeriactaskenvelope-module"></span><h1>celeriac.celeriacTaskEnvelope module<a class="headerlink" href="#module-celeriac.celeriacTaskEnvelope" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope">
+<em class="property">class </em><code class="descclassname">celeriac.celeriacTaskEnvelope.</code><code class="descname">CeleriacTaskEnvelope</code><a class="reference internal" href="../_modules/celeriac/celeriacTaskEnvelope.html#CeleriacTaskEnvelope"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">celery.app.task.Task</span></code></p>
+<p>A Celery task that is responsible for running user defined tasks from flow</p>
+<dl class="attribute">
+<dt id="celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.acks_late">
+<code class="descname">acks_late</code><em class="property"> = True</em><a class="headerlink" href="#celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.acks_late" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.ignore_result">
+<code class="descname">ignore_result</code><em class="property"> = False</em><a class="headerlink" href="#celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.ignore_result" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.max_retries">
+<code class="descname">max_retries</code><em class="property"> = None</em><a class="headerlink" href="#celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.max_retries" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.name">
+<code class="descname">name</code><em class="property"> = 'CeleriacTaskEnvelope'</em><a class="headerlink" href="#celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>task_name</em>, <em>flow_name</em>, <em>parent</em>, <em>node_args</em>, <em>finished=None</em>, <em>retried_count=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/celeriac/celeriacTaskEnvelope.html#CeleriacTaskEnvelope.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.run" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>task_name</strong> &#8211; </li>
+<li><strong>flow_name</strong> &#8211; </li>
+<li><strong>parent</strong> &#8211; </li>
+<li><strong>node_args</strong> &#8211; </li>
+<li><strong>finished</strong> &#8211; </li>
+<li><strong>retried_count</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.track_started">
+<code class="descname">track_started</code><em class="property"> = True</em><a class="headerlink" href="#celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.track_started" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.validate_result">
+<em class="property">classmethod </em><code class="descname">validate_result</code><span class="sig-paren">(</span><em>task_name</em>, <em>result</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/celeriac/celeriacTaskEnvelope.html#CeleriacTaskEnvelope.validate_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#celeriac.celeriacTaskEnvelope.CeleriacTaskEnvelope.validate_result" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>task_name</strong> &#8211; </li>
+<li><strong>result</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="celeriac.html">celeriac package</a><ul>
+      <li>Previous: <a href="celeriac.celeriacTask.html" title="previous chapter">celeriac.celeriacTask module</a></li>
+      <li>Next: <a href="celeriac.config.html" title="next chapter">celeriac.config module</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/celeriac.celeriacTaskEnvelope.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Fridolin Pokorny.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/api/celeriac.celeriacTaskEnvelope.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/fridex/celeriac" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

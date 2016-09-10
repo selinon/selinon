@@ -1,0 +1,7 @@
+celeriac.config module
+======================
+
+.. automodule:: celeriac.config
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+celeriac.storage.redisStorage module
+====================================
+
+.. automodule:: celeriac.storage.redisStorage
+    :members:
+    :undoc-members:
+    :show-inheritance:

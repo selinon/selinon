@@ -1,0 +1,7 @@
+celeriac.flowError module
+=========================
+
+.. automodule:: celeriac.flowError
+    :members:
+    :undoc-members:
+    :show-inheritance:

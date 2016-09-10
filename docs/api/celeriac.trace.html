@@ -1,0 +1,281 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>celeriac.trace module &#8212; Celeriac 0.1.0a1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0a1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Celeriac 0.1.0a1 documentation" href="../index.html" />
+    <link rel="up" title="celeriac package" href="celeriac.html" />
+    <link rel="next" title="celeriac.version module" href="celeriac.version.html" />
+    <link rel="prev" title="celeriac.systemState module" href="celeriac.systemState.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-celeriac.trace">
+<span id="celeriac-trace-module"></span><h1>celeriac.trace module<a class="headerlink" href="#module-celeriac.trace" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="celeriac.trace.Trace">
+<em class="property">class </em><code class="descclassname">celeriac.trace.</code><code class="descname">Trace</code><a class="reference internal" href="../_modules/celeriac/trace.html#Trace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#celeriac.trace.Trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Trace system flow actions</p>
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.DISPATCHER_FAILURE">
+<code class="descname">DISPATCHER_FAILURE</code><em class="property"> = 11</em><a class="headerlink" href="#celeriac.trace.Trace.DISPATCHER_FAILURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.DISPATCHER_RETRY">
+<code class="descname">DISPATCHER_RETRY</code><em class="property"> = 14</em><a class="headerlink" href="#celeriac.trace.Trace.DISPATCHER_RETRY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.DISPATCHER_WAKEUP">
+<code class="descname">DISPATCHER_WAKEUP</code><em class="property"> = 0</em><a class="headerlink" href="#celeriac.trace.Trace.DISPATCHER_WAKEUP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.FALLBACK_START">
+<code class="descname">FALLBACK_START</code><em class="property"> = 13</em><a class="headerlink" href="#celeriac.trace.Trace.FALLBACK_START" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.FLOW_END">
+<code class="descname">FLOW_END</code><em class="property"> = 15</em><a class="headerlink" href="#celeriac.trace.Trace.FLOW_END" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.FLOW_FAILURE">
+<code class="descname">FLOW_FAILURE</code><em class="property"> = 10</em><a class="headerlink" href="#celeriac.trace.Trace.FLOW_FAILURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.FLOW_START">
+<code class="descname">FLOW_START</code><em class="property"> = 1</em><a class="headerlink" href="#celeriac.trace.Trace.FLOW_START" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.NODE_FAILURE">
+<code class="descname">NODE_FAILURE</code><em class="property"> = 12</em><a class="headerlink" href="#celeriac.trace.Trace.NODE_FAILURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.NODE_SUCCESSFUL">
+<code class="descname">NODE_SUCCESSFUL</code><em class="property"> = 6</em><a class="headerlink" href="#celeriac.trace.Trace.NODE_SUCCESSFUL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.STORAGE_CONNECT">
+<code class="descname">STORAGE_CONNECT</code><em class="property"> = 16</em><a class="headerlink" href="#celeriac.trace.Trace.STORAGE_CONNECT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.STORAGE_DISCONNECT">
+<code class="descname">STORAGE_DISCONNECT</code><em class="property"> = 17</em><a class="headerlink" href="#celeriac.trace.Trace.STORAGE_DISCONNECT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.STORAGE_RETRIEVE">
+<code class="descname">STORAGE_RETRIEVE</code><em class="property"> = 18</em><a class="headerlink" href="#celeriac.trace.Trace.STORAGE_RETRIEVE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.STORAGE_STORE">
+<code class="descname">STORAGE_STORE</code><em class="property"> = 19</em><a class="headerlink" href="#celeriac.trace.Trace.STORAGE_STORE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.SUBFLOW_SCHEDULE">
+<code class="descname">SUBFLOW_SCHEDULE</code><em class="property"> = 4</em><a class="headerlink" href="#celeriac.trace.Trace.SUBFLOW_SCHEDULE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.TASK_DISCARD_RESULT">
+<code class="descname">TASK_DISCARD_RESULT</code><em class="property"> = 7</em><a class="headerlink" href="#celeriac.trace.Trace.TASK_DISCARD_RESULT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.TASK_END">
+<code class="descname">TASK_END</code><em class="property"> = 5</em><a class="headerlink" href="#celeriac.trace.Trace.TASK_END" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.TASK_FAILURE">
+<code class="descname">TASK_FAILURE</code><em class="property"> = 8</em><a class="headerlink" href="#celeriac.trace.Trace.TASK_FAILURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.TASK_RETRY">
+<code class="descname">TASK_RETRY</code><em class="property"> = 9</em><a class="headerlink" href="#celeriac.trace.Trace.TASK_RETRY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.TASK_SCHEDULE">
+<code class="descname">TASK_SCHEDULE</code><em class="property"> = 2</em><a class="headerlink" href="#celeriac.trace.Trace.TASK_SCHEDULE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="celeriac.trace.Trace.TASK_START">
+<code class="descname">TASK_START</code><em class="property"> = 3</em><a class="headerlink" href="#celeriac.trace.Trace.TASK_START" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="celeriac.trace.Trace.log">
+<em class="property">classmethod </em><code class="descname">log</code><span class="sig-paren">(</span><em>event</em>, <em>msg_dict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/celeriac/trace.html#Trace.log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#celeriac.trace.Trace.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace work</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>event</strong> &#8211; tracing event</li>
+<li><strong>msg_dict</strong> &#8211; message to be printed</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="celeriac.trace.Trace.logging_trace_func">
+<em class="property">static </em><code class="descname">logging_trace_func</code><span class="sig-paren">(</span><em>event</em>, <em>msg_dict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/celeriac/trace.html#Trace.logging_trace_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#celeriac.trace.Trace.logging_trace_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace to Python&#8217;s logging facilities</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>event</strong> &#8211; event that triggered trace point</li>
+<li><strong>msg_dict</strong> &#8211; a dict holding additional trace information for event</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="celeriac.trace.Trace.trace_by_func">
+<em class="property">classmethod </em><code class="descname">trace_by_func</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/celeriac/trace.html#Trace.trace_by_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#celeriac.trace.Trace.trace_by_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace by a custom function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> &#8211; function with a one single argument</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="celeriac.trace.Trace.trace_by_logging">
+<em class="property">classmethod </em><code class="descname">trace_by_logging</code><span class="sig-paren">(</span><em>level=10</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/celeriac/trace.html#Trace.trace_by_logging"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#celeriac.trace.Trace.trace_by_logging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace by using Python&#8217;s logging</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>level</strong> &#8211; logging level</li>
+<li><strong>logger</strong> &#8211; optional logger that should be used</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="celeriac.html">celeriac package</a><ul>
+      <li>Previous: <a href="celeriac.systemState.html" title="previous chapter">celeriac.systemState module</a></li>
+      <li>Next: <a href="celeriac.version.html" title="next chapter">celeriac.version module</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/celeriac.trace.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Fridolin Pokorny.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/api/celeriac.trace.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/fridex/celeriac" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

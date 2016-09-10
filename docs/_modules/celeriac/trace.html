@@ -1,0 +1,294 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>celeriac.trace &#8212; Celeriac 0.1.0a1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0a1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Celeriac 0.1.0a1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for celeriac.trace</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># ####################################################################</span>
+<span class="c1"># Copyright (C) 2016  Fridolin Pokorny, fpokorny@redhat.com</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU General Public License</span>
+<span class="c1"># as published by the Free Software Foundation; either version 2</span>
+<span class="c1"># of the License, or (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span>
+<span class="c1"># ####################################################################</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+
+
+<span class="k">def</span> <span class="nf">_default_trace_func</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">msg_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Default tracing function that is used for storing results - do nothing</span>
+
+<span class="sd">    :param event: event that triggered trace point</span>
+<span class="sd">    :param msg_dict: a dict holding additional trace information for event</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="Trace"><a class="viewcode-back" href="../../api/celeriac.trace.html#celeriac.trace.Trace">[docs]</a><span class="k">class</span> <span class="nc">Trace</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Trace system flow actions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_trace_func</span> <span class="o">=</span> <span class="n">_default_trace_func</span>
+    <span class="n">_logger</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># TODO: make this nice for Sphinx (?)</span>
+    <span class="c1"># Logged event                                # msg_dict.keys()</span>
+    <span class="c1">################################################################################</span>
+    <span class="c1"># Signalize Dispatcher run by Celery - each time a Dispatcher is started/retried</span>
+    <span class="n">DISPATCHER_WAKEUP</span> <span class="o">=</span> <span class="mi">0</span>                         <span class="c1"># flow_name, dispatcher_id, args, retry, state</span>
+
+    <span class="c1"># Signalize a flow start - called when starting nodes are run</span>
+    <span class="n">FLOW_START</span> <span class="o">=</span> <span class="mi">1</span>                                <span class="c1"># flow_name, dispatcher_id, args</span>
+
+    <span class="c1"># Signalize a task scheduling by Dispatcher</span>
+    <span class="n">TASK_SCHEDULE</span> <span class="o">=</span> <span class="mi">2</span>                             <span class="c1"># flow_name, task_name, task_id, parent, args</span>
+
+    <span class="c1"># Signalize task start by Celery</span>
+    <span class="n">TASK_START</span> <span class="o">=</span> <span class="mi">3</span>                                <span class="c1"># flow_name, task_name, task_id, parent, args</span>
+
+    <span class="c1"># Signalize subflow start by Dispatcher</span>
+    <span class="n">SUBFLOW_SCHEDULE</span> <span class="o">=</span> <span class="mi">4</span>                          <span class="c1"># flow_name, dispatcher_id, child_flow_name, child_dispatcher_id,</span>
+                                                  <span class="c1"># args, parent</span>
+
+    <span class="c1"># Signalize end of task from CeleriacTask</span>
+    <span class="n">TASK_END</span> <span class="o">=</span> <span class="mi">5</span>                                  <span class="c1"># flow_name, task_name, task_id, parent, args, storage</span>
+
+    <span class="c1"># Signalize a node success from dispatcher</span>
+    <span class="n">NODE_SUCCESSFUL</span> <span class="o">=</span> <span class="mi">6</span>                           <span class="c1"># flow_name, dispatcher_id, node_name, node_id</span>
+
+    <span class="c1"># Signalize that the result of task was discarded</span>
+    <span class="n">TASK_DISCARD_RESULT</span> <span class="o">=</span> <span class="mi">7</span>                       <span class="c1"># flow_name, task_name, task_id, parent, args, result</span>
+
+    <span class="c1"># Signalize task failure from CeleriacTask</span>
+    <span class="n">TASK_FAILURE</span> <span class="o">=</span> <span class="mi">8</span>                              <span class="c1"># flow_name, task_name, task_id, parent, args, what, retried_count</span>
+
+    <span class="c1"># Signalize task retry</span>
+    <span class="n">TASK_RETRY</span> <span class="o">=</span> <span class="mi">9</span>                                <span class="c1"># flow_name, task_name, task_id, parent, args, what, retried_count,</span>
+                                                  <span class="c1"># max_retry, retry_countdown</span>
+
+    <span class="c1"># Signalize when a flow ends because of error in nodes without fallback</span>
+    <span class="n">FLOW_FAILURE</span> <span class="o">=</span> <span class="mi">10</span>                             <span class="c1"># flow_name, dispatcher_id, what</span>
+
+    <span class="c1"># Signalize unexpected dispatcher failure - this should not occur (e.g. bug, database connection error, ...)</span>
+    <span class="n">DISPATCHER_FAILURE</span> <span class="o">=</span> <span class="mi">11</span>                       <span class="c1"># flow_name, dispatcher_id, what</span>
+
+    <span class="c1"># Signalize a node failure from dispatcher</span>
+    <span class="n">NODE_FAILURE</span> <span class="o">=</span> <span class="mi">12</span>                             <span class="c1"># flow_name, dispatcher_id, node_name, node_id, what</span>
+
+    <span class="c1"># Signalize fallback evaluation</span>
+    <span class="n">FALLBACK_START</span> <span class="o">=</span> <span class="mi">13</span>                           <span class="c1"># flow_name, dispatcher_id, nodes, fallback</span>
+
+    <span class="c1"># Signalize Dispatcher retry</span>
+    <span class="n">DISPATCHER_RETRY</span> <span class="o">=</span> <span class="mi">14</span>                         <span class="c1"># flow_name, dispatcher_id, retry, state_dict, args</span>
+
+    <span class="c1"># Signalize flow end</span>
+    <span class="n">FLOW_END</span> <span class="o">=</span> <span class="mi">15</span>                                 <span class="c1"># flow_name, dispatcher_id, finished_nodes</span>
+
+    <span class="c1"># Signal storage connect</span>
+    <span class="n">STORAGE_CONNECT</span> <span class="o">=</span> <span class="mi">16</span>                          <span class="c1"># storage_name</span>
+
+    <span class="c1"># Signal storage disconnect</span>
+    <span class="c1"># TODO: currently unused</span>
+    <span class="n">STORAGE_DISCONNECT</span> <span class="o">=</span> <span class="mi">17</span>                       <span class="c1"># storage_name</span>
+
+    <span class="c1"># Signal storage access for reading</span>
+    <span class="n">STORAGE_RETRIEVE</span> <span class="o">=</span> <span class="mi">18</span>                         <span class="c1"># flow_name, task_name, storage</span>
+
+    <span class="c1"># Signal storage access for writing</span>
+    <span class="n">STORAGE_STORE</span> <span class="o">=</span> <span class="mi">19</span>                            <span class="c1"># flow_name, task_name, task_id, storage, result, record_id</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Trace.trace_by_logging"><a class="viewcode-back" href="../../api/celeriac.trace.html#celeriac.trace.Trace.trace_by_logging">[docs]</a>    <span class="k">def</span> <span class="nf">trace_by_logging</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trace by using Python&#39;s logging</span>
+
+<span class="sd">        :param level: logging level</span>
+<span class="sd">        :param logger: optional logger that should be used</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;DISPATCHER </span><span class="si">%10s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">platform</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">logger</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;celeriac_trace&#39;</span><span class="p">)</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39; - </span><span class="si">%(asctime)s</span><span class="s1">.</span><span class="si">%(msecs)d</span><span class="s1"> </span><span class="si">%(levelname)s</span><span class="s1">: </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>
+                                          <span class="n">datefmt</span><span class="o">=</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+            <span class="n">sh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+            <span class="n">sh</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+
+        <span class="n">cls</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logger</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">_trace_func</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">logging_trace_func</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Trace.trace_by_func"><a class="viewcode-back" href="../../api/celeriac.trace.html#celeriac.trace.Trace.trace_by_func">[docs]</a>    <span class="k">def</span> <span class="nf">trace_by_func</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trace by a custom function</span>
+
+<span class="sd">        :param func: function with a one single argument</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">_trace_func</span> <span class="o">=</span> <span class="n">func</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Trace.log"><a class="viewcode-back" href="../../api/celeriac.trace.html#celeriac.trace.Trace.log">[docs]</a>    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">msg_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trace work</span>
+
+<span class="sd">        :param event: tracing event</span>
+<span class="sd">        :param msg_dict: message to be printed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">_trace_func</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">msg_dict</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Trace.logging_trace_func"><a class="viewcode-back" href="../../api/celeriac.trace.html#celeriac.trace.Trace.logging_trace_func">[docs]</a>    <span class="k">def</span> <span class="nf">logging_trace_func</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">msg_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trace to Python&#39;s logging facilities</span>
+
+<span class="sd">        :param event: event that triggered trace point</span>
+<span class="sd">        :param msg_dict: a dict holding additional trace information for event</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">Trace</span><span class="o">.</span><span class="n">_logger</span>
+
+        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">DISPATCHER_WAKEUP</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Dispatcher woken up: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">FLOW_START</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Flow started: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">TASK_SCHEDULE</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Scheduled a new task: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">TASK_START</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Task has been started: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">SUBFLOW_SCHEDULE</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Scheduled a new subflow: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">TASK_END</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Task has successfully finished: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">NODE_SUCCESSFUL</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Node in flow successfully finished: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">TASK_DISCARD_RESULT</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Result of task has been discarded: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">TASK_FAILURE</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Task has failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">TASK_RETRY</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Task will be retried: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">FLOW_FAILURE</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Flow has failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">DISPATCHER_FAILURE</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Dispatcher failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">NODE_FAILURE</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Node has failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">FALLBACK_START</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Fallback is going to be started started: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">DISPATCHER_RETRY</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Dispatcher will be rescheduled: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">FLOW_END</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Flow has successfully ended: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">STORAGE_CONNECT</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Requested connect to storage: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">STORAGE_DISCONNECT</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Requested disconnect from storage: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">STORAGE_RETRIEVE</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Retrieving data from storage: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">STORAGE_STORE</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Storing data in storage: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Unhandled event (</span><span class="si">%s</span><span class="s2">): </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">msg_dict</span><span class="p">))</span></div></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Fridolin Pokorny.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/fridex/celeriac" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

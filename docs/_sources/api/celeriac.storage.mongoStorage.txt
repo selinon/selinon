@@ -1,0 +1,7 @@
+celeriac.storage.mongoStorage module
+====================================
+
+.. automodule:: celeriac.storage.mongoStorage
+    :members:
+    :undoc-members:
+    :show-inheritance:

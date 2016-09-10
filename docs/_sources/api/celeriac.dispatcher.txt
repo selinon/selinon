@@ -1,0 +1,7 @@
+celeriac.dispatcher module
+==========================
+
+.. automodule:: celeriac.dispatcher
+    :members:
+    :undoc-members:
+    :show-inheritance:
