@@ -19,7 +19,7 @@
 #
 import os
 import sys
-path = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
+path = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..'))
 sys.path.insert(0, path)
 
 # -- General configuration ------------------------------------------------
@@ -167,7 +167,12 @@ html_theme = 'alabaster'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    'github_user': 'fridex',
+    'github_repo': 'celeriac',
+    'github_button': True,
+    'github_banner': True
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
