@@ -48,6 +48,7 @@
 <dt id="celeriac.systemState.SystemState">
 <em class="property">class </em><code class="descclassname">celeriac.systemState.</code><code class="descname">SystemState</code><span class="sig-paren">(</span><em>dispatcher_id</em>, <em>flow_name</em>, <em>node_args=None</em>, <em>retry=None</em>, <em>state=None</em>, <em>parent=None</em>, <em>finished=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/celeriac/systemState.html#SystemState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#celeriac.systemState.SystemState" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Main system actions done by Celeriac</p>
 <dl class="attribute">
 <dt id="celeriac.systemState.SystemState.node_args">
 <code class="descname">node_args</code><a class="headerlink" href="#celeriac.systemState.SystemState.node_args" title="Permalink to this definition">¶</a></dt>
@@ -64,12 +65,29 @@
 <dl class="method">
 <dt id="celeriac.systemState.SystemState.to_dict">
 <code class="descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/celeriac/systemState.html#SystemState.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#celeriac.systemState.SystemState.to_dict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">converted system state to dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="celeriac.systemState.SystemState.update">
 <code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/celeriac/systemState.html#SystemState.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#celeriac.systemState.SystemState.update" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Check the current state in the system and start new nodes if possible</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">retry count - can be None (do not retry dispatcher) or time in seconds to retry</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 

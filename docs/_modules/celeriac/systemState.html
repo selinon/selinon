@@ -72,8 +72,10 @@
 <span class="kn">from</span> <span class="nn">.celeriacTaskEnvelope</span> <span class="k">import</span> <span class="n">CeleriacTaskEnvelope</span>
 
 
-<span class="c1"># TODO: write docstrings</span>
 <div class="viewcode-block" id="SystemState"><a class="viewcode-back" href="../../api/celeriac.systemState.html#celeriac.systemState.SystemState">[docs]</a><span class="k">class</span> <span class="nc">SystemState</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main system actions done by Celeriac</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># initial retry countdown</span>
     <span class="n">_start_retry</span> <span class="o">=</span> <span class="mi">2</span>
     <span class="c1"># do not pass this retry countdown</span>
@@ -126,6 +128,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_retry</span> <span class="o">=</span> <span class="n">retry</span> <span class="k">if</span> <span class="n">retry</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_retry</span>
 
 <div class="viewcode-block" id="SystemState.to_dict"><a class="viewcode-back" href="../../api/celeriac.systemState.html#celeriac.systemState.SystemState.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: converted system state to dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;active_nodes&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deinstantiate_active_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_active_nodes</span><span class="p">),</span>
                 <span class="s1">&#39;finished_nodes&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finished_nodes</span><span class="p">,</span>
                 <span class="s1">&#39;failed_nodes&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_failed_nodes</span><span class="p">,</span>
@@ -133,6 +138,9 @@
                 <span class="p">}</span></div>
 
     <span class="k">def</span> <span class="nf">_get_successful_and_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: all successful and failed nodes in system from active nodes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret_successful</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ret_failed</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -163,6 +171,14 @@
         <span class="k">return</span> <span class="n">ret_successful</span><span class="p">,</span> <span class="n">ret_failed</span>
 
     <span class="k">def</span> <span class="nf">_start_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">node_args</span><span class="p">,</span> <span class="n">finished</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start a node in the system</span>
+
+<span class="sd">        :param node_name: name of a node to be started</span>
+<span class="sd">        :param parent: parent nodes of the starting node</span>
+<span class="sd">        :param node_args: arguments for the starting node</span>
+<span class="sd">        :param finished: finished nodes for starting node in case of subflow and propagate_finished flag</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">.dispatcher</span> <span class="k">import</span> <span class="n">Dispatcher</span>
         <span class="k">if</span> <span class="n">Config</span><span class="o">.</span><span class="n">is_flow</span><span class="p">(</span><span class="n">node_name</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">Config</span><span class="o">.</span><span class="n">propagate_node_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_flow_name</span><span class="p">):</span>
@@ -211,6 +227,11 @@
         <span class="k">return</span> <span class="n">record</span>
 
     <span class="k">def</span> <span class="nf">_run_fallback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run fallback in the system</span>
+
+<span class="sd">        :return: fallbacks that were run</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># we sort it first to make evaluation dependent on alphabetical order</span>
         <span class="c1"># TODO: use binary search when inserting to optimize from O(N*log(N)) to O(log(N))</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
@@ -280,12 +301,24 @@
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="k">def</span> <span class="nf">_update_waiting_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update waiting edges (edges that wait for a node finish) based on node name</span>
+
+<span class="sd">        :param node_name: node that will trigger an edge</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">edge</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Config</span><span class="o">.</span><span class="n">edge_table</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_flow_name</span><span class="p">]):</span>
             <span class="k">if</span> <span class="n">node_name</span> <span class="ow">in</span> <span class="n">edge</span><span class="p">[</span><span class="s1">&#39;from&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">idx</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_waiting_edges_idx</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_waiting_edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_waiting_edges_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_extend_parent_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_dict</span><span class="p">,</span> <span class="n">finished_dict</span><span class="p">,</span> <span class="n">flow_info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;</span>
+<span class="sd">        Compute finished and parent for starting node in case of propagate_finished flag</span>
+
+<span class="sd">        :param parent_dict: parent dict that should be extended</span>
+<span class="sd">        :param finished_dict: finished dict that should be extended</span>
+<span class="sd">        :param flow_info: flow info propagated from a flow</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">node_val</span> <span class="ow">in</span> <span class="n">flow_info</span><span class="p">[</span><span class="s1">&#39;finished_nodes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">Config</span><span class="o">.</span><span class="n">is_flow</span><span class="p">(</span><span class="n">node_name</span><span class="p">):</span>
                 <span class="n">finished_dict</span><span class="p">[</span><span class="n">node_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -311,6 +344,12 @@
                 <span class="n">parent_dict</span><span class="p">[</span><span class="n">node_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_val</span>
 
     <span class="k">def</span> <span class="nf">_extend_parent_from_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_dict</span><span class="p">,</span> <span class="n">flow_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute parent in a flow in case of propagate_parent flag</span>
+
+<span class="sd">        :param parent_dict: parent dict that should be extended</span>
+<span class="sd">        :param flow_id: flow id that should be inspected and used to extend parent_dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">async_result</span> <span class="o">=</span> <span class="n">AsyncResult</span><span class="p">(</span><span class="n">flow_id</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">node_ids</span> <span class="ow">in</span> <span class="n">async_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;finished_nodes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -325,6 +364,12 @@
                     <span class="n">parent_dict</span><span class="p">[</span><span class="n">node_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_start_new_from_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_finished</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start new based on finished nodes</span>
+
+<span class="sd">        :param new_finished: finished nodes based on which we should start new nodes</span>
+<span class="sd">        :return: newly started nodes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_args</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_finished</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_active_nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> \
@@ -396,6 +441,13 @@
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="k">def</span> <span class="nf">_update_retry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">started</span><span class="p">,</span> <span class="n">fallback_started</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update retry based on started nodes and nodes started in a fallback, if any</span>
+
+<span class="sd">        :param started: started nodes</span>
+<span class="sd">        :param fallback_started: fallback started in a fallback (if any)</span>
+<span class="sd">        :return: updated/next retry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">started</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">fallback_started</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_retry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_retry</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_active_nodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -406,6 +458,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retry</span>
 
     <span class="k">def</span> <span class="nf">_start_and_update_retry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the flow and update retry</span>
+
+<span class="sd">        :return: new/next retry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Trace</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Trace</span><span class="o">.</span><span class="n">FLOW_START</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;flow_name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flow_name</span><span class="p">,</span>
                                      <span class="s1">&#39;dispatcher_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dispatcher_id</span><span class="p">,</span>
                                      <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_args</span><span class="p">})</span>
@@ -429,6 +486,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retry</span>
 
 <div class="viewcode-block" id="SystemState.update"><a class="viewcode-back" href="../../api/celeriac.systemState.html#celeriac.systemState.SystemState.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check the current state in the system and start new nodes if possible</span>
+
+<span class="sd">        :return: retry count - can be None (do not retry dispatcher) or time in seconds to retry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active_nodes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finished_nodes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_waiting_edges</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_failed_nodes</span><span class="p">:</span>
             <span class="c1"># we are starting up</span>
