@@ -38,6 +38,7 @@ class Dispatcher(Task):
     def run(self, flow_name, node_args=None, parent=None, finished=None, retry=None, state=None):
         """
         Dispatcher entry-point - run each time a dispatcher is scheduled
+
         :param flow_name: name of the flow
         :param parent: flow parent nodes
         :param node_args: arguments for workers

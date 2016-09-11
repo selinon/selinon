@@ -64,6 +64,7 @@ class CeleriacTask(metaclass=abc.ABCMeta):
         """
         Get parent subflow results; note that parent flows can return multiple results from task of same type
         because of loops in flows
+
         :param flow_name: name of parent flow
         :param task_name: name of task in parent flow
         :param index: index of result if more than one subflow was run
@@ -76,6 +77,7 @@ class CeleriacTask(metaclass=abc.ABCMeta):
     def run(self, node_args):
         """
         Task's entrypoint - user defined computation
+
         :param node_args: arguments passed to flow/node
         :return: tasks's result that will be stored in database as configured
         """

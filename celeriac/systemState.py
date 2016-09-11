@@ -29,8 +29,10 @@ from .config import Config
 from .celeriacTaskEnvelope import CeleriacTaskEnvelope
 
 
-# TODO: write docstrings
 class SystemState(object):
+    """
+    Main system actions done by Celeriac
+    """
     # initial retry countdown
     _start_retry = 2
     # do not pass this retry countdown
@@ -83,6 +85,9 @@ class SystemState(object):
         self._retry = retry if retry else self._start_retry
 
     def to_dict(self):
+        """
+        :return: converted system state to dict
+        """
         return {'active_nodes': self._deinstantiate_active_nodes(self._active_nodes),
                 'finished_nodes': self._finished_nodes,
                 'failed_nodes': self._failed_nodes,
@@ -90,6 +95,9 @@ class SystemState(object):
                 }
 
     def _get_successful_and_failed(self):
+        """
+        :return: all successful and failed nodes in system from active nodes
+        """
         ret_successful = []
         ret_failed = []
 
@@ -120,6 +128,14 @@ class SystemState(object):
         return ret_successful, ret_failed
 
     def _start_node(self, node_name, parent, node_args, finished=None):
+        """
+        Start a node in the system
+
+        :param node_name: name of a node to be started
+        :param parent: parent nodes of the starting node
+        :param node_args: arguments for the starting node
+        :param finished: finished nodes for starting node in case of subflow and propagate_finished flag
+        """
         from .dispatcher import Dispatcher
         if Config.is_flow(node_name):
             if Config.propagate_node_args.get(self._flow_name):
@@ -168,6 +184,11 @@ class SystemState(object):
         return record
 
     def _run_fallback(self):
+        """
+        Run fallback in the system
+
+        :return: fallbacks that were run
+        """
         # we sort it first to make evaluation dependent on alphabetical order
         # TODO: use binary search when inserting to optimize from O(N*log(N)) to O(log(N))
         ret = []
@@ -237,12 +258,24 @@ class SystemState(object):
         return ret
 
     def _update_waiting_edges(self, node_name):
+        """
+        Update waiting edges (edges that wait for a node finish) based on node name
+
+        :param node_name: node that will trigger an edge
+        """
         for idx, edge in enumerate(Config.edge_table[self._flow_name]):
             if node_name in edge['from'] and idx not in self._waiting_edges_idx:
                 self._waiting_edges.append(edge)
                 self._waiting_edges_idx.append(idx)
 
     def _extend_parent_finished(self, parent_dict, finished_dict, flow_info):
+        """"
+        Compute finished and parent for starting node in case of propagate_finished flag
+
+        :param parent_dict: parent dict that should be extended
+        :param finished_dict: finished dict that should be extended
+        :param flow_info: flow info propagated from a flow
+        """
         for node_name, node_val in flow_info['finished_nodes'].items():
             if Config.is_flow(node_name):
                 finished_dict[node_name] = {}
@@ -268,6 +301,12 @@ class SystemState(object):
                 parent_dict[node_name] = node_val
 
     def _extend_parent_from_flow(self, parent_dict, flow_id):
+        """
+        Compute parent in a flow in case of propagate_parent flag
+
+        :param parent_dict: parent dict that should be extended
+        :param flow_id: flow id that should be inspected and used to extend parent_dict
+        """
         async_result = AsyncResult(flow_id)
 
         for node_name, node_ids in async_result.result['finished_nodes'].items():
@@ -282,6 +321,12 @@ class SystemState(object):
                     parent_dict[node_name].append(node_id)
 
     def _start_new_from_finished(self, new_finished):
+        """
+        Start new based on finished nodes
+
+        :param new_finished: finished nodes based on which we should start new nodes
+        :return: newly started nodes
+        """
         ret = []
 
         if not self._node_args and len(new_finished) == 1 and len(self._active_nodes) == 0 and \
@@ -353,6 +398,13 @@ class SystemState(object):
         return ret
 
     def _update_retry(self, started, fallback_started):
+        """
+        Update retry based on started nodes and nodes started in a fallback, if any
+
+        :param started: started nodes
+        :param fallback_started: fallback started in a fallback (if any)
+        :return: updated/next retry
+        """
         if len(started) > 0 or len(fallback_started) > 0:
             self._retry = self._start_retry
         elif len(self._active_nodes) > 0:
@@ -363,6 +415,11 @@ class SystemState(object):
         return self._retry
 
     def _start_and_update_retry(self):
+        """
+        Start the flow and update retry
+
+        :return: new/next retry
+        """
         Trace.log(Trace.FLOW_START, {'flow_name': self._flow_name,
                                      'dispatcher_id': self._dispatcher_id,
                                      'args': self._node_args})
@@ -386,6 +443,11 @@ class SystemState(object):
         return self._retry
 
     def update(self):
+        """
+        Check the current state in the system and start new nodes if possible
+
+        :return: retry count - can be None (do not retry dispatcher) or time in seconds to retry
+        """
 
         if not self._active_nodes and not self._finished_nodes and not self._waiting_edges and not self._failed_nodes:
             # we are starting up

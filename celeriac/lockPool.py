@@ -32,6 +32,7 @@ class LockPool(object):
     def get_lock(cls, lock_id):
         """
         Get lock for resource, exclusively
+
         :param lock_id: lock_id for uniquely identify lock
         :return: lock, can be acquired if already taken, if new, always released
         """

@@ -68,6 +68,7 @@ class Config(object):
     def set_config_py(cls, config_code):
         """
         Set dispatcher configuration by Python config file
+
         :param config_code: configuration source code
         """
         config_module = runpy.run_path(config_code)
@@ -77,6 +78,7 @@ class Config(object):
     def set_config_yaml(cls, nodes_definition_file, flow_definition_files, config_py=None):
         """
         Set dispatcher configuration by path to YAML configuration files
+
         :param nodes_definition_file: definition of system nodes - YAML configuration
         :param flow_definition_files: list of flow definition files
         :param config_py: a file that should be used for storing generated config.py
@@ -102,6 +104,7 @@ class Config(object):
     def trace_by_func(cls, trace_func):
         """
         Set tracing function for Dispatcher
+
         :param trace_func: a function that should be used to trace dispatcher actions
         """
         Trace.trace_by_func(trace_func)
@@ -117,6 +120,7 @@ class Config(object):
     def set_celery_app(cls, celery_app):
         """
         Set celery application that should be used
+
         :param celery_app: celery app instance
         """
         from .dispatcher import Dispatcher

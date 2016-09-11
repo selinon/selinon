@@ -17,6 +17,95 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
+"""
+
+List of events that can be traced:
+
++----------------------------------------+-------------------------+------------------------------------+
+| Logged event                           |  Event name             | msg_dict.keys()                    |
++========================================+=========================+====================================+
+| Signalize Dispatcher run by Celery,    |                         | flow_name, dispatcher_id, args,    |
+| each time a Dispatcher is              | `DISPATCHER_WAKEUP`     | retry, state                       |
+| started/retried                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize a flow start - called when   |                         |                                    |
+| starting nodes are run                 | `FLOW_START`            | flow_name, dispatcher_id, args     |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize a task scheduling by         | `TASK_SCHEDULE`         | flow_name, task_name, task_id,     |
+| Dispatcher                             |                         | parent, args                       |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize task start by Celery         | `TASK_START`            | flow_name, task_name, task_id,     |
+|                                        |                         | parent, args                       |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize subflow start by Dispatcher  | `SUBFLOW_SCHEDULE`      | flow_name, dispatcher_id,          |
+|                                        |                         | child_flow_name, args, parent      |
+|                                        |                         | child_dispatcher_id,               |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize end of task from             | `TASK_END`              | flow_name, task_name, task_id,     |
+| CeleriacTaskEnvelope                   |                         | parent, args, storage              |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize a node success from          | `NODE_SUCCESSFUL`       | flow_name, dispatcher_id,          |
+| Dispatcher                             |                         | node_name, node_id                 |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize that the result of task was  | `TASK_DISCARD_RESULT`   | flow_name, task_name, task_id,     |
+| discarded                              |                         | parent, args, result               |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize task failure from            | `TASK_FAILURE`          | flow_name, task_name, task_id,     |
+| CeleriacTaskEnvelope                   |                         | parent, args, what, retried_count  |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize task retry                   | `TASK_RETRY`            | flow_name, task_name, task_id,     |
+|                                        |                         | parent, args, what, retried_count  |
+|                                        |                         | max_retry, retry_countdown         |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize when a flow ends because of  | `FLOW_FAILURE`          | flow_name, dispatcher_id, what     |
+| error in nodes without fallback        |                         |                                    |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize unexpected dispatcher failure| `DISPATCHER_FAILURE`    | flow_name, dispatcher_id, what     |
+| this should not occur (e.g. bug,       |                         |                                    |
+| database connection error, ...)        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize a node failure from          | `NODE_FAILURE`          | flow_name, dispatcher_id,          |
+| Dispatcher                             |                         | node_name, node_id, what           |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize fallback evaluation          | `FALLBACK_START`        | flow_name, dispatcher_id, nodes,   |
+|                                        |                         | fallback                           |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize Dispatcher retry             | `DISPATCHER_RETRY`      | flow_name, dispatcher_id, retry,   |
+|                                        |                         | state_dict, args                   |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalize flow end                     | `FLOW_END`              | flow_name, dispatcher_id,          |
+|                                        |                         | finished_nodes                     |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signal storage connect                 | `STORAGE_CONNECT`       | storage_name                       |
+|                                        |                         |                                    |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signal storage disconnect              | `STORAGE_DISCONNECT`    | storage_name                       |
+|                                        |                         |                                    |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signal storage access for reading      | `STORAGE_RETRIEVE`      | flow_name, task_name, storage      |
+|                                        |                         |                                    |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signal storage access for writing      | `STORAGE_STORE`         | flow_name, task_name, task_id,     |
+|                                        |                         | storage, result, record_id         |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+
+"""
 
 import logging
 import platform
@@ -25,6 +114,7 @@ import platform
 def _default_trace_func(event, msg_dict):
     """
     Default tracing function that is used for storing results - do nothing
+
     :param event: event that triggered trace point
     :param msg_dict: a dict holding additional trace information for event
     """
@@ -38,71 +128,27 @@ class Trace(object):
     _trace_func = _default_trace_func
     _logger = None
 
-    # TODO: make this nice for Sphinx (?)
-    # Logged event                                # msg_dict.keys()
-    ################################################################################
-    # Signalize Dispatcher run by Celery - each time a Dispatcher is started/retried
-    DISPATCHER_WAKEUP = 0                         # flow_name, dispatcher_id, args, retry, state
-
-    # Signalize a flow start - called when starting nodes are run
-    FLOW_START = 1                                # flow_name, dispatcher_id, args
-
-    # Signalize a task scheduling by Dispatcher
-    TASK_SCHEDULE = 2                             # flow_name, task_name, task_id, parent, args
-
-    # Signalize task start by Celery
-    TASK_START = 3                                # flow_name, task_name, task_id, parent, args
-
-    # Signalize subflow start by Dispatcher
-    SUBFLOW_SCHEDULE = 4                          # flow_name, dispatcher_id, child_flow_name, child_dispatcher_id,
-                                                  # args, parent
-
-    # Signalize end of task from CeleriacTask
-    TASK_END = 5                                  # flow_name, task_name, task_id, parent, args, storage
-
-    # Signalize a node success from dispatcher
-    NODE_SUCCESSFUL = 6                           # flow_name, dispatcher_id, node_name, node_id
-
-    # Signalize that the result of task was discarded
-    TASK_DISCARD_RESULT = 7                       # flow_name, task_name, task_id, parent, args, result
-
-    # Signalize task failure from CeleriacTask
-    TASK_FAILURE = 8                              # flow_name, task_name, task_id, parent, args, what, retried_count
-
-    # Signalize task retry
-    TASK_RETRY = 9                                # flow_name, task_name, task_id, parent, args, what, retried_count,
-                                                  # max_retry, retry_countdown
-
-    # Signalize when a flow ends because of error in nodes without fallback
-    FLOW_FAILURE = 10                             # flow_name, dispatcher_id, what
-
-    # Signalize unexpected dispatcher failure - this should not occur (e.g. bug, database connection error, ...)
-    DISPATCHER_FAILURE = 11                       # flow_name, dispatcher_id, what
-
-    # Signalize a node failure from dispatcher
-    NODE_FAILURE = 12                             # flow_name, dispatcher_id, node_name, node_id, what
-
-    # Signalize fallback evaluation
-    FALLBACK_START = 13                           # flow_name, dispatcher_id, nodes, fallback
-
-    # Signalize Dispatcher retry
-    DISPATCHER_RETRY = 14                         # flow_name, dispatcher_id, retry, state_dict, args
-
-    # Signalize flow end
-    FLOW_END = 15                                 # flow_name, dispatcher_id, finished_nodes
-
-    # Signal storage connect
-    STORAGE_CONNECT = 16                          # storage_name
-
-    # Signal storage disconnect
+    DISPATCHER_WAKEUP = 0
+    FLOW_START = 1
+    TASK_SCHEDULE = 2
+    TASK_START = 3
+    SUBFLOW_SCHEDULE = 4
+    TASK_END = 5
+    NODE_SUCCESSFUL = 6
+    TASK_DISCARD_RESULT = 7
+    TASK_FAILURE = 8
+    TASK_RETRY = 9
+    FLOW_FAILURE = 10
+    DISPATCHER_FAILURE = 11
+    NODE_FAILURE = 12
+    FALLBACK_START = 13
+    DISPATCHER_RETRY = 14
+    FLOW_END = 15
+    STORAGE_CONNECT = 16
     # TODO: currently unused
-    STORAGE_DISCONNECT = 17                       # storage_name
-
-    # Signal storage access for reading
-    STORAGE_RETRIEVE = 18                         # flow_name, task_name, storage
-
-    # Signal storage access for writing
-    STORAGE_STORE = 19                            # flow_name, task_name, task_id, storage, result, record_id
+    STORAGE_DISCONNECT = 17
+    STORAGE_RETRIEVE = 18
+    STORAGE_STORE = 19
 
     def __init__(self):
         raise NotImplementedError()
@@ -111,6 +157,7 @@ class Trace(object):
     def trace_by_logging(cls, level=logging.DEBUG, logger=None):
         """
         Trace by using Python's logging
+
         :param level: logging level
         :param logger: optional logger that should be used
         """
@@ -132,6 +179,7 @@ class Trace(object):
     def trace_by_func(cls, func):
         """
         Trace by a custom function
+
         :param func: function with a one single argument
         """
         cls._trace_func = func
@@ -140,6 +188,7 @@ class Trace(object):
     def log(cls, event, msg_dict):
         """
         Trace work
+
         :param event: tracing event
         :param msg_dict: message to be printed
         """
@@ -149,6 +198,7 @@ class Trace(object):
     def logging_trace_func(event, msg_dict):
         """
         Trace to Python's logging facilities
+
         :param event: event that triggered trace point
         :param msg_dict: a dict holding additional trace information for event
         """

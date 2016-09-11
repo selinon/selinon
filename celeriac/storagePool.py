@@ -59,6 +59,12 @@ class StoragePool(object):
 
     @classmethod
     def get_connected_storage(cls, storage_name):
+        """
+        Retrieve connected storage based by its name stated in configuration
+
+        :param storage_name: name of storage
+        :return: connected storage
+        """
         # if this raises KeyError exception it means that the flow was not configured properly - should
         # be handled by Parsley
         storage = Config.storage_mapping[storage_name]
@@ -74,6 +80,7 @@ class StoragePool(object):
     def get(self, task_name):
         """
         Retrieve data for task based on mapping for the current context
+
         :param task_name: task's name that we are retrieving data for
         :return: task's result for the current context
         """
@@ -83,6 +90,7 @@ class StoragePool(object):
     def retrieve(cls, task_name, task_id):
         """
         Retrieve task's result from database which was configured to be used for desired task
+
         :param task_name: name of task for which result should be retrieved
         :param task_id: task ID to uniquely identify task results
         :return: task's result
@@ -96,6 +104,7 @@ class StoragePool(object):
     def set(cls, flow_name, task_name, task_id, result):
         """
         Store result for task
+
         :param flow_name: flow in which task was run
         :param task_name: task that computed result
         :param task_id: task id that computed result
