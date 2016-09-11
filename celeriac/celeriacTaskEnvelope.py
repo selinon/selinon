@@ -26,7 +26,6 @@ from .trace import Trace
 from .config import Config
 
 
-# TODO
 class CeleriacTaskEnvelope(Task):
     """
     A Celery task that is responsible for running user defined tasks from flow
