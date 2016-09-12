@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to Parsley’s documentation! &#8212; Celeriac 0.1.0a1 documentation</title>
+    <title>Celeriac - A Dynamic Task Flow Management on top of Celery &#8212; Celeriac 0.1.0a1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Celeriac 0.1.0a1 documentation" href="#" />
-    <link rel="next" title="celeriac package" href="api/celeriac.html" />
+    <link rel="next" title="A Quick Start" href="start.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -40,13 +40,55 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="welcome-to-parsley-s-documentation">
-<h1>Welcome to Parsley&#8217;s documentation!<a class="headerlink" href="#welcome-to-parsley-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
+  <div class="section" id="celeriac-a-dynamic-task-flow-management-on-top-of-celery">
+<h1>Celeriac - A Dynamic Task Flow Management on top of Celery<a class="headerlink" href="#celeriac-a-dynamic-task-flow-management-on-top-of-celery" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-is-celeriac-and-why-should-i-use-it">
+<h2>What is Celeriac and why should I use it?<a class="headerlink" href="#what-is-celeriac-and-why-should-i-use-it" title="Permalink to this headline">¶</a></h2>
+<p>Celeriac is a tool that gives you a power to define flows, subflows of tasks that should be executed in <a class="reference external" href="http://www.celeryproject.org">Celery</a> - a distributed task queue. If you want to define very simple flows, Celery offers you workflow primitives that can be used. Unfortunately these workflow primitives are very limited when it comes to extending your workflow, working with multiple dependencies or scheduling tasks based on particular conditions.</p>
+<p>If you are looking for a workflow solution, take a look at existing solutions, such as <a class="reference external" href="https://azkaban.github.io/">Azkaban</a>, <a class="reference external" href="https://github.com/apache/incubator-airflow">Apache Airflow</a>, <a class="reference external" href="https://nifi.apache.org">Apache Nifi</a>, <a class="reference external" href="https://luigi.readthedocs.io">Spotify Luigi</a> and others. The main advantage of using Celeriac over these is the fact, that you can use it in fully distributed systems and for example let <a class="reference external" href="https://kubernetes.io">Kubernetes</a> do the workload (and much more, such as recursive flows, subflows support, ...).</p>
+</div>
+<div class="section" id="is-there-available-a-demo">
+<h2>Is there available a demo?<a class="headerlink" href="#is-there-available-a-demo" title="Permalink to this headline">¶</a></h2>
+<p>You can take a look at <a class="reference external" href="https://github.com/fridex/celeriac-demo">celeriac-demo</a> so you can see how Celeriac works without deep diving into configuration. Just run <cite>docker-compose up</cite>.</p>
+</div>
+<div class="section" id="what-do-i-need">
+<h2>What do I need?<a class="headerlink" href="#what-do-i-need" title="Permalink to this headline">¶</a></h2>
+<p>In order to use Celeriac, you need:</p>
+<blockquote>
+<div><ul class="simple">
+<li>a basic knowledge of Python3 and YAML language</li>
+<li>a basic knowledge of Celery and its <a class="reference external" href="http://docs.celeryproject.org/en/latest/configuration.html">configuration</a></li>
+<li>vegetable appetite :)</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="how-does-it-work-a-high-level-overview">
+<h2>How does it work? - a high level overview<a class="headerlink" href="#how-does-it-work-a-high-level-overview" title="Permalink to this headline">¶</a></h2>
+<p>The key idea lies in Dispatcher - there is created Dispatcher Celery task for each flow. Dispatcher takes care of starting new tasks and subflows, checking their results and scheduling new tasks based on your configuration.</p>
+<p>The only thing that needs to be provided by you is a YAML configuration file that specifies dependencies of your tasks and where results of tasks should be stored. This configuration file is parsed by <a class="reference external" href="https://fridex.github.io/parsley">Parsley</a> and automatically transformed to a Python3 code which is then used by Celeriac.</p>
+</div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="start.html">A Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yaml.conf.html">YAML Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Task Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">Storage Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trace.html">Trace Flow Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="patterns.html">Useful Flow Patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/celeriac.html">celeriac package</a></li>
 </ul>
+</div>
+<div class="section" id="see-also">
+<h3>See also<a class="headerlink" href="#see-also" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="https://fridex.github.io/parsley">Parsley</a></li>
+<li><a class="reference external" href="http://docs.celeryproject.org/en/latest/configuration.html">Celery configuration</a></li>
+</ul>
+</div></blockquote>
+</div>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -66,14 +108,24 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to Parsley&#8217;s documentation!</a></li>
+<li><a class="reference internal" href="#">Celeriac - A Dynamic Task Flow Management on top of Celery</a><ul>
+<li><a class="reference internal" href="#what-is-celeriac-and-why-should-i-use-it">What is Celeriac and why should I use it?</a></li>
+<li><a class="reference internal" href="#is-there-available-a-demo">Is there available a demo?</a></li>
+<li><a class="reference internal" href="#what-do-i-need">What do I need?</a></li>
+<li><a class="reference internal" href="#how-does-it-work-a-high-level-overview">How does it work? - a high level overview</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a><ul>
+<li><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="api/celeriac.html" title="next chapter">celeriac package</a></li>
+      <li>Next: <a href="start.html" title="next chapter">A Quick Start</a></li>
   </ul></li>
 </ul>
 </div>

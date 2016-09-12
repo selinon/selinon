@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Storage Implementation &#8212; Celeriac 0.1.0a1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.0a1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Celeriac 0.1.0a1 documentation" href="index.html" />
+    <link rel="next" title="Trace Flow Actions" href="trace.html" />
+    <link rel="prev" title="Task Implementation" href="tasks.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="storage-implementation">
+<h1>Storage Implementation<a class="headerlink" href="#storage-implementation" title="Permalink to this headline">¶</a></h1>
+<p>Currently, there are available three database adapters, see &#8216;celeriac.storage&#8217; module:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">SqlStorage - SQLAlchemy adapter for SQL databases
+Example:
+<a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>yaml
+storages:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">name: &#8216;MySqlStorage&#8217;
+classname: &#8216;SqlStorage&#8217;
+import: &#8216;celeriac.storage&#8217;
+configuration:</p>
+<blockquote>
+<div><p>connection_string: &#8216;postgres://postgres:postgres&#64;postgres:5432/postgres&#8217;
+encoding: &#8216;utf-8&#8217;
+echo: false</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+</li>
+<li><p class="first">RedisStorage - Redis database adapter
+Example:
+<a href="#id9"><span class="problematic" id="id10">``</span></a><a href="#id11"><span class="problematic" id="id12">`</span></a>yaml
+storages:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">name: &#8216;MyRedisStorage&#8217;
+classname: &#8216;RedisStorage&#8217;
+import: &#8216;celeriac.storage&#8217;
+configuration:</p>
+<blockquote>
+<div><p>host: &#8216;redishost&#8217;
+port: 6379
+db: 0
+password: &#8216;secretpassword&#8217;
+charset: &#8216;utf-8&#8217;
+host: &#8216;mongohost&#8217;
+port: 27017</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p><a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a></p>
+</li>
+<li><p class="first">MongoStorage - MongoDB database adapter
+Example:
+<a href="#id17"><span class="problematic" id="id18">``</span></a><a href="#id19"><span class="problematic" id="id20">`</span></a>yaml
+storages:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">name: &#8216;MyMongoStorage&#8217;
+classname: &#8216;MongoStorage&#8217;
+import: &#8216;celeriac.storage&#8217;
+configuration:</p>
+<blockquote>
+<div><p>db_name: &#8216;database_name&#8217;
+collection_name: &#8216;collection_name&#8217;
+host: &#8216;mongohost&#8217;
+port: 27017</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p><a href="#id21"><span class="problematic" id="id22">``</span></a><a href="#id23"><span class="problematic" id="id24">`</span></a></p>
+</li>
+</ul>
+</div></blockquote>
+<p>You can define your own storage by inheriting from <cite>DataStorage</cite> defined in <cite>celeriac.storage</cite>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">celeriac.storage</span> <span class="k">import</span> <span class="n">DataStorage</span>
+
+<span class="k">class</span> <span class="nc">MyStorage</span><span class="p">(</span><span class="n">DataStorage</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="c1"># arguments from YAML file are pasased to constructor as key-value arguments</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">is_connected</span><span class="p">():</span>
+        <span class="c1"># predicate that is used to connect to database</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">connect</span><span class="p">():</span>
+        <span class="c1"># define how to connect based on your configuration</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">():</span>
+        <span class="c1"># define how to disconnect from database</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flow_name</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">task_id</span><span class="p">):</span>
+        <span class="c1"># define how to retrieve result based on flow, task name and task id</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flow_name</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="c1"># define how to store result from task with id task_id based on flow and task name</span>
+      <span class="k">pass</span>
+</pre></div>
+</div>
+<p>You can also reuse current implementation of a storage in order to  define your custom <cite>retrieve()</cite> and <cite>store()</cite> methods based on your requirements.</p>
+<p>#### Database Connection Pool</p>
+<p>Each Celery worker is trying to be efficient when it comes to number of connections to a database. There is held only one instance of <cite>DataStorage</cite> class per whole worker. This means that your database has to be concurrency-safe if you plan to run your Celery worker with concurrency level bigger than one.</p>
+<p>You can simply share connection across multiple <cite>DataStorage</cite> classes in inheritance hierarchy and reuse already defined connections.</p>
+<p>If you would like to limit number of connections to database, you have to do it on your own by sharing connection information in parent of type <cite>DataStorage</cite> and implement connection limitation logic in your database adapter. This is not possible on Celeriac level, since database adapters are black box for Celeriac and they can share connection across multiple instances.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="tasks.html" title="previous chapter">Task Implementation</a></li>
+      <li>Next: <a href="trace.html" title="next chapter">Trace Flow Actions</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/storage.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Fridolin Pokorny.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/storage.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/fridex/celeriac" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
