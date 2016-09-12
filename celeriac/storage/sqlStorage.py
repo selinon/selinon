@@ -61,8 +61,12 @@ class SqlStorage(DataStorage):
         assert(self.is_connected())
 
         record = Result(flow_name, task_name, task_id, result)
-        self.session.add(record)
-        self.session.commit()
+        try:
+            self.session.add(record)
+            self.session.commit()
+        except Exception:
+            self.session.rollback()
+            raise
 
         return record.id
 
