@@ -75,7 +75,7 @@ class TestStorageAccess(unittest.TestCase):
                 # return True so we can test retrieve()
                 return True
 
-            def store(self, flow_name, task_name, task_id, result):
+            def store(self, node_args, flow_name, task_name, task_id, result):
                 # shouldn't be called
                 raise NotImplementedError()
 
@@ -144,7 +144,7 @@ class TestStorageAccess(unittest.TestCase):
                 # return False so we can test connect()
                 return False
 
-            def store(self, flow_name, task_name, task_id, result):
+            def store(self, node_args, flow_name, task_name, task_id, result):
                 # shouldn't be called
                 raise NotImplementedError()
 

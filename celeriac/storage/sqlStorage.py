@@ -19,12 +19,14 @@ class Result(Base):
     task_id = Column(String(255), unique=True)
     # We are using JSONB for postgres, if you want to use other database, change column type
     result = Column(JSONB)
+    node_args = Column(JSONB)
 
-    def __init__(self, flow_name, task_name, task_id, result):
+    def __init__(self, node_args, flow_name, task_name, task_id, result):
         self.flow_name = flow_name
         self.task_name = task_name
         self.task_id = task_id
         self.result = result
+        self.node_args = node_args
 
 
 class SqlStorage(DataStorage):
@@ -57,10 +59,10 @@ class SqlStorage(DataStorage):
         assert(record.task_name == task_name)
         return record.result
 
-    def store(self, flow_name, task_name, task_id, result):
+    def store(self, node_args, flow_name, task_name, task_id, result):
         assert(self.is_connected())
 
-        record = Result(flow_name, task_name, task_id, result)
+        record = Result(node_args, flow_name, task_name, task_id, result)
         try:
             self.session.add(record)
             self.session.commit()

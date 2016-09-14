@@ -101,10 +101,11 @@ class StoragePool(object):
         return storage.retrieve(task_name, task_id)
 
     @classmethod
-    def set(cls, flow_name, task_name, task_id, result):
+    def set(cls, node_args, flow_name, task_name, task_id, result):
         """
         Store result for task
 
+        :param node_args: arguments that were passed to the node
         :param flow_name: flow in which task was run
         :param task_name: task that computed result
         :param task_id: task id that computed result
@@ -113,8 +114,9 @@ class StoragePool(object):
         """
         storage = cls.get_storage_by_task_name(task_name)
 
-        record_id = storage.store(flow_name, task_name, task_id, result)
+        record_id = storage.store(node_args, flow_name, task_name, task_id, result)
         Trace.log(Trace.STORAGE_STORE, {'flow_name': flow_name,
+                                        'node_args': node_args,
                                         'task_name': task_name,
                                         'task_id': task_id,
                                         'storage_name': Config.task_mapping[task_name],

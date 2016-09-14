@@ -54,6 +54,7 @@ class DataStorage(metaclass=abc.ABCMeta):
     def retrieve(self, task_name, task_id):
         """
         Retrieve result stored in storage
+
         :param task_name: task name that result is going to be retrieved
         :param task_id: id of the task that result is going to be retrieved
         :return: task result
@@ -61,9 +62,11 @@ class DataStorage(metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def store(self, flow_name, task_name, task_id, result):
+    def store(self, node_args, flow_name, task_name, task_id, result):
         """
         Store result stored in storage
+
+        :param node_args: arguments that were passed to node
         :param flow_name: flow name in which task was executed
         :param task_name: task name that result is going to be stored
         :param task_id: id of the task that result is going to be stored

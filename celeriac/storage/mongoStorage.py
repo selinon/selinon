@@ -49,10 +49,11 @@ class MongoStorage(DataStorage):
         assert(task_name == record['task_name'])
         return record.get('result')
 
-    def store(self, flow_name, task_name, task_id, result):
+    def store(self, node_args, flow_name, task_name, task_id, result):
         assert(self.is_connected())
 
         record = {
+            'node_args': node_args,
             'flow_name': flow_name,
             'task_name': task_name,
             'task_id': task_id,
