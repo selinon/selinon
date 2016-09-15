@@ -61,7 +61,6 @@ class Config(object):
         cls.propagate_node_args = config_module['propagate_node_args']
         cls.propagate_parent = config_module['propagate_parent']
         cls.propagate_compound_finished = config_module['propagate_compound_finished']
-        cls.propagate_compound_node_args = config_module['propagate_compound_node_args']
         cls.propagate_compound_parent = config_module['propagate_compound_parent']
 
         # task configuration

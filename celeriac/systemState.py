@@ -33,10 +33,6 @@ class SystemState(object):
     """
     Main system actions done by Celeriac
     """
-    # initial retry countdown
-    _start_retry = 2
-    # do not pass this retry countdown
-    _max_retry = 120
 
     @property
     def node_args(self):
@@ -82,7 +78,7 @@ class SystemState(object):
         self._waiting_edges_idx = state_dict.get('waiting_edges', [])
         # Instantiate lazily later if we will know that there is something to process
         self._waiting_edges = []
-        self._retry = retry if retry else self._start_retry
+        self._retry = retry
 
     def to_dict(self):
         """
@@ -411,29 +407,14 @@ class SystemState(object):
 
         return ret
 
-    def _update_retry(self, started, fallback_started):
-        """
-        Update retry based on started nodes and nodes started in a fallback, if any
-
-        :param started: started nodes
-        :param fallback_started: fallback started in a fallback (if any)
-        :return: updated/next retry
-        """
-        if len(started) > 0 or len(fallback_started) > 0:
-            self._retry = self._start_retry
-        elif len(self._active_nodes) > 0:
-            self._retry = min(self._retry*2, self._max_retry)
-        else:
-            # nothing to process in the next run
-            self._retry = None
-        return self._retry
-
     def _start_and_update_retry(self):
         """
         Start the flow and update retry
 
         :return: new/next retry
         """
+        new_started_nodes = []
+
         Trace.log(Trace.FLOW_START, {'flow_name': self._flow_name,
                                      'dispatcher_id': self._dispatcher_id,
                                      'args': self._node_args})
@@ -446,15 +427,16 @@ class SystemState(object):
             storage_pool = StoragePool()
             if start_edge['condition'](storage_pool, self._node_args):
                 for node_name in start_edge['to']:
-                    self._start_node(node_name, node_args=self._node_args, parent=self._parent, finished=self._finished)
+                    node = self._start_node(node_name, node_args=self._node_args, parent=self._parent,
+                                            finished=self._finished)
+                    new_started_nodes.append(node)
                     self._update_waiting_edges(node_name)
 
-        if len(self._active_nodes) > 0:
-            self._retry = self._start_retry
-        else:
-            self._retry = None
-
-        return self._retry
+        self._retry = Config.strategy_function(previous_retry=None,
+                                               active_nodes=self._active_nodes,
+                                               failed_nodes=self._failed_nodes,
+                                               new_started_nodes=new_started_nodes,
+                                               new_fallback_nodes=[])
 
     def update(self):
         """
@@ -465,7 +447,7 @@ class SystemState(object):
 
         if not self._active_nodes and not self._finished_nodes and not self._waiting_edges and not self._failed_nodes:
             # we are starting up
-            return self._start_and_update_retry()
+            self._start_and_update_retry()
         else:
             new_finished, new_failed = self._get_successful_and_failed()
 
@@ -494,8 +476,15 @@ class SystemState(object):
                         }
                         raise FlowError(json.dumps(state_info))
 
-                return self._update_retry(started, fallback_started)
+                self._retry = Config.strategy_function(previous_retry=self._retry,
+                                                       active_nodes=self._active_nodes,
+                                                       failed_nodes=self._failed_nodes,
+                                                       new_started_nodes=started,
+                                                       new_fallback_nodes=fallback_started)
             else:
-                return self._update_retry([], [])
-
-
+                self._retry = Config.strategy_function(previous_retry=self._retry,
+                                                       active_nodes=self._active_nodes,
+                                                       failed_nodes=self._failed_nodes,
+                                                       new_started_nodes=[],
+                                                       new_fallback_nodes=[])
+            return self._retry
