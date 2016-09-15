@@ -111,7 +111,7 @@ class CeleriacTaskEnvelope(Task):
                                              'retry_countdown': retry_countdown,
                                              'retried_count': retried_count,
                                              'max_retry': max_retry})
-                raise self.retry(kwargs=kwargs, countdown=retry_countdown)
+                raise self.retry(kwargs=kwargs, countdown=retry_countdown, queue=Config.task_queues[task_name])
             else:
                 Trace.log(Trace.TASK_FAILURE, {'flow_name': flow_name,
                                                'task_name': task_name,

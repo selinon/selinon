@@ -22,6 +22,7 @@ from celery import Task
 from .systemState import SystemState
 from .flowError import FlowError
 from .trace import Trace
+from .config import Config
 
 
 class Dispatcher(Task):
@@ -86,7 +87,7 @@ class Dispatcher(Task):
                                                'state_dict': state_dict,
                                                'node_args': node_args
                                                })
-            raise self.retry(args=[], kwargs=kwargs, countdown=retry)
+            raise self.retry(args=[], kwargs=kwargs, countdown=retry, queue=Config.dispatcher_queue)
         else:
             Trace.log(Trace.FLOW_END, {'flow_name': flow_name,
                                        'dispatcher_id': self.request.id,
