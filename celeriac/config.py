@@ -37,13 +37,19 @@ class Config(object):
     nowait_nodes = None
     max_retry = None
     retry_countdown = None
-    propagate_finished = None
     propagate_node_args = None
+    propagate_finished = None
     propagate_parent = None
+    propagate_compound_finished = None
+    propagate_compound_parent = None
     output_schemas = None
 
     storage_mapping = None
     task_mapping = None
+    dispatcher_queue = None
+    task_queues = None
+    strategy_function = None
+
 
     @classmethod
     def _set_config(cls, config_module):
