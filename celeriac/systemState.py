@@ -179,7 +179,7 @@ class SystemState(object):
                 'finished': finished
             }
 
-            async_result = CeleriacTaskEnvelope().apply_async(kwargs, queue=Config.task_queues[node_name])
+            async_result = CeleriacTaskEnvelope().apply_async(kwargs=kwargs, queue=Config.task_queues[node_name])
 
             # reuse kwargs for trace log entry
             kwargs['dispatcher_id'] = self._dispatcher_id
