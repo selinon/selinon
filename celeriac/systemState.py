@@ -429,8 +429,9 @@ class SystemState(object):
                 for node_name in start_edge['to']:
                     node = self._start_node(node_name, node_args=self._node_args, parent=self._parent,
                                             finished=self._finished)
-                    new_started_nodes.append(node)
-                    self._update_waiting_edges(node_name)
+                    if node_name not in Config.nowait_nodes.get(self._flow_name, {}):
+                        self._update_waiting_edges(node_name)
+                        new_started_nodes.append(node)
 
         self._retry = Config.strategy_function(previous_retry=None,
                                                active_nodes=self._active_nodes,
@@ -487,4 +488,4 @@ class SystemState(object):
                                                        failed_nodes=self._failed_nodes,
                                                        new_started_nodes=[],
                                                        new_fallback_nodes=[])
-            return self._retry
+        return self._retry

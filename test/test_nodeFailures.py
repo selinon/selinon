@@ -24,6 +24,7 @@ from celeriac import FlowError
 from getTaskInstance import GetTaskInstance
 from queueMock import QueueMock
 from isFlow import IsFlow
+from strategyMock import strategy_function
 
 from celery.result import AsyncResult
 from celeriac import SystemState
@@ -57,6 +58,7 @@ class TestNodeFailures(unittest.TestCase):
         Config.retry_countdown = {}
         Config.task_queues = QueueMock()
         Config.dispatcher_queue = QueueMock()
+        Config.strategy_function = strategy_function
 
     def test_single_failure_flow_fail(self):
         #
@@ -86,7 +88,7 @@ class TestNodeFailures(unittest.TestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertEqual(retry, SystemState._start_retry)
+        self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', get_task_instance.tasks)
         self.assertNotIn('Task2', get_task_instance.tasks)
@@ -134,7 +136,7 @@ class TestNodeFailures(unittest.TestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertEqual(retry, SystemState._start_retry)
+        self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', get_task_instance.tasks)
         self.assertNotIn('Task2', get_task_instance.tasks)
@@ -189,7 +191,7 @@ class TestNodeFailures(unittest.TestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertEqual(retry, SystemState._start_retry)
+        self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', get_task_instance.tasks)
         self.assertNotIn('Task2', get_task_instance.tasks)
@@ -254,7 +256,7 @@ class TestNodeFailures(unittest.TestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertEqual(retry, SystemState._start_retry)
+        self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', get_task_instance.tasks)
         self.assertNotIn('Task2', get_task_instance.tasks)
@@ -352,7 +354,7 @@ class TestNodeFailures(unittest.TestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertEqual(retry, SystemState._start_retry)
+        self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', get_task_instance.tasks)
         self.assertNotIn('flow2', get_task_instance.flows)
@@ -406,7 +408,7 @@ class TestNodeFailures(unittest.TestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertEqual(retry, SystemState._start_retry)
+        self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
         self.assertIn('flow2', get_task_instance.flows)
         self.assertNotIn('Task1', get_task_instance.tasks)
@@ -461,7 +463,7 @@ class TestNodeFailures(unittest.TestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertEqual(retry, SystemState._start_retry)
+        self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', get_task_instance.tasks)
         self.assertIn('Task2', get_task_instance.tasks)
@@ -552,7 +554,7 @@ class TestNodeFailures(unittest.TestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertEqual(retry, SystemState._start_retry)
+        self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', get_task_instance.tasks)
         self.assertIn('Task2', get_task_instance.tasks)
@@ -640,7 +642,7 @@ class TestNodeFailures(unittest.TestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertEqual(retry, SystemState._start_retry)
+        self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', get_task_instance.tasks)
         self.assertIn('Task2', get_task_instance.tasks)
