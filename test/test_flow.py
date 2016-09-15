@@ -20,6 +20,7 @@
 
 import unittest
 from getTaskInstance import GetTaskInstance
+from queueMock import QueueMock
 from isFlow import IsFlow
 from celery.result import AsyncResult
 from celeriac import SystemState
@@ -40,7 +41,7 @@ class TestFlow(unittest.TestCase):
 
     @staticmethod
     def init(get_task_instance, is_flow, edge_table, failures, nowait_nodes,
-             propagate_finished, propagate_node_args, propagate_parent):
+             propagate_finished, propagate_node_args, propagate_parent, queues=None, dispatcher_queue=None):
         Config.get_task_instance = get_task_instance
         Config.is_flow = is_flow
         Config.edge_table = edge_table
@@ -50,6 +51,8 @@ class TestFlow(unittest.TestCase):
         Config.propagate_node_args = propagate_node_args
         Config.propagate_parent = propagate_parent
         Config.retry_countdown = {}
+        Config.task_queues = queues or QueueMock()
+        Config.dispatcher_queue = dispatcher_queue or QueueMock()
 
     def test_simple_flow(self):
         #
@@ -75,7 +78,13 @@ class TestFlow(unittest.TestCase):
         }
         is_flow = IsFlow(edge_table.keys())
         nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes, {'flow1': False}, {}, {})
+        queues = {
+            'Task1': 'mytask1queue',
+            'Task2': 'mytask2queue',
+        }
+        dispatcher_queue = 'mydispatcher'
+        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes, {'flow1': False}, {}, {},
+                  queues, dispatcher_queue)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -88,6 +97,10 @@ class TestFlow(unittest.TestCase):
         self.assertNotIn('Task2', get_task_instance.tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertEqual(state_dict['waiting_edges'][0], 0)
+
+        # check task's queue configuration
+        task1 = get_task_instance.task_by_name('Task1')[0]
+        self.assertEqual(task1.queue, queues.get(task1.task_name))
 
         # No change
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
@@ -103,7 +116,6 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(state_dict['waiting_edges'][0], 0)
 
         # Task1 has finished
-        task1 = get_task_instance.task_by_name('Task1')[0]
         task1_result = [1, 2, 3, 4]
         AsyncResult.set_finished(task1.task_id)
         AsyncResult.set_result(task1.task_id, task1_result)
@@ -147,8 +159,11 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(len(state_dict['finished_nodes']), 1)
         self.assertEqual(len(state_dict['active_nodes']), 1)
 
-        # flow2 has finished
+        # check flow queue propagation
         flow2 = get_task_instance.flow_by_name('flow2')[0]
+        self.assertEqual(flow2.queue, dispatcher_queue)
+
+        # flow2 has finished
         AsyncResult.set_finished(flow2.task_id)
         AsyncResult.set_result(flow2.task_id, {'TaskSubflow': [1]})
 

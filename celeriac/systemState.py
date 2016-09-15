@@ -158,23 +158,37 @@ class SystemState(object):
             else:
                 parent = None
 
-            async_result = Dispatcher().delay(flow_name=node_name, node_args=node_args, parent=parent,
-                                              finished=finished)
-            Trace.log(Trace.SUBFLOW_SCHEDULE, {'flow_name': self._flow_name,
-                                               'dispatcher_id': self._dispatcher_id,
-                                               'child_flow_name': node_name,
-                                               'child_dispatcher_id': async_result.task_id,
-                                               'parent': parent,
-                                               'args': node_args})
+            kwargs = {
+                'flow_name': node_name,
+                'node_args': node_args,
+                'parent': parent,
+                'finished': finished
+            }
+
+            async_result = Dispatcher().apply_async(kwargs=kwargs, queue=Config.dispatcher_queue)
+
+            # reuse kwargs for trace log entry
+            kwargs['flow_name'] = self._flow_name
+            kwargs['child_flow_name'] = node_name
+            kwargs['dispatcher_id'] = self._dispatcher_id
+            kwargs['child_dispatcher_id'] = async_result.task_id,
+            kwargs['queue'] = Config.dispatcher_queue
+            Trace.log(Trace.SUBFLOW_SCHEDULE, kwargs)
         else:
-            async_result = CeleriacTaskEnvelope().delay(task_name=node_name, flow_name=self._flow_name,
-                                                        parent=parent, node_args=node_args, finished=finished)
-            Trace.log(Trace.TASK_SCHEDULE, {'flow_name': self._flow_name,
-                                            'dispatcher_id': self._dispatcher_id,
-                                            'task_name': node_name,
-                                            'task_id': async_result.task_id,
-                                            'parent': parent,
-                                            'args': node_args})
+            kwargs = {
+                'task_name': node_name,
+                'flow_name': self._flow_name,
+                'parent': parent,
+                'node_args': node_args,
+                'finished': finished
+            }
+
+            async_result = CeleriacTaskEnvelope().apply_async(kwargs, queue=Config.task_queues[node_name])
+
+            # reuse kwargs for trace log entry
+            kwargs['dispatcher_id'] = self._dispatcher_id
+            kwargs['task_id'] = async_result.task_id
+            Trace.log(Trace.TASK_SCHEDULE, kwargs)
 
         record = {'name': node_name, 'id': async_result.task_id, 'result': async_result}
 

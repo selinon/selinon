@@ -55,14 +55,31 @@ class Config(object):
         cls.edge_table = config_module['edge_table']
         cls.failures = config_module['failures']
         cls.nowait_nodes = config_module['nowait_nodes']
-        cls.max_retry = config_module['max_retry']
-        cls.retry_countdown = config_module['retry_countdown']
+
+        # propagate_* entries
         cls.propagate_finished = config_module['propagate_finished']
         cls.propagate_node_args = config_module['propagate_node_args']
         cls.propagate_parent = config_module['propagate_parent']
+        cls.propagate_compound_finished = config_module['propagate_compound_finished']
+        cls.propagate_compound_node_args = config_module['propagate_compound_node_args']
+        cls.propagate_compound_parent = config_module['propagate_compound_parent']
+
+        # task configuration
         cls.output_schemas = config_module['output_schemas']
         cls.storage_mapping = config_module['storage2instance_mapping']
         cls.task_mapping = config_module['task2storage_mapping']
+        cls.max_retry = config_module['max_retry']
+        cls.retry_countdown = config_module['retry_countdown']
+
+        # queues
+        cls.dispatcher_queue = config_module['dispatcher_queue']
+        cls.task_queues = config_module['task_queues']
+
+        # Dispatcher scheduling strategy
+        cls.strategy_function = config_module['strategy_function']
+
+        # call config init with Config class to set up other configuration specific values
+        config_module['init'](cls)
 
     @classmethod
     def set_config_py(cls, config_code):

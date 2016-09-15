@@ -85,13 +85,13 @@ class GetTaskInstance(object):
         """
         cls._flow_instances = []
 
-    def __call__(self, task_name, flow_name, parent, args, finished, retried_count):
+    def __call__(self, task_name, flow_name, parent, node_args, finished, retried_count=None):
         """
         Instantiate a task with name task_name
         :param task_name: a name of the task to be instantiated
         :return: task instance
         """
-        task_instance = Task(task_name, flow_name, parent, args, finished, retried_count)
+        task_instance = Task(task_name, flow_name, parent, node_args, finished, retried_count)
         self._task_instances.append(task_instance)
         AsyncResult.set_unfinished(task_instance.task_id)
         return task_instance

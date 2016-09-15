@@ -20,6 +20,7 @@
 
 import unittest
 from getTaskInstance import GetTaskInstance
+from queueMock import QueueMock
 from isFlow import IsFlow
 from celery.result import AsyncResult
 from celeriac import SystemState
@@ -49,6 +50,8 @@ class TestStorageAccess(unittest.TestCase):
         Config.propagate_node_args = {}
         Config.propagate_parent = {}
         Config.retry_countdown = {}
+        Config.task_queues = QueueMock()
+        Config.dispatcher_queue = QueueMock()
 
     def test_retrieve(self):
         #

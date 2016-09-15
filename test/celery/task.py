@@ -31,6 +31,7 @@ class Task(object):
         self._node_args = node_args
         self._retried_count = retried_count
         self._finished = finished
+        self._queue = None
 
     @property
     def task_name(self):
@@ -60,14 +61,24 @@ class Task(object):
     def finished(self):
         return self._finished
 
-    def delay(self, task_name, flow_name, parent, node_args, finished, retried_count):
+    @property
+    def queue(self):
+        return self._queue
+
+    @queue.setter
+    def queue(self, queue):
+        self._queue = queue
+
+    def apply_async(self, kwargs, queue):
         # Ensure that CeleriacTaskEnvelope kept parameters consistent
-        assert(self._task_name == task_name)
-        assert(self._flow_name == flow_name)
-        assert(self._parent == parent)
-        assert(self._finished == finished)
-        self._node_args = node_args
-        self._retried_count = retried_count
+        assert self._task_name == kwargs['task_name']
+        assert self._flow_name == kwargs['flow_name']
+        assert self._parent == kwargs['parent']
+        assert self._finished == kwargs['finished']
+
+        self._queue = queue
+        self._node_args = kwargs['node_args']
+        self._retried_count = kwargs['retried_count']
         return self
 
     @staticmethod

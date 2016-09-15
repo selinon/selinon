@@ -21,6 +21,7 @@
 import unittest
 from celeriac import FlowError
 from getTaskInstance import GetTaskInstance
+from queueMock import QueueMock
 from isFlow import IsFlow
 
 from celery.result import AsyncResult
@@ -53,6 +54,8 @@ class TestSystemState(unittest.TestCase):
         Config.propagate_node_args = {}
         Config.propagate_parent = {}
         Config.retry_countdown = {}
+        Config.task_queues = QueueMock()
+        Config.dispatcher_queue = QueueMock()
 
     def test_simple1(self):
         #

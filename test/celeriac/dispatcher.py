@@ -30,6 +30,7 @@ class Dispatcher(Task):
         self._state = None
         self._parent = None
         self._finished = None
+        self._queue = None
 
     @property
     def flow_name(self):
@@ -47,12 +48,18 @@ class Dispatcher(Task):
     def parent(self):
         return self._parent
 
-    def delay(self, flow_name, node_args=None, parent=None, finished=None, retry=None, state=None):
-        self._flow_name = flow_name
-        self._node_args = node_args
-        self._retry = retry
-        self._state = state
-        self._parent = parent
-        self._finished = finished
+    @property
+    def queue(self):
+        return self._queue
+
+    def apply_async(self, kwargs, queue):
+        self._flow_name = kwargs['flow_name']
+        self._node_args = kwargs['node_args']
+        self._parent = kwargs['parent']
+        self._finished = kwargs['finished']
+        # None for the first run
+        self._retry = kwargs.get('retry')
+        self._state = kwargs.get('state')
+        self._queue = queue
         GetTaskInstance.register_flow(self)
         return self

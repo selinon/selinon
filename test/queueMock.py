@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ####################################################################
 # Copyright (C) 2016  Fridolin Pokorny, fpokorny@redhat.com
@@ -18,24 +18,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
-from .config import Config
 
+class QueueMock(object):
+    queue_string = 'queue_%s'
 
-class CeleriacTaskEnvelope(object):
-    """
-    A base class for user defined workers
-    """
-    # Celery configuration
-    ignore_result = False
-    acks_late = True
-    track_started = True
-    name = "CeleriacTask"
-
-    @classmethod
-    def apply_async(cls, kwargs, queue):
-        # pop queue since it is celeriac specific
-        task = Config.get_task_instance(**kwargs)
-        # queue used only for testing
-        task.queue = queue
-        return task
-
+    def __getitem__(self, item):
+        return self.queue_string % item
