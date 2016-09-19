@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>selinon.storagePool &#8212; Selinon 0.1.0a1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0a1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Selinon 0.1.0a1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for selinon.storagePool</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># ####################################################################</span>
+<span class="c1"># Copyright (C) 2016  Fridolin Pokorny, fpokorny@redhat.com</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU General Public License</span>
+<span class="c1"># as published by the Free Software Foundation; either version 2</span>
+<span class="c1"># of the License, or (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span>
+<span class="c1"># ####################################################################</span>
+
+<span class="kn">from</span> <span class="nn">.config</span> <span class="k">import</span> <span class="n">Config</span>
+<span class="kn">from</span> <span class="nn">.lockPool</span> <span class="k">import</span> <span class="n">LockPool</span>
+<span class="kn">from</span> <span class="nn">.trace</span> <span class="k">import</span> <span class="n">Trace</span>
+
+
+<div class="viewcode-block" id="StoragePool"><a class="viewcode-back" href="../../api/selinon.storagePool.html#selinon.storagePool.StoragePool">[docs]</a><span class="k">class</span> <span class="nc">StoragePool</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A pool that carries all database connections for workers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_mapping</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id_mapping</span> <span class="o">=</span> <span class="n">id_mapping</span> <span class="k">if</span> <span class="n">id_mapping</span> <span class="k">else</span> <span class="p">{}</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="StoragePool.get_storage_name_by_task_name"><a class="viewcode-back" href="../../api/selinon.storagePool.html#selinon.storagePool.StoragePool.get_storage_name_by_task_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_storage_name_by_task_name</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">graceful</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param task_name: name of a task</span>
+<span class="sd">        :param graceful: return None instead of raising an exception</span>
+<span class="sd">        :return: storage name for task</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Config</span><span class="o">.</span><span class="n">task_mapping</span><span class="p">[</span><span class="n">task_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">graceful</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="StoragePool.get_storage_by_task_name"><a class="viewcode-back" href="../../api/selinon.storagePool.html#selinon.storagePool.StoragePool.get_storage_by_task_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_storage_by_task_name</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">task_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param task_name: task&#39;s name for which storage should be get</span>
+<span class="sd">        :rtype: DataStorage</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">storage_name</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">get_storage_name_by_task_name</span><span class="p">(</span><span class="n">task_name</span><span class="p">,</span> <span class="n">graceful</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">storage_name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">get_connected_storage</span><span class="p">(</span><span class="n">storage_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="StoragePool.get_connected_storage"><a class="viewcode-back" href="../../api/selinon.storagePool.html#selinon.storagePool.StoragePool.get_connected_storage">[docs]</a>    <span class="k">def</span> <span class="nf">get_connected_storage</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">storage_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve connected storage based by its name stated in configuration</span>
+
+<span class="sd">        :param storage_name: name of storage</span>
+<span class="sd">        :return: connected storage</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># if this raises KeyError exception it means that the flow was not configured properly - should</span>
+        <span class="c1"># be handled by Selinonlib</span>
+        <span class="n">storage</span> <span class="o">=</span> <span class="n">Config</span><span class="o">.</span><span class="n">storage_mapping</span><span class="p">[</span><span class="n">storage_name</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">storage</span><span class="o">.</span><span class="n">is_connected</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">LockPool</span><span class="o">.</span><span class="n">get_lock</span><span class="p">(</span><span class="n">storage</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">storage</span><span class="o">.</span><span class="n">is_connected</span><span class="p">():</span>
+                    <span class="n">Trace</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Trace</span><span class="o">.</span><span class="n">STORAGE_CONNECT</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;storage_name&#39;</span><span class="p">:</span> <span class="n">storage_name</span><span class="p">})</span>
+                    <span class="n">storage</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">storage</span></div>
+
+<div class="viewcode-block" id="StoragePool.get"><a class="viewcode-back" href="../../api/selinon.storagePool.html#selinon.storagePool.StoragePool.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve data for task based on mapping for the current context</span>
+
+<span class="sd">        :param task_name: task&#39;s name that we are retrieving data for</span>
+<span class="sd">        :return: task&#39;s result for the current context</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">task_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id_mapping</span><span class="p">[</span><span class="n">task_name</span><span class="p">])</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="StoragePool.retrieve"><a class="viewcode-back" href="../../api/selinon.storagePool.html#selinon.storagePool.StoragePool.retrieve">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">task_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve task&#39;s result from database which was configured to be used for desired task</span>
+
+<span class="sd">        :param task_name: name of task for which result should be retrieved</span>
+<span class="sd">        :param task_id: task ID to uniquely identify task results</span>
+<span class="sd">        :return: task&#39;s result</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">storage</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">get_storage_by_task_name</span><span class="p">(</span><span class="n">task_name</span><span class="p">)</span>
+        <span class="n">Trace</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Trace</span><span class="o">.</span><span class="n">STORAGE_RETRIEVE</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;task_name&#39;</span><span class="p">:</span> <span class="n">task_name</span><span class="p">,</span>
+                                           <span class="s1">&#39;storage_name&#39;</span><span class="p">:</span> <span class="n">Config</span><span class="o">.</span><span class="n">task_mapping</span><span class="p">[</span><span class="n">task_name</span><span class="p">]})</span>
+        <span class="k">return</span> <span class="n">storage</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">task_name</span><span class="p">,</span> <span class="n">task_id</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="StoragePool.set"><a class="viewcode-back" href="../../api/selinon.storagePool.html#selinon.storagePool.StoragePool.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">node_args</span><span class="p">,</span> <span class="n">flow_name</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Store result for task</span>
+
+<span class="sd">        :param node_args: arguments that were passed to the node</span>
+<span class="sd">        :param flow_name: flow in which task was run</span>
+<span class="sd">        :param task_name: task that computed result</span>
+<span class="sd">        :param task_id: task id that computed result</span>
+<span class="sd">        :param result: result that should be stored</span>
+<span class="sd">        :return: result ID - a unique ID which can be used to reference task results</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">storage</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">get_storage_by_task_name</span><span class="p">(</span><span class="n">task_name</span><span class="p">)</span>
+
+        <span class="n">record_id</span> <span class="o">=</span> <span class="n">storage</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">node_args</span><span class="p">,</span> <span class="n">flow_name</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+        <span class="n">Trace</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Trace</span><span class="o">.</span><span class="n">STORAGE_STORE</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;flow_name&#39;</span><span class="p">:</span> <span class="n">flow_name</span><span class="p">,</span>
+                                        <span class="s1">&#39;node_args&#39;</span><span class="p">:</span> <span class="n">node_args</span><span class="p">,</span>
+                                        <span class="s1">&#39;task_name&#39;</span><span class="p">:</span> <span class="n">task_name</span><span class="p">,</span>
+                                        <span class="s1">&#39;task_id&#39;</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span>
+                                        <span class="s1">&#39;storage_name&#39;</span><span class="p">:</span> <span class="n">Config</span><span class="o">.</span><span class="n">task_mapping</span><span class="p">[</span><span class="n">task_name</span><span class="p">],</span>
+                                        <span class="s1">&#39;result&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">,</span>
+                                        <span class="s1">&#39;record_id&#39;</span><span class="p">:</span> <span class="n">record_id</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">record_id</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Fridolin Pokorny.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/fridex/selinon" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

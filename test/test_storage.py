@@ -19,14 +19,14 @@
 # ####################################################################
 
 import unittest
-from celeriacTestCase import CeleriacTestCase
+from selinonTestCase import SelinonTestCase
 
-from celeriac import SystemState
-from celeriac.storage import DataStorage
-from celeriac.config import Config
+from selinon import SystemState
+from selinon.storage import DataStorage
+from selinon.config import Config
 
 
-class TestStorageAccess(CeleriacTestCase):
+class TestStorageAccess(SelinonTestCase):
     def test_retrieve(self):
         #
         # flow1:
@@ -90,7 +90,7 @@ class TestStorageAccess(CeleriacTestCase):
 
     @unittest.skip("store() currently not tested")
     def test_store(self):
-        # store() is called transparently by CeleriacTask - not possible to directly check it without running a task
+        # store() is called transparently by SelinonTask - not possible to directly check it without running a task
         pass
 
     def test_connect_and_configuration(self):

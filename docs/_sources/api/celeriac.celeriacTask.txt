@@ -1,7 +1,0 @@
-celeriac.celeriacTask module
-============================
-
-.. automodule:: celeriac.celeriacTask
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -1,0 +1,34 @@
+selinon package
+===============
+
+Subpackages
+-----------
+
+.. toctree::
+
+    selinon.storage
+
+Submodules
+----------
+
+.. toctree::
+
+   selinon.config
+   selinon.dispatcher
+   selinon.fatalTaskError
+   selinon.flowError
+   selinon.lockPool
+   selinon.selinonTask
+   selinon.selinonTaskEnvelope
+   selinon.storagePool
+   selinon.systemState
+   selinon.trace
+   selinon.version
+
+Module contents
+---------------
+
+.. automodule:: selinon
+    :members:
+    :undoc-members:
+    :show-inheritance:

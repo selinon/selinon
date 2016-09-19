@@ -18,11 +18,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
-from celeriacTestCase import CeleriacTestCase
-from celeriac import SystemState
+from selinonTestCase import SelinonTestCase
+from selinon import SystemState
 
 
-class TestFlow(CeleriacTestCase):
+class TestFlow(SelinonTestCase):
     def test_simple_flow(self):
         #
         # flow1:

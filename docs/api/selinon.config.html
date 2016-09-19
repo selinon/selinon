@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>selinon.config module &#8212; Selinon 0.1.0a1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0a1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Selinon 0.1.0a1 documentation" href="../index.html" />
+    <link rel="up" title="selinon package" href="selinon.html" />
+    <link rel="next" title="selinon.dispatcher module" href="selinon.dispatcher.html" />
+    <link rel="prev" title="selinon.storage.sqlStorage module" href="selinon.storage.sqlStorage.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-selinon.config">
+<span id="selinon-config-module"></span><h1>selinon.config module<a class="headerlink" href="#module-selinon.config" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="selinon.config.Config">
+<em class="property">class </em><code class="descclassname">selinon.config.</code><code class="descname">Config</code><a class="reference internal" href="../_modules/selinon/config.html#Config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#selinon.config.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>All user configurations generated from YAML file</p>
+<dl class="attribute">
+<dt id="selinon.config.Config.celery_app">
+<code class="descname">celery_app</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.celery_app" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.dispatcher_queue">
+<code class="descname">dispatcher_queue</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.dispatcher_queue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.edge_table">
+<code class="descname">edge_table</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.edge_table" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.failures">
+<code class="descname">failures</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.failures" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.get_task_instance">
+<code class="descname">get_task_instance</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.get_task_instance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.is_flow">
+<code class="descname">is_flow</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.is_flow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.max_retry">
+<code class="descname">max_retry</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.max_retry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.nowait_nodes">
+<code class="descname">nowait_nodes</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.nowait_nodes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.output_schemas">
+<code class="descname">output_schemas</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.output_schemas" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.propagate_compound_finished">
+<code class="descname">propagate_compound_finished</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.propagate_compound_finished" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.propagate_compound_parent">
+<code class="descname">propagate_compound_parent</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.propagate_compound_parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.propagate_finished">
+<code class="descname">propagate_finished</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.propagate_finished" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.propagate_node_args">
+<code class="descname">propagate_node_args</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.propagate_node_args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.propagate_parent">
+<code class="descname">propagate_parent</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.propagate_parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.retry_countdown">
+<code class="descname">retry_countdown</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.retry_countdown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="selinon.config.Config.set_celery_app">
+<em class="property">classmethod </em><code class="descname">set_celery_app</code><span class="sig-paren">(</span><em>celery_app</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/selinon/config.html#Config.set_celery_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#selinon.config.Config.set_celery_app" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set celery application that should be used</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>celery_app</strong> &#8211; celery app instance</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="selinon.config.Config.set_config_py">
+<em class="property">classmethod </em><code class="descname">set_config_py</code><span class="sig-paren">(</span><em>config_code</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/selinon/config.html#Config.set_config_py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#selinon.config.Config.set_config_py" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set dispatcher configuration by Python config file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config_code</strong> &#8211; configuration source code</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="selinon.config.Config.set_config_yaml">
+<em class="property">classmethod </em><code class="descname">set_config_yaml</code><span class="sig-paren">(</span><em>nodes_definition_file</em>, <em>flow_definition_files</em>, <em>config_py=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/selinon/config.html#Config.set_config_yaml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#selinon.config.Config.set_config_yaml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set dispatcher configuration by path to YAML configuration files</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nodes_definition_file</strong> &#8211; definition of system nodes - YAML configuration</li>
+<li><strong>flow_definition_files</strong> &#8211; list of flow definition files</li>
+<li><strong>config_py</strong> &#8211; a file that should be used for storing generated config.py</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.storage_mapping">
+<code class="descname">storage_mapping</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.storage_mapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.strategy_function">
+<code class="descname">strategy_function</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.strategy_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.task_mapping">
+<code class="descname">task_mapping</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.task_mapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="selinon.config.Config.task_queues">
+<code class="descname">task_queues</code><em class="property"> = None</em><a class="headerlink" href="#selinon.config.Config.task_queues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="selinon.config.Config.trace_by_func">
+<em class="property">classmethod </em><code class="descname">trace_by_func</code><span class="sig-paren">(</span><em>trace_func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/selinon/config.html#Config.trace_by_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#selinon.config.Config.trace_by_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set tracing function for Dispatcher</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>trace_func</strong> &#8211; a function that should be used to trace dispatcher actions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="selinon.config.Config.trace_by_logging">
+<em class="property">classmethod </em><code class="descname">trace_by_logging</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/selinon/config.html#Config.trace_by_logging"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#selinon.config.Config.trace_by_logging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use Python&#8217;s logging for tracing</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="selinon.html">selinon package</a><ul>
+      <li>Previous: <a href="selinon.storage.sqlStorage.html" title="previous chapter">selinon.storage.sqlStorage module</a></li>
+      <li>Next: <a href="selinon.dispatcher.html" title="next chapter">selinon.dispatcher module</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/selinon.config.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Fridolin Pokorny.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/api/selinon.config.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/fridex/selinon" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

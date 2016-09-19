@@ -1,15 +1,15 @@
 Task Implementation
 ===================
 
-A task is of type CeleriacTask. Constructor of task is transparently called by CeleriacTaskEnvelope, which handles arguments propagation, parent node propagation. Base class CeleriacTask also handles how data should be retrieved from database in case you want to retrieve data from parent tasks.
+A task is of type SelinonTask. Constructor of task is transparently called by SelinonTaskEnvelope, which handles arguments propagation, parent node propagation. Base class SelinonTask also handles how data should be retrieved from database in case you want to retrieve data from parent tasks.
 
 The only thing you need to define is `args` parameter based on which Task computes its results. The return value of your Task is than checked against JSON schema and stored to database if configured so.
 
 ::
 
-  from celeriac import CeleriacTask
+  from selinon import SelinonTask
 
-  class MyTask(CeleriacTask):
+  class MyTask(SelinonTask):
      def execute(self, args):
      pass
 

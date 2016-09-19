@@ -1,7 +1,7 @@
 Storage Implementation
 ======================
 
-Currently, there are available three database adapters, see 'celeriac.storage' module:
+Currently, there are available three database adapters, see 'selinon.storage' module:
 
   * SqlStorage - SQLAlchemy adapter for SQL databases
     Example:
@@ -9,7 +9,7 @@ Currently, there are available three database adapters, see 'celeriac.storage' m
     storages:
       - name: 'MySqlStorage'
         classname: 'SqlStorage'
-        import: 'celeriac.storage'
+        import: 'selinon.storage'
         configuration:
           connection_string: 'postgres://postgres:postgres@postgres:5432/postgres'
           encoding: 'utf-8'
@@ -22,7 +22,7 @@ Currently, there are available three database adapters, see 'celeriac.storage' m
     storages:
       - name: 'MyRedisStorage'
         classname: 'RedisStorage'
-        import: 'celeriac.storage'
+        import: 'selinon.storage'
         configuration:
           host: 'redishost'
           port: 6379
@@ -39,7 +39,7 @@ Currently, there are available three database adapters, see 'celeriac.storage' m
     storages:
       - name: 'MyMongoStorage'
         classname: 'MongoStorage'
-        import: 'celeriac.storage'
+        import: 'selinon.storage'
         configuration:
           db_name: 'database_name'
           collection_name: 'collection_name'
@@ -47,11 +47,11 @@ Currently, there are available three database adapters, see 'celeriac.storage' m
           port: 27017
     ```
     
-You can define your own storage by inheriting from `DataStorage` defined in `celeriac.storage`:
+You can define your own storage by inheriting from `DataStorage` defined in `selinon.storage`:
 
 ::
 
-  from celeriac.storage import DataStorage
+  from selinon.storage import DataStorage
 
   class MyStorage(DataStorage):
       def __init__(self, host, port):
@@ -86,4 +86,4 @@ Each Celery worker is trying to be efficient when it comes to number of connecti
 
 You can simply share connection across multiple `DataStorage` classes in inheritance hierarchy and reuse already defined connections.
 
-If you would like to limit number of connections to database, you have to do it on your own by sharing connection information in parent of type `DataStorage` and implement connection limitation logic in your database adapter. This is not possible on Celeriac level, since database adapters are black box for Celeriac and they can share connection across multiple instances.
+If you would like to limit number of connections to database, you have to do it on your own by sharing connection information in parent of type `DataStorage` and implement connection limitation logic in your database adapter. This is not possible on Selinon level, since database adapters are black box for Selinon and they can share connection across multiple instances.

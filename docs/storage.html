@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Storage Implementation &#8212; Celeriac 0.1.0a1 documentation</title>
+    <title>Storage Implementation &#8212; Selinon 0.1.0a1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Celeriac 0.1.0a1 documentation" href="index.html" />
+    <link rel="top" title="Selinon 0.1.0a1 documentation" href="index.html" />
     <link rel="next" title="Trace Flow Actions" href="trace.html" />
     <link rel="prev" title="Task Implementation" href="tasks.html" />
    
@@ -43,7 +43,7 @@
             
   <div class="section" id="storage-implementation">
 <h1>Storage Implementation<a class="headerlink" href="#storage-implementation" title="Permalink to this headline">¶</a></h1>
-<p>Currently, there are available three database adapters, see &#8216;celeriac.storage&#8217; module:</p>
+<p>Currently, there are available three database adapters, see &#8216;selinon.storage&#8217; module:</p>
 <blockquote>
 <div><ul>
 <li><p class="first">SqlStorage - SQLAlchemy adapter for SQL databases
@@ -54,7 +54,7 @@ storages:</p>
 <div><ul>
 <li><p class="first">name: &#8216;MySqlStorage&#8217;
 classname: &#8216;SqlStorage&#8217;
-import: &#8216;celeriac.storage&#8217;
+import: &#8216;selinon.storage&#8217;
 configuration:</p>
 <blockquote>
 <div><p>connection_string: &#8216;postgres://postgres:postgres&#64;postgres:5432/postgres&#8217;
@@ -74,7 +74,7 @@ storages:</p>
 <div><ul>
 <li><p class="first">name: &#8216;MyRedisStorage&#8217;
 classname: &#8216;RedisStorage&#8217;
-import: &#8216;celeriac.storage&#8217;
+import: &#8216;selinon.storage&#8217;
 configuration:</p>
 <blockquote>
 <div><p>host: &#8216;redishost&#8217;
@@ -98,7 +98,7 @@ storages:</p>
 <div><ul>
 <li><p class="first">name: &#8216;MyMongoStorage&#8217;
 classname: &#8216;MongoStorage&#8217;
-import: &#8216;celeriac.storage&#8217;
+import: &#8216;selinon.storage&#8217;
 configuration:</p>
 <blockquote>
 <div><p>db_name: &#8216;database_name&#8217;
@@ -113,8 +113,8 @@ port: 27017</p>
 </li>
 </ul>
 </div></blockquote>
-<p>You can define your own storage by inheriting from <cite>DataStorage</cite> defined in <cite>celeriac.storage</cite>:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">celeriac.storage</span> <span class="k">import</span> <span class="n">DataStorage</span>
+<p>You can define your own storage by inheriting from <cite>DataStorage</cite> defined in <cite>selinon.storage</cite>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">selinon.storage</span> <span class="k">import</span> <span class="n">DataStorage</span>
 
 <span class="k">class</span> <span class="nc">MyStorage</span><span class="p">(</span><span class="n">DataStorage</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
@@ -146,7 +146,7 @@ port: 27017</p>
 <p>#### Database Connection Pool</p>
 <p>Each Celery worker is trying to be efficient when it comes to number of connections to a database. There is held only one instance of <cite>DataStorage</cite> class per whole worker. This means that your database has to be concurrency-safe if you plan to run your Celery worker with concurrency level bigger than one.</p>
 <p>You can simply share connection across multiple <cite>DataStorage</cite> classes in inheritance hierarchy and reuse already defined connections.</p>
-<p>If you would like to limit number of connections to database, you have to do it on your own by sharing connection information in parent of type <cite>DataStorage</cite> and implement connection limitation logic in your database adapter. This is not possible on Celeriac level, since database adapters are black box for Celeriac and they can share connection across multiple instances.</p>
+<p>If you would like to limit number of connections to database, you have to do it on your own by sharing connection information in parent of type <cite>DataStorage</cite> and implement connection limitation logic in your database adapter. This is not possible on Selinon level, since database adapters are black box for Selinon and they can share connection across multiple instances.</p>
 </div>
 
 
@@ -197,7 +197,7 @@ port: 27017</p>
     </div>
 
     
-    <a href="https://github.com/fridex/celeriac" class="github">
+    <a href="https://github.com/fridex/selinon" class="github">
         <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
     </a>
     

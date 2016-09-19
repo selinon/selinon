@@ -1,0 +1,7 @@
+selinon.storage.sqlStorage module
+=================================
+
+.. automodule:: selinon.storage.sqlStorage
+    :members:
+    :undoc-members:
+    :show-inheritance:

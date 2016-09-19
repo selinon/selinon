@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Task Implementation &#8212; Celeriac 0.1.0a1 documentation</title>
+    <title>Task Implementation &#8212; Selinon 0.1.0a1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Celeriac 0.1.0a1 documentation" href="index.html" />
+    <link rel="top" title="Selinon 0.1.0a1 documentation" href="index.html" />
     <link rel="next" title="Storage Implementation" href="storage.html" />
     <link rel="prev" title="YAML Configuration" href="yaml.conf.html" />
    
@@ -43,11 +43,11 @@
             
   <div class="section" id="task-implementation">
 <h1>Task Implementation<a class="headerlink" href="#task-implementation" title="Permalink to this headline">¶</a></h1>
-<p>A task is of type CeleriacTask. Constructor of task is transparently called by CeleriacTaskEnvelope, which handles arguments propagation, parent node propagation. Base class CeleriacTask also handles how data should be retrieved from database in case you want to retrieve data from parent tasks.</p>
+<p>A task is of type SelinonTask. Constructor of task is transparently called by SelinonTaskEnvelope, which handles arguments propagation, parent node propagation. Base class SelinonTask also handles how data should be retrieved from database in case you want to retrieve data from parent tasks.</p>
 <p>The only thing you need to define is <cite>args</cite> parameter based on which Task computes its results. The return value of your Task is than checked against JSON schema and stored to database if configured so.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">celeriac</span> <span class="k">import</span> <span class="n">CeleriacTask</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">selinon</span> <span class="k">import</span> <span class="n">SelinonTask</span>
 
-<span class="k">class</span> <span class="nc">MyTask</span><span class="p">(</span><span class="n">CeleriacTask</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MyTask</span><span class="p">(</span><span class="n">SelinonTask</span><span class="p">):</span>
    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
    <span class="k">pass</span>
 </pre></div>
@@ -103,7 +103,7 @@
     </div>
 
     
-    <a href="https://github.com/fridex/celeriac" class="github">
+    <a href="https://github.com/fridex/selinon" class="github">
         <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
     </a>
     

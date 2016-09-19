@@ -18,12 +18,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
-from celeriacTestCase import CeleriacTestCase
+from selinonTestCase import SelinonTestCase
 
-from celeriac import SystemState
+from selinon import SystemState
 
 
-class TestNodeFailures(CeleriacTestCase):
+class TestNodeFailures(SelinonTestCase):
     def test_nowait_task(self):
         #
         # flow1:

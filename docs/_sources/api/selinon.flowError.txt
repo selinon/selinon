@@ -1,0 +1,7 @@
+selinon.flowError module
+========================
+
+.. automodule:: selinon.flowError
+    :members:
+    :undoc-members:
+    :show-inheritance:

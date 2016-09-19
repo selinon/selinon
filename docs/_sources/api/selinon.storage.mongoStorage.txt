@@ -1,0 +1,7 @@
+selinon.storage.mongoStorage module
+===================================
+
+.. automodule:: selinon.storage.mongoStorage
+    :members:
+    :undoc-members:
+    :show-inheritance:

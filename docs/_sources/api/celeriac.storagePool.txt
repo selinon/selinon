@@ -1,7 +1,0 @@
-celeriac.storagePool module
-===========================
-
-.. automodule:: celeriac.storagePool
-    :members:
-    :undoc-members:
-    :show-inheritance:

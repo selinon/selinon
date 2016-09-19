@@ -1,7 +1,0 @@
-celeriac.storage.dataStorage module
-===================================
-
-.. automodule:: celeriac.storage.dataStorage
-    :members:
-    :undoc-members:
-    :show-inheritance:

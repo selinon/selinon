@@ -5,8 +5,8 @@ If you want to trace actions that are done within flow, you can define trace a t
 
 ::
 
-  from celeriac import Config
-  from celeriac import Trace
+  from selinon import Config
+  from selinon import Trace
 
   def my_trace_func(event, msg_dict):
       if event == Trace.FLOW_FAILURE:
@@ -15,5 +15,5 @@ If you want to trace actions that are done within flow, you can define trace a t
   Config.trace_by_logging()
   Config.trace_by_func(my_trace_func)
 
-All events that are available to trace are defined in `celeriac/trace.py` file.
+All events that are available to trace are defined in `selinon/trace.py` file.
 

@@ -1,7 +1,0 @@
-celeriac.storage.sqlStorage module
-==================================
-
-.. automodule:: celeriac.storage.sqlStorage
-    :members:
-    :undoc-members:
-    :show-inheritance:

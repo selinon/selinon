@@ -1,4 +1,4 @@
-# Celeriac
+# Selinon
 Python Celery dispatcher worker for scheduling tasks
 
 ## About
@@ -17,19 +17,19 @@ The key of the concept is in having a Dispatcher that schedules (dispatches work
 
 Imagine you defined two flows ("flow1" and "flow2") that consist of five tasks named Task1 - Task5. The flows are illustrated on images bellow.
 
-![flow2](https://raw.github.com/fridex/celeriac/master/examples/figures/flow2.png)
+![flow2](https://raw.github.com/fridex/selinon/master/examples/figures/flow2.png)
 
 In the flow "flow2" we start node Task4 on condition that is always true (we start if dispatcher was requested to start "flow2"). After Task4 finishes, we start (always) node Task5 which ends the flow "flow2". Results of tasks are stored in the database named "Storage2".
 
-![flow1](https://raw.github.com/fridex/celeriac/master/examples/figures/flow1.png)
+![flow1](https://raw.github.com/fridex/selinon/master/examples/figures/flow1.png)
 
 The second flow is slightly more complex. We (always) start with Task1. Task1 will transparently store results in Storage1. After Task1 finishes, Dispatcher checks results of Task1 in Storage1 and if condition ```result['foo'] == 'bar'``` is evaluated as True, Dispatcher starts nodes Task2 and flow2. After both Task2 and flow2 finish, Dispatcher starts Task3. If the condition ```result['foo'] == bar``` is met, Task1 is started recursively again. Results of all tasks are stored in database named "Storage1" except for results computed in subflow "flow2", where "Storage2" is used.
 
-A YAML configuration file is available in [examples/example.yml](examples/example.yml). Refer to [Parsley](https://github.com/fridex/Parsley) for more information on how to define and use YAML configuration files or plot flow graphs.
+A YAML configuration file is available in [examples/example.yml](examples/example.yml). Refer to [Selinonlib](https://github.com/fridex/Selinonlib) for more information on how to define and use YAML configuration files or plot flow graphs.
 
 ### Conditions
 
-Conditions are made of predicates that can be nested as desired using logical operators - `and`, `or` and `not`. See [Parsley](https://github.com/fridex/Parsley) for more info.
+Conditions are made of predicates that can be nested as desired using logical operators - `and`, `or` and `not`. See [Selinonlib](https://github.com/fridex/Selinonlib) for more info.
 
 ### Starting Nodes
 
@@ -51,7 +51,7 @@ Results of tasks are stored in database as you define in your configuration file
 
 ### How to configure Dispatcher?
 
-See Configuration section and [Parsley](https://www.github.com/fridex/Parsley).
+See Configuration section and [Selinonlib](https://www.github.com/fridex/Selinonlib).
 
 ### Dispatcher does not work properly or hangs in an infinite loop.
 
@@ -59,4 +59,4 @@ Check your result backend configuration in Celery. Currently, there is supported
 
 ### Can I see how does it work?
 
-See [Celeriac-demo](https://github.com/fridex/Celeriac-demo).
+See [Selinon-demo](https://github.com/fridex/Selinon-demo).

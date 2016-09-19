@@ -1,7 +1,0 @@
-celeriac.celeriacTaskEnvelope module
-====================================
-
-.. automodule:: celeriac.celeriacTaskEnvelope
-    :members:
-    :undoc-members:
-    :show-inheritance:

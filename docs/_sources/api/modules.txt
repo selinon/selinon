@@ -1,7 +1,7 @@
-celeriac
-========
+selinon
+=======
 
 .. toctree::
    :maxdepth: 4
 
-   celeriac
+   selinon

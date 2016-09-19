@@ -1,7 +1,0 @@
-celeriac.fatalTaskError module
-==============================
-
-.. automodule:: celeriac.fatalTaskError
-    :members:
-    :undoc-members:
-    :show-inheritance:

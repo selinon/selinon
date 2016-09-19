@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>YAML Configuration &#8212; Celeriac 0.1.0a1 documentation</title>
+    <title>YAML Configuration &#8212; Selinon 0.1.0a1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,9 +23,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Celeriac 0.1.0a1 documentation" href="index.html" />
-    <link rel="next" title="&lt;no title&gt;" href="tasks.html" />
-    <link rel="prev" title="&lt;no title&gt;" href="storage.html" />
+    <link rel="top" title="Selinon 0.1.0a1 documentation" href="index.html" />
+    <link rel="next" title="Task Implementation" href="tasks.html" />
+    <link rel="prev" title="A Quick Start" href="start.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -43,7 +43,7 @@
             
   <div class="section" id="yaml-configuration">
 <h1>YAML Configuration<a class="headerlink" href="#yaml-configuration" title="Permalink to this headline">¶</a></h1>
-<p>The only thing you have to provide is a configuration file that describes how should be your flow organized. A flow is defined by nodes that can be either tasks or another flows (subflows). Once you create a YAML configuration file, this file is parsed and checked using Parsley tool (you can even visualize your flows based on configuration). Parsley automatically generates Python code for Dispatcher to let Dispatcher know what to do when.</p>
+<p>The only thing you have to provide is a configuration file that describes how should be your flow organized. A flow is defined by nodes that can be either tasks or another flows (subflows). Once you create a YAML configuration file, this file is parsed and checked using Selinonlib tool (you can even visualize your flows based on configuration). Selinonlib automatically generates Python code for Dispatcher to let Dispatcher know what to do when.</p>
 <p>Now let&#8217;s a look at YAML configuration file structure. At the top level, there are listed following keys:
 <a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>yaml
 &#8212;</p>
@@ -192,7 +192,7 @@ Storage name that should be used for task results; see Storages section.</p>
 <dt>storages:</dt>
 <dd><ul class="first last">
 <li><p class="first">name: &#8220;Storage1&#8221;
-import: &#8220;celeriac.storage&#8221;
+import: &#8220;selinon.storage&#8221;
 classname: &#8220;SqlStorage&#8221;
 configuration:</p>
 <blockquote>
@@ -229,9 +229,9 @@ Module that holds storage class definition.</p>
 <p>###### <cite>classname</cite>
 A name of a database storage adapter class in <cite>import</cite> module. The class from example is imported as:
 <code class="docutils literal"><span class="pre">`python</span>
-<span class="pre">from</span> <span class="pre">celeriac.storage</span> <span class="pre">import</span> <span class="pre">SqlStorage</span>
+<span class="pre">from</span> <span class="pre">selinon.storage</span> <span class="pre">import</span> <span class="pre">SqlStorage</span>
 <span class="pre">#</span> <span class="pre">if</span> <span class="pre">classname</span> <span class="pre">is</span> <span class="pre">omitted</span>
-<span class="pre">#from</span> <span class="pre">celeriac.storage</span> <span class="pre">improt</span> <span class="pre">Storage1</span>
+<span class="pre">#from</span> <span class="pre">selinon.storage</span> <span class="pre">improt</span> <span class="pre">Storage1</span>
 <span class="pre">`</span></code></p>
 <blockquote>
 <div><ul class="simple">
@@ -433,7 +433,7 @@ A list of failures that can occur in the system and their fallbacks. See Failure
 </div></blockquote>
 <p>Default: None</p>
 <p>##### Conditions and Predicates</p>
-<p>You can start a node based on particular conditions that needs to be met. These conditions can be either external (e.g. availability of a remote server) or flow specific (e.g. results of tasks, arguments that are passed to flow, etc.). A list of all predicates can be found in Parsley tool in <cite>parsley.predicates</cite> module, which is also the default module to be used for predicates.</p>
+<p>You can start a node based on particular conditions that needs to be met. These conditions can be either external (e.g. availability of a remote server) or flow specific (e.g. results of tasks, arguments that are passed to flow, etc.). A list of all predicates can be found in Selinonlib tool in <cite>selinonlib.predicates</cite> module, which is also the default module to be used for predicates.</p>
 <p>If you would like to use your own predicates, just state <cite>predicate_module</cite> in your YAML configuration file on top level.</p>
 <p>###### <cite>predicate_module</cite>
 Use a custom predicate module.</p>
@@ -444,7 +444,7 @@ Use a custom predicate module.</p>
 <li>Required: False</li>
 </ul>
 </div></blockquote>
-<p>Default: &#8216;parsley.predicates&#8217;</p>
+<p>Default: &#8216;selinonlib.predicates&#8217;</p>
 <p>All predicates tend to be safe - they do not raise any exception. This would cause fatal error to flow. Instead they return either <cite>True</cite> or <cite>False</cite>. Nothing in-between. That means that if desired condition cannot be satisfied (e.g. requested key in result is not present), <cite>False</cite> is returned.</p>
 <p>More complex boolean conditions can be created using build-in support for boolean operators <cite>and</cite>, <cite>or</cite> and <cite>not</cite>. Operators <cite>and</cite> and <cite>or</cite> are n-ary boolean operators (they accept a list of predicates that need to be evaluated, short circuit evaluation is applied). Logical operator <cite>not</cite> is unary.</p>
 <p>A condition can look like the following example:</p>
@@ -494,7 +494,7 @@ True if condition is evaluated on multiple dependent nodes and predicate expects
 If there is only dependency on a single node stated in <cite>from</cite>, node is automatically computed.</dd>
 </dl>
 <p>###### <cite>args</cite>
-Arguments to predicate that should be passed. These arguments are dependent on used predicate - see parsley.predicates for list of all predicates available.</p>
+Arguments to predicate that should be passed. These arguments are dependent on used predicate - see selinonlib.predicates for list of all predicates available.</p>
 <p>Predicates were designed to use &#8220;listed keys&#8221; as shown in the example - if a list of keys is provided, these keys are deferred as one would intuitively expect. For example the condition listed above will be roughly translated (without exception checks):
 <code class="docutils literal"><span class="pre">`python</span>
 <span class="pre">result['foo']['bar']</span> <span class="pre">==</span> <span class="pre">'baz'</span>
@@ -581,8 +581,8 @@ Fallback that should be applied on failure.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="storage.html" title="previous chapter">&lt;no title&gt;</a></li>
-      <li>Next: <a href="tasks.html" title="next chapter">&lt;no title&gt;</a></li>
+      <li>Previous: <a href="start.html" title="previous chapter">A Quick Start</a></li>
+      <li>Next: <a href="tasks.html" title="next chapter">Task Implementation</a></li>
   </ul></li>
 </ul>
 </div>
@@ -620,7 +620,7 @@ Fallback that should be applied on failure.</p>
     </div>
 
     
-    <a href="https://github.com/fridex/celeriac" class="github">
+    <a href="https://github.com/fridex/selinon" class="github">
         <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
     </a>
     

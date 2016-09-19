@@ -1,7 +1,7 @@
 YAML Configuration
 ==================
 
-The only thing you have to provide is a configuration file that describes how should be your flow organized. A flow is defined by nodes that can be either tasks or another flows (subflows). Once you create a YAML configuration file, this file is parsed and checked using Parsley tool (you can even visualize your flows based on configuration). Parsley automatically generates Python code for Dispatcher to let Dispatcher know what to do when.
+The only thing you have to provide is a configuration file that describes how should be your flow organized. A flow is defined by nodes that can be either tasks or another flows (subflows). Once you create a YAML configuration file, this file is parsed and checked using Selinonlib tool (you can even visualize your flows based on configuration). Selinonlib automatically generates Python code for Dispatcher to let Dispatcher know what to do when.
 
 
 Now let's a look at YAML configuration file structure. At the top level, there are listed following keys:
@@ -133,7 +133,7 @@ Here is an example of storage configuration:
 ```yaml
   storages:
     - name: "Storage1"
-      import: "celeriac.storage"
+      import: "selinon.storage"
       classname: "SqlStorage"
       configuration:
         connection_string: 'postgresql://postgres:postgres@localhost:5432/mydatabase'
@@ -163,9 +163,9 @@ Module that holds storage class definition.
 ###### `classname`
 A name of a database storage adapter class in `import` module. The class from example is imported as:
 ```python
-from celeriac.storage import SqlStorage
+from selinon.storage import SqlStorage
 # if classname is omitted
-#from celeriac.storage improt Storage1
+#from selinon.storage improt Storage1
 ```
 
  * Possible types:
@@ -324,7 +324,7 @@ Default: None
 
 ##### Conditions and Predicates
 
-You can start a node based on particular conditions that needs to be met. These conditions can be either external (e.g. availability of a remote server) or flow specific (e.g. results of tasks, arguments that are passed to flow, etc.). A list of all predicates can be found in Parsley tool in `parsley.predicates` module, which is also the default module to be used for predicates.
+You can start a node based on particular conditions that needs to be met. These conditions can be either external (e.g. availability of a remote server) or flow specific (e.g. results of tasks, arguments that are passed to flow, etc.). A list of all predicates can be found in Selinonlib tool in `selinonlib.predicates` module, which is also the default module to be used for predicates.
 
 If you would like to use your own predicates, just state `predicate_module` in your YAML configuration file on top level.
 
@@ -336,7 +336,7 @@ Use a custom predicate module.
   
  * Required: False
   
-Default: 'parsley.predicates'
+Default: 'selinonlib.predicates'
 
 All predicates tend to be safe - they do not raise any exception. This would cause fatal error to flow. Instead they return either `True` or `False`. Nothing in-between. That means that if desired condition cannot be satisfied (e.g. requested key in result is not present), `False` is returned.
 
@@ -378,7 +378,7 @@ Default:
   If there is only dependency on a single node stated in `from`, node is automatically computed.
 
 ###### `args`
-Arguments to predicate that should be passed. These arguments are dependent on used predicate - see parsley.predicates for list of all predicates available.
+Arguments to predicate that should be passed. These arguments are dependent on used predicate - see selinonlib.predicates for list of all predicates available.
 
 Predicates were designed to use "listed keys" as shown in the example - if a list of keys is provided, these keys are deferred as one would intuitively expect. For example the condition listed above will be roughly translated (without exception checks):
 ```python

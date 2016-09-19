@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Trace Flow Actions &#8212; Celeriac 0.1.0a1 documentation</title>
+    <title>Trace Flow Actions &#8212; Selinon 0.1.0a1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Celeriac 0.1.0a1 documentation" href="index.html" />
+    <link rel="top" title="Selinon 0.1.0a1 documentation" href="index.html" />
     <link rel="next" title="Useful Flow Patterns" href="patterns.html" />
     <link rel="prev" title="Storage Implementation" href="storage.html" />
    
@@ -44,8 +44,8 @@
   <div class="section" id="trace-flow-actions">
 <h1>Trace Flow Actions<a class="headerlink" href="#trace-flow-actions" title="Permalink to this headline">¶</a></h1>
 <p>If you want to trace actions that are done within flow, you can define trace a trace function or use already available logging tracing, that uses Python&#8217;s <cite>logging</cite>. Here is an example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">celeriac</span> <span class="k">import</span> <span class="n">Config</span>
-<span class="kn">from</span> <span class="nn">celeriac</span> <span class="k">import</span> <span class="n">Trace</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">selinon</span> <span class="k">import</span> <span class="n">Config</span>
+<span class="kn">from</span> <span class="nn">selinon</span> <span class="k">import</span> <span class="n">Trace</span>
 
 <span class="k">def</span> <span class="nf">my_trace_func</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">msg_dict</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">FLOW_FAILURE</span><span class="p">:</span>
@@ -55,7 +55,7 @@
 <span class="n">Config</span><span class="o">.</span><span class="n">trace_by_func</span><span class="p">(</span><span class="n">my_trace_func</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>All events that are available to trace are defined in <cite>celeriac/trace.py</cite> file.</p>
+<p>All events that are available to trace are defined in <cite>selinon/trace.py</cite> file.</p>
 </div>
 
 
@@ -106,7 +106,7 @@
     </div>
 
     
-    <a href="https://github.com/fridex/celeriac" class="github">
+    <a href="https://github.com/fridex/selinon" class="github">
         <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
     </a>
     

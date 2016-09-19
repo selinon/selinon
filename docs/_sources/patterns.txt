@@ -11,7 +11,7 @@ Consider following flow definition (tasks definition omitted, but all Task2 and 
 ```
 ```
 
-A visualization of such flow using Parsley tool would be:
+A visualization of such flow using Selinonlib tool would be:
 
     Task1
     

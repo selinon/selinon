@@ -1,7 +1,0 @@
-celeriac.systemState module
-===========================
-
-.. automodule:: celeriac.systemState
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -22,9 +22,9 @@
 class Task(object):
     def __init__(self, task_name=None, flow_name=None, parent=None, node_args=None, finished=None,
                  retried_count=None):
-        # TODO: We could introduce a new CeleriacTask and remove this from test/celery since CeleriacTask is
+        # TODO: We could introduce a new SelinonTask and remove this from test/celery since SelinonTask is
         # not Celery.Task anymore
-        # In case of instantiating CeleriacTaskEnvelope or Dispatcher, we are not passing any arguments
+        # In case of instantiating SelinonTaskEnvelope or Dispatcher, we are not passing any arguments
         self._task_name = task_name
         self._flow_name = flow_name
         self._parent = parent
@@ -70,7 +70,7 @@ class Task(object):
         self._queue = queue
 
     def apply_async(self, kwargs, queue):
-        # Ensure that CeleriacTaskEnvelope kept parameters consistent
+        # Ensure that SelinonTaskEnvelope kept parameters consistent
         assert self._task_name == kwargs['task_name']
         assert self._flow_name == kwargs['flow_name']
         assert self._parent == kwargs['parent']

@@ -1,7 +1,0 @@
-celeriac.version module
-=======================
-
-.. automodule:: celeriac.version
-    :members:
-    :undoc-members:
-    :show-inheritance:
