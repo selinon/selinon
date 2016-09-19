@@ -11,4 +11,10 @@ Imagine you have a distributed task queue you want to run. [Celery](http://www.c
 
 See [Documentation](https://fridex.github.io/selinon) for examples, documentation and more info about project.
 
+## Installation
+
+```
+$ pip3 install selinon
+```
+
 
