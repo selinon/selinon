@@ -304,8 +304,14 @@ class SystemState(object):
                 if node_name not in finished_dict:
                     finished_dict[node_name] = {}
                 for node_id in node_val:
-                    raw_result = str(AsyncResult(node_id).result)
-                    child_flow_info = json.loads(raw_result)
+                    result = AsyncResult(node_id).result
+
+                    if not isinstance(result, FlowError):
+                        # If we had some exception that was caused not by error in flow (e.g. bug in dispatcher, failed
+                        # to connect to db, ...) we propagate it
+                        raise result
+
+                    child_flow_info = json.loads(str(result))
                     self._extend_parent_finished(parent_dict[node_name], finished_dict[node_name], child_flow_info)
             else:
                 parent_dict[node_name] = node_val
