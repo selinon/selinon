@@ -128,27 +128,49 @@ class Trace(object):
     _trace_func = _default_trace_func
     _logger = None
 
-    DISPATCHER_WAKEUP = 0
-    FLOW_START = 1
-    TASK_SCHEDULE = 2
-    TASK_START = 3
-    SUBFLOW_SCHEDULE = 4
-    TASK_END = 5
-    NODE_SUCCESSFUL = 6
-    TASK_DISCARD_RESULT = 7
-    TASK_FAILURE = 8
-    TASK_RETRY = 9
-    FLOW_FAILURE = 10
-    DISPATCHER_FAILURE = 11
-    NODE_FAILURE = 12
-    FALLBACK_START = 13
-    DISPATCHER_RETRY = 14
-    FLOW_END = 15
-    STORAGE_CONNECT = 16
-    # TODO: currently unused
-    STORAGE_DISCONNECT = 17
-    STORAGE_RETRIEVE = 18
-    STORAGE_STORE = 19
+    DISPATCHER_WAKEUP, \
+    FLOW_START, \
+    TASK_SCHEDULE, \
+    TASK_START, \
+    SUBFLOW_SCHEDULE, \
+    TASK_END, \
+    NODE_SUCCESSFUL, \
+    TASK_DISCARD_RESULT, \
+    TASK_FAILURE, \
+    TASK_RETRY, \
+    FLOW_FAILURE, \
+    DISPATCHER_FAILURE, \
+    NODE_FAILURE, \
+    FALLBACK_START, \
+    DISPATCHER_RETRY, \
+    FLOW_END, \
+    STORAGE_CONNECT, \
+    STORAGE_DISCONNECT, \
+    STORAGE_RETRIEVE, \
+    STORAGE_STORE = range(20)
+
+    _event_strings = [
+        'DISPATCHER_WAKEUP',
+        'FLOW_START',
+        'TASK_SCHEDULE',
+        'TASK_START',
+        'SUBFLOW_SCHEDULE',
+        'TASK_END',
+        'NODE_SUCCESSFUL',
+        'TASK_DISCARD_RESULT',
+        'TASK_FAILURE',
+        'TASK_RETRY',
+        'FLOW_FAILURE',
+        'DISPATCHER_FAILURE',
+        'NODE_FAILURE',
+        'FALLBACK_START',
+        'DISPATCHER_RETRY',
+        'FLOW_END',
+        'STORAGE_CONNECT',
+        'STORAGE_DISCONNECT',
+        'STORAGE_RETRIEVE',
+        'STORAGE_STORE'
+    ]
 
     def __init__(self):
         raise NotImplementedError()
@@ -194,56 +216,29 @@ class Trace(object):
         """
         cls._trace_func(event, msg_dict)
 
-    @staticmethod
-    def logging_trace_func(event, msg_dict):
+    @classmethod
+    def event2str(cls, event):
+        """
+        Translate event to it's string representation
+
+        :param event: event
+        :return: string representation of event
+        """
+        # We could make a hack here in order to have O(1), but let's keep it this way
+        return cls._event_strings[event]
+
+    @classmethod
+    def logging_trace_func(cls, event, msg_dict):
         """
         Trace to Python's logging facilities
 
         :param event: event that triggered trace point
         :param msg_dict: a dict holding additional trace information for event
         """
-        logger = Trace._logger
+        message = "%s: %s" % (cls.event2str(event), msg_dict)
 
-        if event == Trace.DISPATCHER_WAKEUP:
-            logger.info("Dispatcher woken up: %s" % msg_dict)
-        elif event == Trace.FLOW_START:
-            logger.info("Flow started: %s" % msg_dict)
-        elif event == Trace.TASK_SCHEDULE:
-            logger.info("Scheduled a new task: %s" % msg_dict)
-        elif event == Trace.TASK_START:
-            logger.info("Task has been started: %s" % msg_dict)
-        elif event == Trace.SUBFLOW_SCHEDULE:
-            logger.info("Scheduled a new subflow: %s" % msg_dict)
-        elif event == Trace.TASK_END:
-            logger.info("Task has successfully finished: %s" % msg_dict)
-        elif event == Trace.NODE_SUCCESSFUL:
-            logger.info("Node in flow successfully finished: %s" % msg_dict)
-        elif event == Trace.TASK_DISCARD_RESULT:
-            logger.warning("Result of task has been discarded: %s" % msg_dict)
-        elif event == Trace.TASK_FAILURE:
-            logger.warning("Task has failed: %s" % msg_dict)
-        elif event == Trace.TASK_RETRY:
-            logger.warning("Task will be retried: %s" % msg_dict)
-        elif event == Trace.FLOW_FAILURE:
-            logger.warning("Flow has failed: %s" % msg_dict)
-        elif event == Trace.DISPATCHER_FAILURE:
-            logger.error("Dispatcher failed: %s" % msg_dict)
-        elif event == Trace.NODE_FAILURE:
-            logger.warning("Node has failed: %s" % msg_dict)
-        elif event == Trace.FALLBACK_START:
-            logger.info("Fallback is going to be started started: %s" % msg_dict)
-        elif event == Trace.DISPATCHER_RETRY:
-            logger.info("Dispatcher will be rescheduled: %s" % msg_dict)
-        elif event == Trace.FLOW_END:
-            logger.info("Flow has successfully ended: %s" % msg_dict)
-        elif event == Trace.STORAGE_CONNECT:
-            logger.info("Requested connect to storage: %s" % msg_dict)
-        elif event == Trace.STORAGE_DISCONNECT:
-            logger.info("Requested disconnect from storage: %s" % msg_dict)
-        elif event == Trace.STORAGE_RETRIEVE:
-            logger.info("Retrieving data from storage: %s" % msg_dict)
-        elif event == Trace.STORAGE_STORE:
-            logger.info("Storing data in storage: %s" % msg_dict)
+        if event == Trace.NODE_FAILURE or event == Trace.DISPATCHER_FAILURE:
+            return Trace._logger.warn(message)
         else:
-            logger.info("Unhandled event (%s): %s" % (event, msg_dict))
+            return Trace._logger.info(message)
 
