@@ -69,8 +69,8 @@ List of events that can be traced:
 |                                        |                         |                                    |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize unexpected dispatcher failure| `DISPATCHER_FAILURE`    | flow_name, dispatcher_id, what     |
-| this should not occur (e.g. bug,       |                         |                                    |
-| database connection error, ...)        |                         |                                    |
+| this should not occur (e.g. bug,       |                         | state, node_args, parent, finished |
+| database connection error, ...)        |                         | retry                              |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize a node failure from          | `NODE_FAILURE`          | flow_name, dispatcher_id,          |
 | Dispatcher                             |                         | node_name, node_id, what           |
