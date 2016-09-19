@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>selinon.trace module &#8212; Selinon 0.1.0a1 documentation</title>
+    <title>selinon.trace module &#8212; Selinon 0.1.0rc1 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.1.0a1',
+        VERSION:     '0.1.0rc1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Selinon 0.1.0a1 documentation" href="../index.html" />
+    <link rel="top" title="Selinon 0.1.0rc1 documentation" href="../index.html" />
     <link rel="up" title="selinon package" href="selinon.html" />
     <link rel="next" title="selinon.version module" href="selinon.version.html" />
     <link rel="prev" title="selinon.systemState module" href="selinon.systemState.html" />
@@ -45,6 +45,129 @@
   <div class="section" id="module-selinon.trace">
 <span id="selinon-trace-module"></span><h1>selinon.trace module<a class="headerlink" href="#module-selinon.trace" title="Permalink to this headline">¶</a></h1>
 <p>List of events that can be traced:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="40%" />
+<col width="25%" />
+<col width="36%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Logged event</th>
+<th class="head">Event name</th>
+<th class="head">msg_dict.keys()</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Signalize Dispatcher run by Celery,
+each time a Dispatcher is
+started/retried</td>
+<td><cite>DISPATCHER_WAKEUP</cite></td>
+<td>flow_name, dispatcher_id, args,
+retry, state</td>
+</tr>
+<tr class="row-odd"><td>Signalize a flow start - called when
+starting nodes are run</td>
+<td><cite>FLOW_START</cite></td>
+<td>flow_name, dispatcher_id, args</td>
+</tr>
+<tr class="row-even"><td>Signalize a task scheduling by
+Dispatcher</td>
+<td><cite>TASK_SCHEDULE</cite></td>
+<td>flow_name, task_name, task_id,
+parent, args</td>
+</tr>
+<tr class="row-odd"><td>Signalize task start by Celery</td>
+<td><cite>TASK_START</cite></td>
+<td>flow_name, task_name, task_id,
+parent, args</td>
+</tr>
+<tr class="row-even"><td>Signalize subflow start by Dispatcher</td>
+<td><cite>SUBFLOW_SCHEDULE</cite></td>
+<td>flow_name, dispatcher_id,
+child_flow_name, args, parent
+child_dispatcher_id,</td>
+</tr>
+<tr class="row-odd"><td>Signalize end of task from
+SelinonTaskEnvelope</td>
+<td><cite>TASK_END</cite></td>
+<td>flow_name, task_name, task_id,
+parent, args, storage</td>
+</tr>
+<tr class="row-even"><td>Signalize a node success from
+Dispatcher</td>
+<td><cite>NODE_SUCCESSFUL</cite></td>
+<td>flow_name, dispatcher_id,
+node_name, node_id</td>
+</tr>
+<tr class="row-odd"><td>Signalize that the result of task was
+discarded</td>
+<td><cite>TASK_DISCARD_RESULT</cite></td>
+<td>flow_name, task_name, task_id,
+parent, args, result</td>
+</tr>
+<tr class="row-even"><td>Signalize task failure from
+SelinonTaskEnvelope</td>
+<td><cite>TASK_FAILURE</cite></td>
+<td>flow_name, task_name, task_id,
+parent, args, what, retried_count</td>
+</tr>
+<tr class="row-odd"><td>Signalize task retry</td>
+<td><cite>TASK_RETRY</cite></td>
+<td>flow_name, task_name, task_id,
+parent, args, what, retried_count
+max_retry, retry_countdown</td>
+</tr>
+<tr class="row-even"><td>Signalize when a flow ends because of
+error in nodes without fallback</td>
+<td><cite>FLOW_FAILURE</cite></td>
+<td>flow_name, dispatcher_id, what</td>
+</tr>
+<tr class="row-odd"><td>Signalize unexpected dispatcher failure
+this should not occur (e.g. bug,
+database connection error, ...)</td>
+<td><cite>DISPATCHER_FAILURE</cite></td>
+<td>flow_name, dispatcher_id, what</td>
+</tr>
+<tr class="row-even"><td>Signalize a node failure from
+Dispatcher</td>
+<td><cite>NODE_FAILURE</cite></td>
+<td>flow_name, dispatcher_id,
+node_name, node_id, what</td>
+</tr>
+<tr class="row-odd"><td>Signalize fallback evaluation</td>
+<td><cite>FALLBACK_START</cite></td>
+<td>flow_name, dispatcher_id, nodes,
+fallback</td>
+</tr>
+<tr class="row-even"><td>Signalize Dispatcher retry</td>
+<td><cite>DISPATCHER_RETRY</cite></td>
+<td>flow_name, dispatcher_id, retry,
+state_dict, args</td>
+</tr>
+<tr class="row-odd"><td>Signalize flow end</td>
+<td><cite>FLOW_END</cite></td>
+<td>flow_name, dispatcher_id,
+finished_nodes</td>
+</tr>
+<tr class="row-even"><td>Signal storage connect</td>
+<td><cite>STORAGE_CONNECT</cite></td>
+<td>storage_name</td>
+</tr>
+<tr class="row-odd"><td>Signal storage disconnect</td>
+<td><cite>STORAGE_DISCONNECT</cite></td>
+<td>storage_name</td>
+</tr>
+<tr class="row-even"><td>Signal storage access for reading</td>
+<td><cite>STORAGE_RETRIEVE</cite></td>
+<td>flow_name, task_name, storage</td>
+</tr>
+<tr class="row-odd"><td>Signal storage access for writing</td>
+<td><cite>STORAGE_STORE</cite></td>
+<td>flow_name, task_name, task_id,
+storage, result, record_id</td>
+</tr>
+</tbody>
+</table>
 <dl class="class">
 <dt id="selinon.trace.Trace">
 <em class="property">class </em><code class="descclassname">selinon.trace.</code><code class="descname">Trace</code><a class="reference internal" href="../_modules/selinon/trace.html#Trace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#selinon.trace.Trace" title="Permalink to this definition">¶</a></dt>
@@ -243,7 +366,19 @@
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper"><h3><a href="../index.html">Main Content</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../start.html">A Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../start.html#more-info">More info</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../yaml.conf.html">YAML Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tasks.html">Task Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../storage.html">Storage Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trace.html">Trace Flow Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../patterns.html">Useful Flow Patterns</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="selinon.html">selinon package</a></li>
+</ul>
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>

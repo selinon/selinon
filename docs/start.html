@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>A Quick Start &#8212; Selinon 0.1.0a1 documentation</title>
+    <title>A Quick Start &#8212; Selinon 0.1.0rc1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.0a1',
+        VERSION:     '0.1.0rc1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Selinon 0.1.0a1 documentation" href="index.html" />
-    <link rel="next" title="YAML Configuration" href="yaml.conf.html" />
+    <link rel="top" title="Selinon 0.1.0rc1 documentation" href="index.html" />
+    <link rel="next" title="Frequently Asked Questions (FAQ)" href="faq.html" />
     <link rel="prev" title="Selinon - A Dynamic Task Flow Management on top of Celery" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -43,7 +43,45 @@
             
   <div class="section" id="a-quick-start">
 <h1>A Quick Start<a class="headerlink" href="#a-quick-start" title="Permalink to this headline">¶</a></h1>
-<p>TODO</p>
+<div class="section" id="yaml-configuration">
+<h2>YAML configuration<a class="headerlink" href="#yaml-configuration" title="Permalink to this headline">¶</a></h2>
+<p>In order to use Selinon, you have to implement tasks and define your flow in a YAML confguration file (or split it across multiple YAML configuration files).</p>
+</div>
+<div class="section" id="naming-convention">
+<h2>Naming Convention<a class="headerlink" href="#naming-convention" title="Permalink to this headline">¶</a></h2>
+<p>A system consist of flows. Each flow consist of well defined dependencies on nodes that compute results. A node can be either a task or another flow, so you can make flows as nested as desired. You can make decisions on when to run which nodes based on conditions.</p>
+<p>The key of the concept is in having a Dispatcher that schedules (dispatches work) to connected workers as defined in the flow configuration.</p>
+<p>Imagine you defined two flows (&#8220;flow1&#8221; and &#8220;flow2&#8221;) that consist of five tasks named Task1 - Task5. The flows are illustrated on images bellow.</p>
+<img alt="https://raw.github.com/fridex/selinon/master/examples/figures/flow2.png" class="align-center" src="https://raw.github.com/fridex/selinon/master/examples/figures/flow2.png" />
+<p>In the flow &#8220;flow2&#8221; we start node Task4 on condition that is always true (we start if dispatcher was requested to start &#8220;flow2&#8221;). After Task4 finishes, we start (always) node Task5 which ends the flow &#8220;flow2&#8221;. Results of tasks are stored in the database named &#8220;Storage2&#8221;.</p>
+<img alt="https://raw.github.com/fridex/selinon/master/examples/figures/flow1.png" class="align-center" src="https://raw.github.com/fridex/selinon/master/examples/figures/flow1.png" />
+<p>The second flow is slightly more complex. We (always) start with Task1. Task1 will transparently store results in Storage1. After Task1 finishes, Dispatcher checks results of Task1 in Storage1 and if condition <code class="docutils literal"><span class="pre">`result['foo']</span> <span class="pre">==</span> <span class="pre">'bar'`</span></code> is evaluated as True, Dispatcher starts nodes Task2 and flow2. After both Task2 and flow2 finish, Dispatcher starts Task3. If the condition <code class="docutils literal"><span class="pre">`result['foo']</span> <span class="pre">==</span> <span class="pre">bar`</span></code> is met, Task1 is started recursively again. Results of all tasks are stored in database named &#8220;Storage1&#8221; except for results computed in subflow &#8220;flow2&#8221;, where &#8220;Storage2&#8221; is used.</p>
+<p>A YAML configuration file is available in <a class="reference external" href="https://github.com/fridex/selinon/tree/master/examples">examples/</a>. Refer to <a class="reference external" href="https://github.com/fridex/Selinonlib">Selinonlib</a> for plotting flow graphs.</p>
+</div>
+<div class="section" id="conditions">
+<h2>Conditions<a class="headerlink" href="#conditions" title="Permalink to this headline">¶</a></h2>
+<p>Conditions are made of predicates that can be nested as desired using logical operators - <cite>and</cite>, <cite>or</cite> and <cite>not</cite>. See default predicates defined in <a class="reference external" href="https://fridex.github.io/selinonlib/api/selinonlib.predicates.html">Selinonlib</a> for more info.</p>
+</div>
+<div class="section" id="starting-nodes">
+<h2>Starting Nodes<a class="headerlink" href="#starting-nodes" title="Permalink to this headline">¶</a></h2>
+<p>You can have a single or multiple starting nodes in your flow. If you define a single starting node, the result of starting node is propagated to other nodes as arguments. If you define more than one starting node, the result is not propagated, however you can explicitly define arguments (these arguments have higher priority in case of single starting node).</p>
+</div>
+<div class="section" id="flows">
+<h2>Flows<a class="headerlink" href="#flows" title="Permalink to this headline">¶</a></h2>
+<p>Flows can be nested as desired. The only limitation is that you cannot inspect results of a flow since a flow is a black box for another flow.</p>
+</div>
+<div class="section" id="node-failures">
+<h2>Node Failures<a class="headerlink" href="#node-failures" title="Permalink to this headline">¶</a></h2>
+<p>You can define fallback tasks that are run if a node fails.</p>
+</div>
+<div class="section" id="results-of-tasks-nodes">
+<h2>Results of Tasks/Nodes<a class="headerlink" href="#results-of-tasks-nodes" title="Permalink to this headline">¶</a></h2>
+<p>Results of tasks are stored in database as you define in your configuration file.</p>
+</div>
+</div>
+<div class="section" id="more-info">
+<h1>More info<a class="headerlink" href="#more-info" title="Permalink to this headline">¶</a></h1>
+<p>More information can be found in other sections of this doc.</p>
 </div>
 
 
@@ -51,12 +89,39 @@
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper"><h3><a href="index.html">Main Content</a></h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">A Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#more-info">More info</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yaml.conf.html">YAML Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Task Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">Storage Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trace.html">Trace Flow Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="patterns.html">Useful Flow Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/selinon.html">selinon package</a></li>
+</ul>
+
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">A Quick Start</a><ul>
+<li><a class="reference internal" href="#yaml-configuration">YAML configuration</a></li>
+<li><a class="reference internal" href="#naming-convention">Naming Convention</a></li>
+<li><a class="reference internal" href="#conditions">Conditions</a></li>
+<li><a class="reference internal" href="#starting-nodes">Starting Nodes</a></li>
+<li><a class="reference internal" href="#flows">Flows</a></li>
+<li><a class="reference internal" href="#node-failures">Node Failures</a></li>
+<li><a class="reference internal" href="#results-of-tasks-nodes">Results of Tasks/Nodes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#more-info">More info</a></li>
+</ul>
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="index.html" title="previous chapter">Selinon - A Dynamic Task Flow Management on top of Celery</a></li>
-      <li>Next: <a href="yaml.conf.html" title="next chapter">YAML Configuration</a></li>
+      <li>Next: <a href="faq.html" title="next chapter">Frequently Asked Questions (FAQ)</a></li>
   </ul></li>
 </ul>
 </div>

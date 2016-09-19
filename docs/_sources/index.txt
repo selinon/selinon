@@ -1,8 +1,8 @@
 Selinon - A Dynamic Task Flow Management on top of Celery
-==========================================================
+=========================================================
 
 What is Selinon and why should I use it?
-#########################################
+########################################
 
 Selinon is a tool that gives you a power to define flows, subflows of tasks that should be executed in `Celery <http://www.celeryproject.org>`_ - a distributed task queue. If you want to define very simple flows, Celery offers you workflow primitives that can be used. Unfortunately these workflow primitives are very limited when it comes to extending your workflow, working with multiple dependencies or scheduling tasks based on particular conditions.
 
@@ -18,8 +18,9 @@ What do I need?
 
 In order to use Selinon, you need:
 
-  * a basic knowledge of Python3 and YAML language
-  * a basic knowledge of Celery and its `configuration <http://docs.celeryproject.org/en/latest/configuration.html>`_
+  * a basic knowledge of Python3 (yes, there is no support for Python2!)
+  * YAML language
+  * a basic knowledge of Celery 4 (older versions are not supported) and its `configuration <http://docs.celeryproject.org/en/latest/configuration.html>`_
   * vegetable appetite :)
 
 How does it work? - a high level overview
@@ -36,6 +37,7 @@ Documentation
    :maxdepth: 1
 
    start
+   faq
    yaml.conf
    tasks
    storage

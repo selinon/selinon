@@ -1,0 +1,57 @@
+---
+    tasks:
+        - name: "Task1"
+          import: "worker.task1"
+          storage: "Storage1"
+          output_schema: "path/to/schema1.json"
+          classname: "Task1"
+          max_retry: 1
+          queue: 'queue_Task1_v0'
+
+        - name: "Task2"
+          import: "worker.task2"
+          storage: "Storage1"
+          output_schema: "path/to/schema2.json"
+          classname: "Task2"
+          max_retry: 1
+          queue: 'queue_Task2_v1'
+
+        - name: "Task3"
+          import: "worker.task3"
+          storage: "Storage1"
+          output_schema: "path/to/schema3.json"
+          classname: "Task1"
+          max_retry: 1
+          # If queue is omitted, Celery's default queue will be used
+          #queue: 'celery'
+
+        - name: "Task4"
+          import: "worker.task4"
+          storage: "Storage2"
+          output_schema: "path/to/schema4.json"
+          classname: "Task4"
+          max_retry: 1
+
+        - name: "Task5"
+          import: "worker.task1"
+          storage: "Storage2"
+          output_schema: "path/to/schema1.json"
+          classname: "Task4"
+          max_retry: 1
+
+
+    flows:
+        - "flow1"
+        - "flow2"
+
+
+    storages:
+        - name: "Storage1"
+          import: "storage.storage1"
+          classname: "Storage1Class"
+          configuration: "put your configuration for Storage1 here"
+
+        - name: "Storage2"
+          import: "storage.storage2"
+          configuration: "put your configuration for Storage2 here"
+

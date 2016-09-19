@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Task Implementation &#8212; Selinon 0.1.0a1 documentation</title>
+    <title>Task Implementation &#8212; Selinon 0.1.0rc1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.0a1',
+        VERSION:     '0.1.0rc1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Selinon 0.1.0a1 documentation" href="index.html" />
+    <link rel="top" title="Selinon 0.1.0rc1 documentation" href="index.html" />
     <link rel="next" title="Storage Implementation" href="storage.html" />
     <link rel="prev" title="YAML Configuration" href="yaml.conf.html" />
    
@@ -43,16 +43,16 @@
             
   <div class="section" id="task-implementation">
 <h1>Task Implementation<a class="headerlink" href="#task-implementation" title="Permalink to this headline">¶</a></h1>
-<p>A task is of type SelinonTask. Constructor of task is transparently called by SelinonTaskEnvelope, which handles arguments propagation, parent node propagation. Base class SelinonTask also handles how data should be retrieved from database in case you want to retrieve data from parent tasks.</p>
-<p>The only thing you need to define is <cite>args</cite> parameter based on which Task computes its results. The return value of your Task is than checked against JSON schema and stored to database if configured so.</p>
+<p>A task is of type <cite>SelinonTask</cite>. Constructor of task is transparently called by SelinonTaskEnvelope, which handles arguments propagation, parent node propagation. Base class SelinonTask also handles how data should be retrieved from database in case you want to retrieve data from parent tasks.</p>
+<p>The only thing you need to define is <cite>node_args</cite> parameter based on which Task computes its results. The return value of your Task is than checked against JSON schema and stored to database if configured so.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">selinon</span> <span class="k">import</span> <span class="n">SelinonTask</span>
 
 <span class="k">class</span> <span class="nc">MyTask</span><span class="p">(</span><span class="n">SelinonTask</span><span class="p">):</span>
-   <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-   <span class="k">pass</span>
+   <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_args</span><span class="p">):</span>
+     <span class="k">pass</span>
 </pre></div>
 </div>
-<p>In order to retrieve data from parent task, one can call <cite>self.parent_result(task_name, task_id)</cite>. Results of parent nodes that are flows are propagated only if <cite>propagate_finished</cite> was set. In that case parent key is a name of flow and consists of dictionary containing task names run that were run as a keys and and list of task ids as value. Any subflow run within flow is hidden and results of tasks are retrieved recursively.</p>
+<p>In order to retrieve data from parent task/flow, one can call <cite>self.parent_task_result()</cite> or <cite>self.parent_flow_result()</cite> (see <a class="reference external" href="https://fridex.github.io/selinon/api/selinon.selinonTask.html">sources</a>). Results of parent nodes that are flows are propagated only if <cite>propagate_finished</cite> was set. In that case parent key is a name of flow and consists of dictionary containing task names run that were run as a keys and and list of task ids as value.</p>
 </div>
 
 
@@ -60,7 +60,19 @@
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper"><h3><a href="index.html">Main Content</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="start.html">A Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html#more-info">More info</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yaml.conf.html">YAML Configuration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Task Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">Storage Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trace.html">Trace Flow Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="patterns.html">Useful Flow Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/selinon.html">selinon package</a></li>
+</ul>
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>

@@ -20,7 +20,7 @@ In order to use Selinon, you need:
 
   * a basic knowledge of Python3 (yes, there is no support for Python2!)
   * YAML language
-  * a basic knowledge of Celery and its `configuration <http://docs.celeryproject.org/en/latest/configuration.html>`_
+  * a basic knowledge of Celery 4 (older versions are not supported) and its `configuration <http://docs.celeryproject.org/en/latest/configuration.html>`_
   * vegetable appetite :)
 
 How does it work? - a high level overview

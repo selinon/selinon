@@ -45,7 +45,7 @@ List of events that can be traced:
 |                                        |                         | child_dispatcher_id,               |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize end of task from             | `TASK_END`              | flow_name, task_name, task_id,     |
-| SelinonTaskEnvelope                   |                         | parent, args, storage              |
+| SelinonTaskEnvelope                    |                         | parent, args, storage              |
 |                                        |                         |                                    |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize a node success from          | `NODE_SUCCESSFUL`       | flow_name, dispatcher_id,          |
@@ -57,7 +57,7 @@ List of events that can be traced:
 |                                        |                         |                                    |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize task failure from            | `TASK_FAILURE`          | flow_name, task_name, task_id,     |
-| SelinonTaskEnvelope                   |                         | parent, args, what, retried_count  |
+| SelinonTaskEnvelope                    |                         | parent, args, what, retried_count  |
 |                                        |                         |                                    |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize task retry                   | `TASK_RETRY`            | flow_name, task_name, task_id,     |

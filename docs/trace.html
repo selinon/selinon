@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Trace Flow Actions &#8212; Selinon 0.1.0a1 documentation</title>
+    <title>Trace Flow Actions &#8212; Selinon 0.1.0rc1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.0a1',
+        VERSION:     '0.1.0rc1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Selinon 0.1.0a1 documentation" href="index.html" />
+    <link rel="top" title="Selinon 0.1.0rc1 documentation" href="index.html" />
     <link rel="next" title="Useful Flow Patterns" href="patterns.html" />
     <link rel="prev" title="Storage Implementation" href="storage.html" />
    
@@ -43,19 +43,15 @@
             
   <div class="section" id="trace-flow-actions">
 <h1>Trace Flow Actions<a class="headerlink" href="#trace-flow-actions" title="Permalink to this headline">¶</a></h1>
-<p>If you want to trace actions that are done within flow, you can define trace a trace function or use already available logging tracing, that uses Python&#8217;s <cite>logging</cite>. Here is an example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">selinon</span> <span class="k">import</span> <span class="n">Config</span>
-<span class="kn">from</span> <span class="nn">selinon</span> <span class="k">import</span> <span class="n">Trace</span>
+<p>If you want to trace actions that are done within flow, you can define trace a trace function or use already available logging tracing, that uses Python&#8217;s <cite>logging</cite>. See <cite>trace</cite> option in <cite>global</cite> section.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">selinon</span> <span class="k">import</span> <span class="n">Trace</span>
 
 <span class="k">def</span> <span class="nf">my_trace_func</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">msg_dict</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="n">Trace</span><span class="o">.</span><span class="n">FLOW_FAILURE</span><span class="p">:</span>
        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;My flow </span><span class="si">%s</span><span class="s2"> failed&quot;</span> <span class="o">%</span> <span class="n">msg_dict</span><span class="p">[</span><span class="s1">&#39;flow_name&#39;</span><span class="p">])</span>
-
-<span class="n">Config</span><span class="o">.</span><span class="n">trace_by_logging</span><span class="p">()</span>
-<span class="n">Config</span><span class="o">.</span><span class="n">trace_by_func</span><span class="p">(</span><span class="n">my_trace_func</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>All events that are available to trace are defined in <cite>selinon/trace.py</cite> file.</p>
+<p>All events that are available to trace are defined in <a class="reference external" href="https://fridex.github.io/selinon/docs/api/selinon.trace.html">trace module</a>.</p>
 </div>
 
 
@@ -63,7 +59,19 @@
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper"><h3><a href="index.html">Main Content</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="start.html">A Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html#more-info">More info</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yaml.conf.html">YAML Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Task Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">Storage Implementation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Trace Flow Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="patterns.html">Useful Flow Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/selinon.html">selinon package</a></li>
+</ul>
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>

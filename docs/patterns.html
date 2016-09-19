@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Useful Flow Patterns &#8212; Selinon 0.1.0a1 documentation</title>
+    <title>Useful Flow Patterns &#8212; Selinon 0.1.0rc1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.0a1',
+        VERSION:     '0.1.0rc1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Selinon 0.1.0a1 documentation" href="index.html" />
+    <link rel="top" title="Selinon 0.1.0rc1 documentation" href="index.html" />
     <link rel="next" title="selinon package" href="api/selinon.html" />
     <link rel="prev" title="Trace Flow Actions" href="trace.html" />
    
@@ -43,74 +43,68 @@
             
   <div class="section" id="useful-flow-patterns">
 <h1>Useful Flow Patterns<a class="headerlink" href="#useful-flow-patterns" title="Permalink to this headline">¶</a></h1>
+<p>TODO: this section needs to be revisited</p>
 <p>This section gives you an overview if flow patterns that can be suitable for your flow.</p>
 <div class="section" id="permutations-of-all-parent-tasks-cyclic-diamond-with-permutations">
 <h2>Permutations of all Parent Tasks - Cyclic Diamond with Permutations<a class="headerlink" href="#permutations-of-all-parent-tasks-cyclic-diamond-with-permutations" title="Permalink to this headline">¶</a></h2>
 <p>Consider following flow definition (tasks definition omitted, but all Task2 and Task3 use storage, Task4 is reading parent results):</p>
-<div class="section" id="id5">
-<h3><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
 <p>A visualization of such flow using Selinonlib tool would be:</p>
-<blockquote>
-<div><blockquote>
-<div>Task1</div></blockquote>
-<p>Task2 Task3</p>
-<blockquote>
-<div>Task4</div></blockquote>
-</div></blockquote>
-<p>As one would expect Task4 is called after Task2 and Task3 are finished. Consider task1_1 is task id of Task1 after it&#8217;s first run, task2_1 is tasks id of Task2 after it&#8217;s first, task2_2 is task id after it&#8217;s second run and so forth. After the second run of Task1, Task2 and Task3 (before Task4 execution) we would have following task ids:</p>
-<p>task1_1
-task1_2
-task2_1
-task2_2
-task3_1
-task3_2
-task4_1</p>
-<p>Now we Task4 is going to be run. In the first run, it was run with parent:
-<code class="docutils literal"><span class="pre">`python</span>
-<span class="pre">{'Task2':</span> <span class="pre">'task2_1',</span> <span class="pre">'Task3':</span> <span class="pre">'task3_1'</span>
-<span class="pre">`</span></code>
-Now Task4 will be run three times with parent
-<code class="docutils literal"><span class="pre">`python</span>
-<span class="pre">{'Task2':</span> <span class="pre">'task2_1',</span> <span class="pre">'Task3':</span> <span class="pre">'task3_2'}</span>
-<span class="pre">`</span></code></p>
-<p><code class="docutils literal"><span class="pre">`python</span>
-<span class="pre">{'Task2':</span> <span class="pre">'task2_2',</span> <span class="pre">'Task3':</span> <span class="pre">'task3_1'}</span>
-<span class="pre">`</span></code></p>
-<p><code class="docutils literal"><span class="pre">`python</span>
-<span class="pre">{'Task2':</span> <span class="pre">'task2_2',</span> <span class="pre">'Task3':</span> <span class="pre">'task3_2'}</span>
-<span class="pre">`</span></code>
-In other words, task Task4 will be run with all permutations of Task2 and Task3. If this is not what you want, take a look at diamond without permutations pattern listed bellow.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span>  <span class="l l-Scalar l-Scalar-Plain">Task1</span>
+
+<span class="l l-Scalar l-Scalar-Plain">Task2 Task3</span>
+
+  <span class="l l-Scalar l-Scalar-Plain">Task4</span>
+</pre></div>
 </div>
+<p>As one would expect Task4 is called after Task2 and Task3 are finished. Consider task1_1 is task id of Task1 after it&#8217;s first run, task2_1 is tasks id of Task2 after it&#8217;s first, task2_2 is task id after it&#8217;s second run and so forth. After the second run of Task1, Task2 and Task3 (before Task4 execution) we would have following task ids:</p>
+<p><cite>task1_1</cite>
+<cite>task1_2</cite>
+<cite>task2_1</cite>
+<cite>task2_2</cite>
+<cite>task3_1</cite>
+<cite>task3_2</cite>
+<cite>task4_1</cite></p>
+<p>Now we Task4 is going to be run. In the first run, it was run with parent:</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span>{&#39;Task2&#39;: &#39;task2_1&#39;, &#39;Task3&#39;: &#39;task3_1&#39;}
+</pre></div>
+</div>
+<p>Now Task4 will be run three times with parent</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span>{&#39;Task2&#39;: &#39;task2_1&#39;, &#39;Task3&#39;: &#39;task3_2&#39;}
+</pre></div>
+</div>
+<div class="highlight-json"><div class="highlight"><pre><span></span>{&#39;Task2&#39;: &#39;task2_2&#39;, &#39;Task3&#39;: &#39;task3_1&#39;}
+</pre></div>
+</div>
+<div class="highlight-json"><div class="highlight"><pre><span></span>{&#39;Task2&#39;: &#39;task2_2&#39;, &#39;Task3&#39;: &#39;task3_2&#39;}
+</pre></div>
+</div>
+<p>In other words, task Task4 will be run with all permutations of Task2 and Task3. If this is not what you want, take a look at diamond without permutations pattern listed bellow.</p>
 </div>
 <div class="section" id="cyclic-diamond-without-permutations">
 <h2>Cyclic Diamond without Permutations<a class="headerlink" href="#cyclic-diamond-without-permutations" title="Permalink to this headline">¶</a></h2>
-<p>If you would like to run Task4 with parent:
-<code class="docutils literal"><span class="pre">`python</span>
-<span class="pre">{'Task2':</span> <span class="pre">'task2_1',</span> <span class="pre">'Task3':</span> <span class="pre">'task3_1'}</span>
-<span class="pre">`</span></code></p>
-<p><code class="docutils literal"><span class="pre">`python</span>
-<span class="pre">{'Task2':</span> <span class="pre">'task2_2',</span> <span class="pre">'Task3':</span> <span class="pre">'task3_2'}</span>
-<span class="pre">`</span></code>
-you have to run Task2 and Task3 in a separate flow that is marked with <cite>propagate_finished</cite> (and <cite>propagate_node_args</cite> if needed).</p>
+<p>If you would like to run Task4 with parent:</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span>{&#39;Task2&#39;: &#39;task2_1&#39;, &#39;Task3&#39;: &#39;task3_1&#39;}
+</pre></div>
+</div>
+<div class="highlight-json"><div class="highlight"><pre><span></span>{&#39;Task2&#39;: &#39;task2_2&#39;, &#39;Task3&#39;: &#39;task3_2&#39;}
+</pre></div>
+</div>
+<p>you have to run Task2 and Task3 in a separate flow that is marked with <cite>propagate_finished</cite> (and <cite>propagate_node_args</cite> if needed).</p>
 </div>
 <div class="section" id="task-aggregator">
 <h2>Task Aggregator<a class="headerlink" href="#task-aggregator" title="Permalink to this headline">¶</a></h2>
 <p>A task&#8217;s parent is a dictionary a task id under task name key of parent and a dictionary of finished nodes if parent is a flow. An example of parent dictionary is:</p>
-<p><a href="#id6"><span class="problematic" id="id7">``</span></a><a href="#id8"><span class="problematic" id="id9">`</span></a>python
-{</p>
-<blockquote>
-<div><p>&#8216;Task1&#8217;: &#8216;task1&#8217;
-...
-&#8216;flow1&#8217;: {</p>
-<blockquote>
-<div>&#8216;Task2&#8217;: [&#8216;task2_1&#8217;, &#8216;task2_2&#8217;]
-...</div></blockquote>
-<p>}</p>
-</div></blockquote>
-<div class="section" id="id10">
-<h3>}<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
-<p>If you would like to aggregate results of all tasks of a type in another task (e.g. if they are computed recursively), just run task in a separate flow. After a flow finishes, you will get list of task ids under <cite>parent[&#8216;flow&#8217;][&#8216;Task1&#8217;]</cite>.</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span>{
+  &#39;Task1&#39;: &#39;task1&#39;
+  ...
+  &#39;flow1&#39;: {
+    &#39;Task2&#39;: [&#39;task2_1&#39;, &#39;task2_2&#39;]
+    ...
+  }
+}
+</pre></div>
 </div>
+<p>If you would like to aggregate results of all tasks of a type in another task (e.g. if they are computed recursively), just run task in a separate flow. After a flow finishes, you will get list of task ids under <cite>parent[&#8216;flow&#8217;][&#8216;Task1&#8217;]</cite>.</p>
 </div>
 <div class="section" id="flow-failures-versus-task-failures">
 <h2>Flow Failures versus Task Failures<a class="headerlink" href="#flow-failures-versus-task-failures" title="Permalink to this headline">¶</a></h2>
@@ -124,19 +118,25 @@ you have to run Task2 and Task3 in a separate flow that is marked with <cite>pro
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
+        <div class="sphinxsidebarwrapper"><h3><a href="index.html">Main Content</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="start.html">A Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html#more-info">More info</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yaml.conf.html">YAML Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Task Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">Storage Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trace.html">Trace Flow Actions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Useful Flow Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/selinon.html">selinon package</a></li>
+</ul>
+
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Useful Flow Patterns</a><ul>
-<li><a class="reference internal" href="#permutations-of-all-parent-tasks-cyclic-diamond-with-permutations">Permutations of all Parent Tasks - Cyclic Diamond with Permutations</a><ul>
-<li><a class="reference internal" href="#id5">```</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#permutations-of-all-parent-tasks-cyclic-diamond-with-permutations">Permutations of all Parent Tasks - Cyclic Diamond with Permutations</a></li>
 <li><a class="reference internal" href="#cyclic-diamond-without-permutations">Cyclic Diamond without Permutations</a></li>
-<li><a class="reference internal" href="#task-aggregator">Task Aggregator</a><ul>
-<li><a class="reference internal" href="#id10">}</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#task-aggregator">Task Aggregator</a></li>
 <li><a class="reference internal" href="#flow-failures-versus-task-failures">Flow Failures versus Task Failures</a></li>
 </ul>
 </li>

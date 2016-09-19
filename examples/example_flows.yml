@@ -1,0 +1,48 @@
+---
+    flow-definitions:
+        - name: "flow1"
+          edges:
+              - from:
+                to:
+                  - "Task1"
+
+              - from:
+                  - "Task1"
+                to:
+                  - "Task2"
+                  - "flow2"
+                condition:
+                    name: "fieldEqual"
+                    node: "Task1"
+                    args:
+                        key: 'foo'
+                        value: 'bar'
+
+              - from:
+                  - "Task2"
+                  - "flow2"
+                to:
+                  - "Task3"
+
+              - from:
+                  - "Task3"
+                to:
+                  - "Task1"
+                condition:
+                    name: "fieldEqual"
+                    node: "Task3"
+                    args:
+                        key: 'foo'
+                        value: 'bar'
+
+
+        - name: "flow2"
+          edges:
+              - from:
+                to:
+                  - "Task4"
+
+              - from:
+                  - "Task4"
+                to:
+                  - "Task5"

@@ -1,52 +1,55 @@
 Storage Implementation
 ======================
 
-Currently, there are available three database adapters, see 'selinon.storage' module:
+Currently, there are available three database adapters, see 'selinon.storage' module. In order to use these storages, you have to manually install database adapters as they are not explicitly included by Pypi.
 
-  * SqlStorage - SQLAlchemy adapter for SQL databases
+  * `SqlStorage` - SQLAlchemy adapter for SQL databases
     Example:
-    ```yaml
-    storages:
-      - name: 'MySqlStorage'
-        classname: 'SqlStorage'
-        import: 'selinon.storage'
-        configuration:
-          connection_string: 'postgres://postgres:postgres@postgres:5432/postgres'
-          encoding: 'utf-8'
-          echo: false
-    ```
-    
-  * RedisStorage - Redis database adapter
+
+    .. code-block:: yaml
+
+      storages:
+        - name: 'MySqlStorage'
+          classname: 'SqlStorage'
+          import: 'selinon.storage'
+          configuration:
+            connection_string: 'postgres://postgres:postgres@postgres:5432/postgres'
+            encoding: 'utf-8'
+            echo: false
+
+  * `RedisStorage` - Redis database adapter
     Example:
-    ```yaml
-    storages:
-      - name: 'MyRedisStorage'
-        classname: 'RedisStorage'
-        import: 'selinon.storage'
-        configuration:
-          host: 'redishost'
-          port: 6379
-          db: 0
-          password: 'secretpassword'
-          charset: 'utf-8'
-          host: 'mongohost'
-          port: 27017
-    ```
-    
-  * MongoStorage - MongoDB database adapter
+
+    .. code-block:: yaml
+
+      storages:
+        - name: 'MyRedisStorage'
+          classname: 'RedisStorage'
+          import: 'selinon.storage'
+          configuration:
+            host: 'redishost'
+            port: 6379
+            db: 0
+            password: 'secretpassword'
+            charset: 'utf-8'
+            host: 'mongohost'
+            port: 27017
+
+  * `MongoStorage` - MongoDB database adapter
     Example:
-    ```yaml
-    storages:
-      - name: 'MyMongoStorage'
-        classname: 'MongoStorage'
-        import: 'selinon.storage'
-        configuration:
-          db_name: 'database_name'
-          collection_name: 'collection_name'
-          host: 'mongohost'
-          port: 27017
-    ```
-    
+
+    .. code-block:: yaml
+
+      storages:
+        - name: 'MyMongoStorage'
+          classname: 'MongoStorage'
+          import: 'selinon.storage'
+          configuration:
+            db_name: 'database_name'
+            collection_name: 'collection_name'
+            host: 'mongohost'
+            port: 27017
+
 You can define your own storage by inheriting from `DataStorage` defined in `selinon.storage`:
 
 ::
@@ -80,7 +83,8 @@ You can define your own storage by inheriting from `DataStorage` defined in `sel
 
 You can also reuse current implementation of a storage in order to  define your custom `retrieve()` and `store()` methods based on your requirements.
 
-#### Database Connection Pool
+Database Connection Pool
+########################
 
 Each Celery worker is trying to be efficient when it comes to number of connections to a database. There is held only one instance of `DataStorage` class per whole worker. This means that your database has to be concurrency-safe if you plan to run your Celery worker with concurrency level bigger than one.
 

@@ -66,29 +66,23 @@
 <div class="section" id="how-can-i-access-nested-keys-in-a-dict">
 <h2>How can I access nested keys in a dict<a class="headerlink" href="#how-can-i-access-nested-keys-in-a-dict" title="Permalink to this headline">¶</a></h2>
 <p>What you want is (in Python3):</p>
-<p><code class="docutils literal"><span class="pre">`python</span>
-<span class="pre">message['foo']['bar']</span> <span class="pre">==</span> <span class="pre">&quot;baz&quot;</span>
-<span class="pre">`</span></code></p>
-<p>Predicates were designed to deal with this - just provide list of keys, where position in a list describes key position:
-<a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>yaml
-condition:</p>
-<blockquote>
-<div><p>name: &#8220;fieldEqual&#8221;
-args:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>key:</dt>
-<dd><ul class="first last simple">
-<li>&#8220;foo&#8221;</li>
-<li>&#8220;bar&#8221;</li>
-</ul>
-</dd>
-</dl>
-<p>value: &#8220;baz&#8221;</p>
-</div></blockquote>
-</div></blockquote>
-<p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
-<p>If this is not what you want, you can still use your own predicates module.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">message</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">][</span><span class="s1">&#39;bar&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;baz&quot;</span>
+</pre></div>
+</div>
+<p>Predicates were designed to deal with this - just provide list of keys, where position in a list describes key position:</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">condition</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="s">&quot;fieldEqual&quot;</span>
+    <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">key</span><span class="p p-Indicator">:</span>
+            <span class="p p-Indicator">-</span> <span class="s">&quot;foo&quot;</span>
+            <span class="p p-Indicator">-</span> <span class="s">&quot;bar&quot;</span>
+        <span class="l l-Scalar l-Scalar-Plain">value</span><span class="p p-Indicator">:</span> <span class="s">&quot;baz&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="i-need-a-custom-predicate">
+<h2>I need a custom predicate<a class="headerlink" href="#i-need-a-custom-predicate" title="Permalink to this headline">¶</a></h2>
+<p>If selinonlib predicates are not suitable for you or you miss a specific predicate, you can define your own module in <cite>global</cite> configuration.</p>
 </div>
 <div class="section" id="what-exceptions-can-predicates-raise">
 <h2>What exceptions can predicates raise?<a class="headerlink" href="#what-exceptions-can-predicates-raise" title="Permalink to this headline">¶</a></h2>
@@ -101,7 +95,19 @@ args:</p>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
+        <div class="sphinxsidebarwrapper"><h3><a href="index.html">Main Content</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="start.html">A Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html#more-info">More info</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Frequently Asked Questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yaml.conf.html">YAML Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Task Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">Storage Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trace.html">Trace Flow Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="patterns.html">Useful Flow Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/selinon.html">selinon package</a></li>
+</ul>
+
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Frequently Asked Questions (FAQ)</a><ul>
@@ -111,6 +117,7 @@ args:</p>
 <li><a class="reference internal" href="#i-m-getting-warning-multiple-starting-nodes-found-in-a-flow-why">I&#8217;m getting warning: &#8220;Multiple starting nodes found in a flow&#8221;. Why?</a></li>
 <li><a class="reference internal" href="#how-should-i-name-tasks-and-flows">How should I name tasks and flows?</a></li>
 <li><a class="reference internal" href="#how-can-i-access-nested-keys-in-a-dict">How can I access nested keys in a dict</a></li>
+<li><a class="reference internal" href="#i-need-a-custom-predicate">I need a custom predicate</a></li>
 <li><a class="reference internal" href="#what-exceptions-can-predicates-raise">What exceptions can predicates raise?</a></li>
 </ul>
 </li>
