@@ -43,6 +43,7 @@ Documentation
    storage
    trace
    patterns
+   development
    api/selinon
 
 See also
