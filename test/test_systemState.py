@@ -18,46 +18,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
-import unittest
-from getTaskInstance import GetTaskInstance
-from queueMock import QueueMock
-from isFlow import IsFlow
-from strategyMock import strategy_function
-
-from celery.result import AsyncResult
+from celeriacTestCase import CeleriacTestCase
 from celeriac import SystemState
-from celeriac.config import Config
 
 
-def _cond_true(db, node_args):
-    return True
-
-
-def _cond_false(db, node_args):
-    return False
-
-
-class TestSystemState(unittest.TestCase):
-
-    def setUp(self):
-        AsyncResult.clear()
-        GetTaskInstance.clear()
-
-    @staticmethod
-    def init(get_task_instance, is_flow, edge_table, failures, nowait_nodes):
-        Config.get_task_instance = get_task_instance
-        Config.is_flow = is_flow
-        Config.edge_table = edge_table
-        Config.failures = failures
-        Config.nowait_nodes = nowait_nodes
-        Config.propagate_finished = {}
-        Config.propagate_node_args = {}
-        Config.propagate_parent = {}
-        Config.retry_countdown = {}
-        Config.task_queues = QueueMock()
-        Config.dispatcher_queue = QueueMock()
-        Config.strategy_function = strategy_function
-
+class TestSystemState(CeleriacTestCase):
     def test_simple1(self):
         #
         # flow1:
@@ -67,14 +32,11 @@ class TestSystemState(unittest.TestCase):
         #       |
         #     Task2
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-            'flow1': [{'from': ['Task1'], 'to': ['Task2'], 'condition': _cond_true},
-                      {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
+            'flow1': [{'from': ['Task1'], 'to': ['Task2'], 'condition': self.cond_true},
+                      {'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -82,7 +44,7 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertEqual(state_dict['waiting_edges'][0], 0)
 
@@ -93,14 +55,13 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNone(system_state.node_args)
         self.assertIsNotNone(retry)
-        self.assertIn('Task1', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertEqual(state_dict['waiting_edges'][0], 0)
 
         # Task1 has finished
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        AsyncResult.set_finished(task1.task_id)
-        AsyncResult.set_result(task1.task_id, 1)
+        task1 = self.get_task('Task1')
+        self.set_finished(task1, 1)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -116,9 +77,8 @@ class TestSystemState(unittest.TestCase):
         self.assertEqual(system_state.node_args, 1)
 
         # Task2 has finished
-        task2 = get_task_instance.task_by_name('Task2')[0]
-        AsyncResult.set_finished(task2.task_id)
-        AsyncResult.set_result(task2.task_id, 1)
+        task2 = self.get_task('Task2')
+        self.set_finished(task2, 1)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -141,14 +101,11 @@ class TestSystemState(unittest.TestCase):
         #           |
         #         Task3
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-                      'flow1': [{'from': ['Task1', 'Task2'], 'to': ['Task3'], 'condition': _cond_true},
-                                {'from': [], 'to': ['Task1', 'Task2'], 'condition': _cond_true}]
+                      'flow1': [{'from': ['Task1', 'Task2'], 'to': ['Task3'], 'condition': self.cond_true},
+                                {'from': [], 'to': ['Task1', 'Task2'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -156,15 +113,15 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertEqual(state_dict['waiting_edges'][0], 0)
 
         # Run without change at first
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        task2 = get_task_instance.task_by_name('Task2')[0]
+        task1 = self.get_task('Task1')
+        task2 = self.get_task('Task2')
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -172,13 +129,13 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertEqual(state_dict['waiting_edges'][0], 0)
 
         # Task2 has finished
-        AsyncResult.set_finished(task2.task_id)
+        self.set_finished(task2)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -186,8 +143,8 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
         self.assertEqual(len(state_dict.get('finished_nodes')), 1)
         self.assertEqual(state_dict['active_nodes'][0]['name'], 'Task1')
@@ -198,8 +155,7 @@ class TestSystemState(unittest.TestCase):
         self.assertEqual(state_dict['waiting_edges'][0], 0)
 
         # Task1 has finished
-        AsyncResult.set_finished(task1.task_id)
-        AsyncResult.set_result(task1.task_id, "some result of task1 that shouldn't be propagated")
+        self.set_finished(task1, "some result of task1 that shouldn't be propagated")
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -207,9 +163,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
         self.assertEqual(len(state_dict.get('finished_nodes')), 2)
         self.assertEqual(state_dict['active_nodes'][0]['name'], 'Task3')
@@ -220,7 +176,7 @@ class TestSystemState(unittest.TestCase):
         self.assertEqual(state_dict['waiting_edges'][0], 0)
 
         # No change so far
-        task3 = get_task_instance.task_by_name('Task3')[0]
+        task3 = self.get_task('Task3')
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -228,9 +184,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
         self.assertEqual(len(state_dict.get('finished_nodes')), 2)
         self.assertEqual(state_dict['active_nodes'][0]['name'], 'Task3')
@@ -241,7 +197,7 @@ class TestSystemState(unittest.TestCase):
         self.assertEqual(state_dict['waiting_edges'][0], 0)
 
         # Task 3 has finished
-        AsyncResult.set_finished(task3.task_id)
+        self.set_finished(task3)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -268,15 +224,12 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Each time only one task instance finishes
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-            'flow1': [{'from': ['Task1'], 'to': ['Task3'], 'condition': _cond_true},
-                      {'from': ['Task2'], 'to': ['Task3'], 'condition': _cond_true},
-                      {'from': [], 'to': ['Task1', 'Task2'], 'condition': _cond_true}]
+            'flow1': [{'from': ['Task1'], 'to': ['Task3'], 'condition': self.cond_true},
+                      {'from': ['Task2'], 'to': ['Task3'], 'condition': self.cond_true},
+                      {'from': [], 'to': ['Task1', 'Task2'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -284,16 +237,16 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
 
         # Run without change at first
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        task2 = get_task_instance.task_by_name('Task2')[0]
+        task1 = self.get_task('Task1')
+        task2 = self.get_task('Task2')
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -301,14 +254,14 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
 
         # Task1 has finished
-        AsyncResult.set_finished(task1.task_id)
+        self.set_finished(task1)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -316,9 +269,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -328,7 +281,7 @@ class TestSystemState(unittest.TestCase):
         self.assertIn('Task1', state_dict['finished_nodes'].keys())
 
         # No change so far
-        task3_0 = get_task_instance.task_by_name('Task3')[0]
+        task3_0 = self.get_task('Task3')
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -336,9 +289,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -348,7 +301,7 @@ class TestSystemState(unittest.TestCase):
         self.assertIn('Task1', state_dict['finished_nodes'].keys())
 
         # Task2 has finished
-        AsyncResult.set_finished(task2.task_id)
+        self.set_finished(task2)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -356,9 +309,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -369,7 +322,7 @@ class TestSystemState(unittest.TestCase):
         self.assertIn('Task2', state_dict['finished_nodes'].keys())
 
         # Again, no change
-        task3_1 = get_task_instance.task_by_name('Task3')[1]
+        task3_1 = self.get_task('Task3')
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -377,9 +330,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -390,7 +343,7 @@ class TestSystemState(unittest.TestCase):
         self.assertIn('Task2', state_dict['finished_nodes'].keys())
 
         # Now the second instance of Task3 has finished
-        AsyncResult.set_finished(task3_1.task_id)
+        self.set_finished(task3_1)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -398,9 +351,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -411,7 +364,7 @@ class TestSystemState(unittest.TestCase):
         self.assertIn('Task3', state_dict['finished_nodes'].keys())
 
         # The last task - the instance of Task3 has just finished
-        AsyncResult.set_finished(task3_0.task_id)
+        self.set_finished(task3_0)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -439,15 +392,12 @@ class TestSystemState(unittest.TestCase):
         #   Task1 and Task2 finish at the same time
         #   Both instances of Task3 finish at the same time
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-            'flow1': [{'from': ['Task1'], 'to': ['Task3'], 'condition': _cond_true},
-                      {'from': ['Task2'], 'to': ['Task3'], 'condition': _cond_true},
-                      {'from': [], 'to': ['Task1', 'Task2'], 'condition': _cond_true}]
+            'flow1': [{'from': ['Task1'], 'to': ['Task3'], 'condition': self.cond_true},
+                      {'from': ['Task2'], 'to': ['Task3'], 'condition': self.cond_true},
+                      {'from': [], 'to': ['Task1', 'Task2'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -455,18 +405,18 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
 
         # Task1, Task2 has finished
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        task2 = get_task_instance.task_by_name('Task2')[0]
-        AsyncResult.set_finished(task1.task_id)
-        AsyncResult.set_finished(task2.task_id)
+        task1 = self.get_task('Task1')
+        task2 = self.get_task('Task2')
+        self.set_finished(task1)
+        self.set_finished(task2)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -474,9 +424,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -487,10 +437,10 @@ class TestSystemState(unittest.TestCase):
         self.assertIn('Task2', state_dict['finished_nodes'].keys())
 
         # Now both Task3 instances finished
-        task3_0 = get_task_instance.task_by_name('Task3')[0]
-        task3_1 = get_task_instance.task_by_name('Task3')[1]
-        AsyncResult.set_finished(task3_0.task_id)
-        AsyncResult.set_finished(task3_1.task_id)
+        task3_0 = self.get_task('Task3', 0)
+        task3_1 = self.get_task('Task3', 1)
+        self.set_finished(task3_0)
+        self.set_finished(task3_1)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -514,14 +464,11 @@ class TestSystemState(unittest.TestCase):
         #               |
         #             Task4
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-            'flow1': [{'from': ['Task1', 'Task2', 'Task3'], 'to': ['Task4'], 'condition': _cond_true},
-                      {'from': [], 'to': ['Task1', 'Task2', 'Task3'], 'condition': _cond_true}]
+            'flow1': [{'from': ['Task1', 'Task2', 'Task3'], 'to': ['Task4'], 'condition': self.cond_true},
+                      {'from': [], 'to': ['Task1', 'Task2', 'Task3'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -529,17 +476,17 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
 
         # Task1 has finished
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        task2 = get_task_instance.task_by_name('Task2')[0]
-        task3 = get_task_instance.task_by_name('Task3')[0]
-        AsyncResult.set_finished(task1.task_id)
+        task1 = self.get_task('Task1')
+        task2 = self.get_task('Task2')
+        task3 = self.get_task('Task3')
+        self.set_finished(task1)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -551,11 +498,11 @@ class TestSystemState(unittest.TestCase):
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('active_nodes')), 2)
         self.assertIn('Task1', state_dict['finished_nodes'].keys())
-        self.assertNotIn('Task4', get_task_instance.tasks)
+        self.assertNotIn('Task4', self.instantiated_tasks)
 
         # Task2 and Task3 have finished
-        AsyncResult.set_finished(task2.task_id)
-        AsyncResult.set_finished(task3.task_id)
+        self.set_finished(task2)
+        self.set_finished(task3)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -569,10 +516,10 @@ class TestSystemState(unittest.TestCase):
         self.assertIn('Task1', state_dict['finished_nodes'].keys())
         self.assertIn('Task2', state_dict['finished_nodes'].keys())
         self.assertIn('Task3', state_dict['finished_nodes'].keys())
-        self.assertIn('Task4', get_task_instance.tasks)
+        self.assertIn('Task4', self.instantiated_tasks)
 
         # Wait for Task4
-        task4 = get_task_instance.task_by_name('Task4')[0]
+        task4 = self.get_task('Task4')
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -586,10 +533,10 @@ class TestSystemState(unittest.TestCase):
         self.assertIn('Task1', state_dict['finished_nodes'].keys())
         self.assertIn('Task2', state_dict['finished_nodes'].keys())
         self.assertIn('Task3', state_dict['finished_nodes'].keys())
-        self.assertIn('Task4', get_task_instance.tasks)
+        self.assertIn('Task4', self.instantiated_tasks)
 
         # Finish the flow
-        AsyncResult.set_finished(task4.task_id)
+        self.set_finished(task4)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -619,14 +566,11 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   The condition will fail
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-            'flow1': [{'from': ['Task1', 'Task2', 'Task3'], 'to': ['Task4'], 'condition': _cond_false},
-                      {'from': [], 'to': ['Task1', 'Task2', 'Task3'], 'condition': _cond_true}]
+            'flow1': [{'from': ['Task1', 'Task2', 'Task3'], 'to': ['Task4'], 'condition': self.cond_false},
+                      {'from': [], 'to': ['Task1', 'Task2', 'Task3'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -634,19 +578,19 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
 
         # Task1, Task2 and Task3 have finished
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        task2 = get_task_instance.task_by_name('Task2')[0]
-        task3 = get_task_instance.task_by_name('Task3')[0]
-        AsyncResult.set_finished(task1.task_id)
-        AsyncResult.set_finished(task2.task_id)
-        AsyncResult.set_finished(task3.task_id)
+        task1 = self.get_task('Task1')
+        task2 = self.get_task('Task2')
+        task3 = self.get_task('Task3')
+        self.set_finished(task1)
+        self.set_finished(task2)
+        self.set_finished(task3)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -674,14 +618,11 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Task3 finishes before Task2
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-            'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3'], 'condition': _cond_true},
-                      {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
+            'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3'], 'condition': self.cond_true},
+                      {'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -689,9 +630,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertNotIn('Task2', get_task_instance.tasks)
-        self.assertNotIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertNotIn('Task2', self.instantiated_tasks)
+        self.assertNotIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
@@ -704,18 +645,17 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertNotIn('Task2', get_task_instance.tasks)
-        self.assertNotIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertNotIn('Task2', self.instantiated_tasks)
+        self.assertNotIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
 
         # Task1 has finished
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        AsyncResult.set_finished(task1.task_id)
-        AsyncResult.set_result(task1.task_id, 0xDEADBEEF)
+        task1 = self.get_task('Task1')
+        self.set_finished(task1, 0xDEADBEEF)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -723,9 +663,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, 0xDEADBEEF)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 1)
@@ -738,17 +678,17 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, 0xDEADBEEF)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 1)
         self.assertEqual(len(state_dict.get('active_nodes')), 2)
 
         # Task3 has finished
-        task3 = get_task_instance.task_by_name('Task3')[0]
-        AsyncResult.set_finished(task3.task_id)
+        task3 = self.get_task('Task3')
+        self.set_finished(task3)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -756,9 +696,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, 0xDEADBEEF)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 2)
@@ -771,17 +711,17 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, 0xDEADBEEF)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 2)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
 
         # Task2 has finished
-        task2= get_task_instance.task_by_name('Task2')[0]
-        AsyncResult.set_finished(task2.task_id)
+        task2= self.get_task('Task2')
+        self.set_finished(task2)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -789,9 +729,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNone(retry)
         self.assertEqual(system_state.node_args, 0xDEADBEEF)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertEqual(len(state_dict.get('finished_nodes')), 3)
         self.assertEqual(len(state_dict.get('active_nodes')), 0)
@@ -809,14 +749,11 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Task2 and Task3 finish at the same time
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-            'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3'], 'condition': _cond_true},
-                      {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
+            'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3'], 'condition': self.cond_true},
+                      {'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -824,18 +761,17 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertNotIn('Task2', get_task_instance.tasks)
-        self.assertNotIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertNotIn('Task2', self.instantiated_tasks)
+        self.assertNotIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
 
         # Task1 has finished
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        AsyncResult.set_finished(task1.task_id)
-        AsyncResult.set_result(task1.task_id, 0xDEADBEEF)
+        task1 = self.get_task('Task1')
+        self.set_finished(task1, 0xDEADBEEF)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -843,19 +779,19 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, 0xDEADBEEF)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 1)
         self.assertEqual(len(state_dict.get('active_nodes')), 2)
 
         # Task2, Task3 have finished
-        task2 = get_task_instance.task_by_name('Task2')[0]
-        task3 = get_task_instance.task_by_name('Task3')[0]
-        AsyncResult.set_finished(task2.task_id)
-        AsyncResult.set_finished(task3.task_id)
+        task2 = self.get_task('Task2')
+        task3 = self.get_task('Task3')
+        self.set_finished(task2)
+        self.set_finished(task3)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -863,9 +799,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNone(retry)
         self.assertEqual(system_state.node_args, 0xDEADBEEF)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertEqual(len(state_dict.get('finished_nodes')), 3)
         self.assertEqual(len(state_dict.get('active_nodes')), 0)
@@ -883,14 +819,11 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Child tasks do not finish at the same time
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-            'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3', 'Task4'], 'condition': _cond_true},
-                      {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
+            'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3', 'Task4'], 'condition': self.cond_true},
+                      {'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -898,9 +831,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertNotIn('Task2', get_task_instance.tasks)
-        self.assertNotIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertNotIn('Task2', self.instantiated_tasks)
+        self.assertNotIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
@@ -908,9 +841,8 @@ class TestSystemState(unittest.TestCase):
 
         # Task1 has finished
         task1_result = {'foo': ['bar']}
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        AsyncResult.set_finished(task1.task_id)
-        AsyncResult.set_result(task1.task_id, task1_result)
+        task1 = self.get_task('Task1')
+        self.set_finished(task1, task1_result)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -918,18 +850,18 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertIn('Task4', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertIn('Task4', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 1)
         self.assertEqual(len(state_dict.get('active_nodes')), 3)
 
         # Task2 has finished
-        task2 = get_task_instance.task_by_name('Task2')[0]
-        AsyncResult.set_finished(task2.task_id)
+        task2 = self.get_task('Task2')
+        self.set_finished(task2)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -937,18 +869,18 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertIn('Task4', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertIn('Task4', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 2)
         self.assertEqual(len(state_dict.get('active_nodes')), 2)
 
         # Task3 has finished
-        task3 = get_task_instance.task_by_name('Task3')[0]
-        AsyncResult.set_finished(task3.task_id)
+        task3 = self.get_task('Task3')
+        self.set_finished(task3)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -956,18 +888,18 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertIn('Task4', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertIn('Task4', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 3)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
 
         # Task4 has finished
-        task4 = get_task_instance.task_by_name('Task4')[0]
-        AsyncResult.set_finished(task4.task_id)
+        task4 = self.get_task('Task4')
+        self.set_finished(task4)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -975,10 +907,10 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertIn('Task4', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertIn('Task4', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 4)
@@ -997,14 +929,11 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Child tasks finish at the same time
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-            'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3', 'Task4'], 'condition': _cond_true},
-                      {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
+            'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3', 'Task4'], 'condition': self.cond_true},
+                      {'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -1012,9 +941,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertNotIn('Task2', get_task_instance.tasks)
-        self.assertNotIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertNotIn('Task2', self.instantiated_tasks)
+        self.assertNotIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
@@ -1022,9 +951,8 @@ class TestSystemState(unittest.TestCase):
 
         # Task1 has finished
         task1_result = {'foo': ['bar']}
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        AsyncResult.set_finished(task1.task_id)
-        AsyncResult.set_result(task1.task_id, task1_result)
+        task1 = self.get_task('Task1')
+        self.set_finished(task1, task1_result)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1032,22 +960,22 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertIn('Task4', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertIn('Task4', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 1)
         self.assertEqual(len(state_dict.get('active_nodes')), 3)
 
         # Task2 has finished
-        task2 = get_task_instance.task_by_name('Task2')[0]
-        task3 = get_task_instance.task_by_name('Task3')[0]
-        task4 = get_task_instance.task_by_name('Task4')[0]
-        AsyncResult.set_finished(task2.task_id)
-        AsyncResult.set_finished(task3.task_id)
-        AsyncResult.set_finished(task4.task_id)
+        task2 = self.get_task('Task2')
+        task3 = self.get_task('Task3')
+        task4 = self.get_task('Task4')
+        self.set_finished(task2)
+        self.set_finished(task3)
+        self.set_finished(task4)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1055,10 +983,10 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertIn('Task4', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertIn('Task4', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 4)
@@ -1080,14 +1008,11 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Task1 and Task2 finish at the same time, Task3 afterwards. Task4, Task5 and Task6 finish at the same time
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-            'flow1': [{'from': ['Task1', 'Task2', 'Task3'], 'to': ['Task4', 'Task5', 'Task6'], 'condition': _cond_true},
-                      {'from': [], 'to': ['Task1', 'Task2', 'Task3'], 'condition': _cond_true}]
+            'flow1': [{'from': ['Task1', 'Task2', 'Task3'], 'to': ['Task4', 'Task5', 'Task6'], 'condition': self.cond_true},
+                      {'from': [], 'to': ['Task1', 'Task2', 'Task3'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -1095,12 +1020,12 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertNotIn('Task4', get_task_instance.tasks)
-        self.assertNotIn('Task5', get_task_instance.tasks)
-        self.assertNotIn('Task6', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertNotIn('Task4', self.instantiated_tasks)
+        self.assertNotIn('Task5', self.instantiated_tasks)
+        self.assertNotIn('Task6', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
@@ -1113,22 +1038,22 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertNotIn('Task4', get_task_instance.tasks)
-        self.assertNotIn('Task5', get_task_instance.tasks)
-        self.assertNotIn('Task6', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertNotIn('Task4', self.instantiated_tasks)
+        self.assertNotIn('Task5', self.instantiated_tasks)
+        self.assertNotIn('Task6', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
         self.assertEqual(len(state_dict.get('active_nodes')), 3)
 
         # Task1, Task2 have finished
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        task2 = get_task_instance.task_by_name('Task2')[0]
-        AsyncResult.set_finished(task1.task_id)
-        AsyncResult.set_finished(task2.task_id)
+        task1 = self.get_task('Task1')
+        task2 = self.get_task('Task2')
+        self.set_finished(task1)
+        self.set_finished(task2)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1136,12 +1061,12 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertNotIn('Task4', get_task_instance.tasks)
-        self.assertNotIn('Task5', get_task_instance.tasks)
-        self.assertNotIn('Task6', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertNotIn('Task4', self.instantiated_tasks)
+        self.assertNotIn('Task5', self.instantiated_tasks)
+        self.assertNotIn('Task6', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 2)
@@ -1154,20 +1079,20 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertNotIn('Task4', get_task_instance.tasks)
-        self.assertNotIn('Task5', get_task_instance.tasks)
-        self.assertNotIn('Task6', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertNotIn('Task4', self.instantiated_tasks)
+        self.assertNotIn('Task5', self.instantiated_tasks)
+        self.assertNotIn('Task6', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 2)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
 
         # Task3 has finished
-        task3 = get_task_instance.task_by_name('Task3')[0]
-        AsyncResult.set_finished(task3.task_id)
+        task3 = self.get_task('Task3')
+        self.set_finished(task3)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1175,24 +1100,24 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertIn('Task4', get_task_instance.tasks)
-        self.assertIn('Task5', get_task_instance.tasks)
-        self.assertIn('Task6', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertIn('Task4', self.instantiated_tasks)
+        self.assertIn('Task5', self.instantiated_tasks)
+        self.assertIn('Task6', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 3)
         self.assertEqual(len(state_dict.get('active_nodes')), 3)
 
         # Task4, Task5, Task6 have finished
-        task4 = get_task_instance.task_by_name('Task4')[0]
-        task5 = get_task_instance.task_by_name('Task5')[0]
-        task6 = get_task_instance.task_by_name('Task6')[0]
-        AsyncResult.set_finished(task4.task_id)
-        AsyncResult.set_finished(task5.task_id)
-        AsyncResult.set_finished(task6.task_id)
+        task4 = self.get_task('Task4')
+        task5 = self.get_task('Task5')
+        task6 = self.get_task('Task6')
+        self.set_finished(task4)
+        self.set_finished(task5)
+        self.set_finished(task6)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1200,12 +1125,12 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertIn('Task4', get_task_instance.tasks)
-        self.assertIn('Task5', get_task_instance.tasks)
-        self.assertIn('Task6', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertIn('Task4', self.instantiated_tasks)
+        self.assertIn('Task5', self.instantiated_tasks)
+        self.assertIn('Task6', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 6)
@@ -1227,14 +1152,11 @@ class TestSystemState(unittest.TestCase):
         # Note:
         #   Task1, Task2 and Task3 finish at the same time; Task4, Task5 finish at the same time, then Task6
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-            'flow1': [{'from': ['Task1', 'Task2', 'Task3'], 'to': ['Task4', 'Task5', 'Task6'], 'condition': _cond_true},
-                      {'from': [], 'to': ['Task1', 'Task2', 'Task3'], 'condition': _cond_true}]
+            'flow1': [{'from': ['Task1', 'Task2', 'Task3'], 'to': ['Task4', 'Task5', 'Task6'], 'condition': self.cond_true},
+                      {'from': [], 'to': ['Task1', 'Task2', 'Task3'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -1242,24 +1164,24 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertNotIn('Task4', get_task_instance.tasks)
-        self.assertNotIn('Task5', get_task_instance.tasks)
-        self.assertNotIn('Task6', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertNotIn('Task4', self.instantiated_tasks)
+        self.assertNotIn('Task5', self.instantiated_tasks)
+        self.assertNotIn('Task6', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
         self.assertEqual(len(state_dict.get('active_nodes')), 3)
 
         # Task1, Task2, Task3 have finished
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        task2 = get_task_instance.task_by_name('Task2')[0]
-        task3 = get_task_instance.task_by_name('Task3')[0]
-        AsyncResult.set_finished(task1.task_id)
-        AsyncResult.set_finished(task2.task_id)
-        AsyncResult.set_finished(task3.task_id)
+        task1 = self.get_task('Task1')
+        task2 = self.get_task('Task2')
+        task3 = self.get_task('Task3')
+        self.set_finished(task1)
+        self.set_finished(task2)
+        self.set_finished(task3)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1267,20 +1189,20 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertIn('Task4', get_task_instance.tasks)
-        self.assertIn('Task5', get_task_instance.tasks)
-        self.assertIn('Task6', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertIn('Task4', self.instantiated_tasks)
+        self.assertIn('Task5', self.instantiated_tasks)
+        self.assertIn('Task6', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 3)
         self.assertEqual(len(state_dict.get('active_nodes')), 3)
 
         # Task4 has finished
-        task4 = get_task_instance.task_by_name('Task4')[0]
-        AsyncResult.set_finished(task4.task_id)
+        task4 = self.get_task('Task4')
+        self.set_finished(task4)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1288,22 +1210,22 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertIn('Task4', get_task_instance.tasks)
-        self.assertIn('Task5', get_task_instance.tasks)
-        self.assertIn('Task6', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertIn('Task4', self.instantiated_tasks)
+        self.assertIn('Task5', self.instantiated_tasks)
+        self.assertIn('Task6', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 4)
         self.assertEqual(len(state_dict.get('active_nodes')), 2)
 
         # Task5, Task6 have finished
-        task5 = get_task_instance.task_by_name('Task5')[0]
-        task6 = get_task_instance.task_by_name('Task6')[0]
-        AsyncResult.set_finished(task5.task_id)
-        AsyncResult.set_finished(task6.task_id)
+        task5 = self.get_task('Task5')
+        task6 = self.get_task('Task6')
+        self.set_finished(task5)
+        self.set_finished(task6)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1311,12 +1233,12 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertIn('Task4', get_task_instance.tasks)
-        self.assertIn('Task5', get_task_instance.tasks)
-        self.assertIn('Task6', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertIn('Task4', self.instantiated_tasks)
+        self.assertIn('Task5', self.instantiated_tasks)
+        self.assertIn('Task6', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 6)
@@ -1336,15 +1258,12 @@ class TestSystemState(unittest.TestCase):
         #   Task2 finishes before Task3 in the first iteration
         #   Task3 finishes before Task2 in the second iteration
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-            'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3'], 'condition': _cond_true},
-                      {'from': ['Task3'], 'to': ['Task1'], 'condition': _cond_true},
-                      {'from': [], 'to': ['Task1'], 'condition': _cond_true}]
+            'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3'], 'condition': self.cond_true},
+                      {'from': ['Task3'], 'to': ['Task1'], 'condition': self.cond_true},
+                      {'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -1352,9 +1271,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertNotIn('Task2', get_task_instance.tasks)
-        self.assertNotIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertNotIn('Task2', self.instantiated_tasks)
+        self.assertNotIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
@@ -1367,27 +1286,25 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertNotIn('Task2', get_task_instance.tasks)
-        self.assertNotIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertNotIn('Task2', self.instantiated_tasks)
+        self.assertNotIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
 
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        AsyncResult.set_finished(task1.task_id)
+        task1 = self.get_task('Task1')
+        self.set_finished(task1)
         # There was no Result set for Task1
         with self.assertRaises(KeyError):
             system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
             system_state.update()
 
         # Task1 has finished
-        task1 = get_task_instance.task_by_name('Task1')[-1]
-        AsyncResult.set_finished(task1.task_id)
-
+        task1 = self.get_task('Task1')
         task1_result = "some task result"
-        AsyncResult.set_result(task1.task_id, task1_result)
+        self.set_finished(task1, task1_result)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1395,9 +1312,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 1)
@@ -1410,17 +1327,17 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 1)
         self.assertEqual(len(state_dict.get('active_nodes')), 2)
 
         # Task2 has finished
-        task2 = get_task_instance.task_by_name('Task2')[0]
-        AsyncResult.set_finished(task2.task_id)
+        task2 = self.get_task('Task2')
+        self.set_finished(task2)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1428,9 +1345,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 2)
@@ -1443,17 +1360,17 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 2)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
 
         # Task3 has finished
-        task3 = get_task_instance.task_by_name('Task3')[0]
-        AsyncResult.set_finished(task3.task_id)
+        task3 = self.get_task('Task3')
+        self.set_finished(task3)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1461,10 +1378,10 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertEqual(len(get_task_instance.task_by_name('Task1')), 2)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task1')), 2)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -1479,10 +1396,10 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertEqual(len(get_task_instance.task_by_name('Task1')), 2)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task1')), 2)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -1490,8 +1407,8 @@ class TestSystemState(unittest.TestCase):
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
 
         # The second instance of Task1 has finished
-        task1_1 = get_task_instance.task_by_name('Task1')[1]
-        AsyncResult.set_finished(task1_1.task_id)
+        task1_1 = self.get_task('Task1')
+        self.set_finished(task1_1)
         # We do not set task result, since it should be propagated from the first run of Task1
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
@@ -1500,13 +1417,13 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         # There should be a second instance of Task2 and Task3 spawned as well
-        self.assertEqual(len(get_task_instance.task_by_name('Task1')), 2)
-        self.assertEqual(len(get_task_instance.task_by_name('Task2')), 2)
-        self.assertEqual(len(get_task_instance.task_by_name('Task3')), 2)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task1')), 2)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task2')), 2)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task3')), 2)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -1521,12 +1438,12 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertEqual(len(get_task_instance.task_by_name('Task1')), 2)
-        self.assertEqual(len(get_task_instance.task_by_name('Task2')), 2)
-        self.assertEqual(len(get_task_instance.task_by_name('Task3')), 2)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task1')), 2)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task2')), 2)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task3')), 2)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -1535,8 +1452,8 @@ class TestSystemState(unittest.TestCase):
         self.assertEqual(len(state_dict.get('active_nodes')), 2)
 
         # Task3 has finished
-        task3_1 = get_task_instance.task_by_name('Task3')[-1]
-        AsyncResult.set_finished(task3_1.task_id)
+        task3_1 = self.get_task('Task3')
+        self.set_finished(task3_1)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1544,12 +1461,12 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertEqual(len(get_task_instance.task_by_name('Task1')), 3)
-        self.assertEqual(len(get_task_instance.task_by_name('Task2')), 2)
-        self.assertEqual(len(get_task_instance.task_by_name('Task3')), 2)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task1')), 3)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task2')), 2)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task3')), 2)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -1565,12 +1482,12 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertEqual(len(get_task_instance.task_by_name('Task1')), 3)
-        self.assertEqual(len(get_task_instance.task_by_name('Task2')), 2)
-        self.assertEqual(len(get_task_instance.task_by_name('Task3')), 2)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task1')), 3)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task2')), 2)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task3')), 2)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -1580,8 +1497,8 @@ class TestSystemState(unittest.TestCase):
         self.assertEqual(len(state_dict.get('active_nodes')), 2)
 
         # Task2 has finished
-        task2_1 = get_task_instance.task_by_name('Task2')[-1]
-        AsyncResult.set_finished(task2_1.task_id)
+        task2_1 = self.get_task('Task2')
+        self.set_finished(task2_1)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1589,12 +1506,12 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertEqual(len(get_task_instance.task_by_name('Task1')), 3)
-        self.assertEqual(len(get_task_instance.task_by_name('Task2')), 2)
-        self.assertEqual(len(get_task_instance.task_by_name('Task3')), 2)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task1')), 3)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task2')), 2)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task3')), 2)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -1610,12 +1527,12 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertEqual(system_state.node_args, task1_result)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertEqual(len(get_task_instance.task_by_name('Task1')), 3)
-        self.assertEqual(len(get_task_instance.task_by_name('Task2')), 2)
-        self.assertEqual(len(get_task_instance.task_by_name('Task3')), 2)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task1')), 3)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task2')), 2)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task3')), 2)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -1642,15 +1559,12 @@ class TestSystemState(unittest.TestCase):
         #      With Task1_1 from the first iteration and Task2 from the first iteration
         #      With Task1_1 from the first iteration and Task2 from the second iteration
         #
-        get_task_instance = GetTaskInstance()
         edge_table = {
-            'flow1': [{'from': ['Task1', 'Task2'], 'to': ['Task3'], 'condition': _cond_true},
-                      {'from': ['Task3'], 'to': ['Task2'], 'condition': _cond_true},
-                      {'from': [], 'to': ['Task1', 'Task2'], 'condition': _cond_true}]
+            'flow1': [{'from': ['Task1', 'Task2'], 'to': ['Task3'], 'condition': self.cond_true},
+                      {'from': ['Task3'], 'to': ['Task2'], 'condition': self.cond_true},
+                      {'from': [], 'to': ['Task1', 'Task2'], 'condition': self.cond_true}]
         }
-        is_flow = IsFlow(edge_table.keys())
-        nowait_nodes = dict.fromkeys(edge_table.keys(), [])
-        self.init(get_task_instance, is_flow, edge_table, None, nowait_nodes)
+        self.init(edge_table)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -1658,9 +1572,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertNotIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertNotIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
@@ -1673,17 +1587,17 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertNotIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertNotIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
         self.assertEqual(len(state_dict.get('active_nodes')), 2)
 
         # Task1 has finished
-        task1 = get_task_instance.task_by_name('Task1')[0]
-        AsyncResult.set_finished(task1.task_id)
+        task1 = self.get_task('Task1')
+        self.set_finished(task1)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1691,9 +1605,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertNotIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertNotIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 1)
@@ -1706,17 +1620,17 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertNotIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertNotIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 1)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
 
         # Task2 has finished
-        task2 = get_task_instance.task_by_name('Task2')[0]
-        AsyncResult.set_finished(task2.task_id)
+        task2 = self.get_task('Task2')
+        self.set_finished(task2)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1724,9 +1638,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 2)
@@ -1739,17 +1653,17 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 1)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertEqual(len(state_dict.get('finished_nodes')), 2)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
 
         # Task3 has finished
-        task3 = get_task_instance.task_by_name('Task3')[0]
-        AsyncResult.set_finished(task3.task_id)
+        task3 = self.get_task('Task3')
+        self.set_finished(task3)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -1757,9 +1671,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -1773,9 +1687,9 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -1783,8 +1697,8 @@ class TestSystemState(unittest.TestCase):
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
 
         # Newly spawned Task2 has finished, Task3 should be spawned
-        task2_1 = get_task_instance.task_by_name('Task2')[-1]
-        AsyncResult.set_finished(task2_1.task_id)
+        task2_1 = self.get_task('Task2')
+        self.set_finished(task2_1)
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         system_state.update()
@@ -1792,11 +1706,11 @@ class TestSystemState(unittest.TestCase):
 
         self.assertIsNotNone(retry)
         self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', get_task_instance.tasks)
-        self.assertIn('Task2', get_task_instance.tasks)
-        self.assertIn('Task3', get_task_instance.tasks)
-        self.assertEqual(len(get_task_instance.task_by_name('Task2')), 2)
-        self.assertEqual(len(get_task_instance.task_by_name('Task3')), 2)
+        self.assertIn('Task1', self.instantiated_tasks)
+        self.assertIn('Task2', self.instantiated_tasks)
+        self.assertIn('Task3', self.instantiated_tasks)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task2')), 2)
+        self.assertEqual(len(self.get_task_instance.task_by_name('Task3')), 2)
         self.assertEqual(len(state_dict.get('waiting_edges')), 2)
         self.assertIn(0, state_dict['waiting_edges'])
         self.assertIn(1, state_dict['waiting_edges'])
@@ -1804,7 +1718,7 @@ class TestSystemState(unittest.TestCase):
         self.assertEqual(len(state_dict['finished_nodes']['Task2']), 2)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
 
-        task3_1 = get_task_instance.task_by_name('Task3')[-1]
+        task3_1 = self.get_task('Task3')
 
         # Check parent tasks of Task3 from the first iteration and Task3_1 from the second iteration
         self.assertEqual(task3_1.parent['Task1'], task3.parent['Task1'])
