@@ -142,8 +142,10 @@ class Config(object):
 
         :param celery_app: celery app instance
         """
+        # Avoid circular imports
         from .dispatcher import Dispatcher
         from .selinonTaskEnvelope import SelinonTaskEnvelope
+
         cls.celery_app = celery_app
         celery_app.tasks.register(Dispatcher())
         celery_app.tasks.register(SelinonTaskEnvelope())
