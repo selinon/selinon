@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
+import traceback
 from celery import Task
 from .systemState import SystemState
 from .flowError import FlowError
@@ -72,7 +73,7 @@ class Dispatcher(Task):
         except Exception as exc:
             Trace.log(Trace.DISPATCHER_FAILURE, {'flow_name': flow_name,
                                                  'dispatcher_id': self.request.id,
-                                                 'what': str(exc)})
+                                                 'what': traceback.format_exc()})
             raise
 
         state_dict = system_state.to_dict()

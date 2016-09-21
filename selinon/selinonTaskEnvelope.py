@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
+import traceback
 import jsonschema
 from .storagePool import StoragePool
 from .fatalTaskError import FatalTaskError
@@ -107,7 +108,7 @@ class SelinonTaskEnvelope(Task):
                                              'parent': parent,
                                              'finished': finished,
                                              'args': node_args,
-                                             'what': exc,
+                                             'what': traceback.format_exc(),
                                              'retry_countdown': retry_countdown,
                                              'retried_count': retried_count,
                                              'max_retry': max_retry})
@@ -119,7 +120,7 @@ class SelinonTaskEnvelope(Task):
                                                'parent': parent,
                                                'finished': finished,
                                                'args': node_args,
-                                               'what': exc,
+                                               'what': traceback.format_exc(),
                                                'retried_count': retried_count})
                 raise self.retry(max_retries=0, exc=exc)
 
