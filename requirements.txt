@@ -1,8 +1,8 @@
 selinonlib
 celery>=4.0.0rc3
 jsonschema>=2.5.1
+redis>=2.10.5
 # Install following if you want to use predefined storages
 #pymongo>=3.3.0
-#redis>=2.10.5
 #SQLAlchemy>=1.0.14
 #SQLAlchemy-Utils>=0.32.9
