@@ -10,7 +10,7 @@ def get_requirements():
 
 setup(
     name='selinon',
-    version='0.1.0rc1',
+    version='0.1.0rc2',
     packages=['selinon', 'selinon.storage'],
     install_requires=get_requirements(),
     author='Fridolin Pokorny',
