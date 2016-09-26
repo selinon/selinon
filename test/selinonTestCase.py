@@ -59,6 +59,8 @@ class SelinonTestCase(unittest.TestCase):
         Config.task_queues = kwargs.get('task_queues', QueueMock())
         Config.dispatcher_queue = kwargs.get('dispatcher_queue', QueueMock())
         Config.strategy_function = kwargs.get('strategy_function', strategy_function)
+        # TODO: this is currently unused as we do not have tests for store()
+        Config.storage_readonly = kwargs.get('storage_readonly', {})
 
     @staticmethod
     def cond_true(db, node_args):

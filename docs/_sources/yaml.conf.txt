@@ -141,6 +141,19 @@ Storage name that should be used for task results; see Storages section.
 Default:
   None
 
+`storage_readonly`
+******************
+If True, results of tasks are not saved to the storage. The storage is used only for reading (through `self.storage`).
+
+  * Possible types:
+
+    * bool - True if storage is only for reading
+
+  * Required: False
+
+Default:
+  False
+
 `queue`
 *******
 Queue that should be used by Celery for task, see Celery's queue `documentation <http://docs.celeryproject.org/en/latest/userguide/routing.html#id2>`_.

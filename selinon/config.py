@@ -38,6 +38,7 @@ class Config(object):
     nowait_nodes = None
     max_retry = None
     retry_countdown = None
+    storage_readonly = None
     propagate_node_args = None
     propagate_finished = None
     propagate_parent = None
@@ -76,6 +77,7 @@ class Config(object):
         cls.task_mapping = config_module['task2storage_mapping']
         cls.max_retry = config_module['max_retry']
         cls.retry_countdown = config_module['retry_countdown']
+        cls.storage_readonly = config_module['storage_readonly']
 
         # queues
         cls.dispatcher_queue = config_module['dispatcher_queue']
