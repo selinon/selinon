@@ -193,6 +193,8 @@ class Trace(object):
             sh.setFormatter(formatter)
             logger.addHandler(sh)
             logger.setLevel(level)
+            # do not propagate to parent loggers so we don't get duplicate output
+            logger.propagate = False
 
         cls._logger = logger
         cls._trace_func = cls.logging_trace_func
