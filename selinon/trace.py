@@ -239,7 +239,8 @@ class Trace(object):
         """
         message = "%s: %s" % (cls.event2str(event), msg_dict)
 
-        if event == Trace.NODE_FAILURE or event == Trace.DISPATCHER_FAILURE or event == Trace.TASK_DISCARD_RESULT:
+        if event == Trace.NODE_FAILURE or event == Trace.DISPATCHER_FAILURE or event == Trace.TASK_DISCARD_RESULT \
+                or event == Trace.TASK_RETRY:
             return Trace._logger.warn(message)
         else:
             return Trace._logger.info(message)
