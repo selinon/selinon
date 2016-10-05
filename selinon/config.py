@@ -52,7 +52,6 @@ class Config(object):
     task_queues = None
     strategy_function = None
 
-
     @classmethod
     def _set_config(cls, config_module):
         """

@@ -65,12 +65,12 @@ class SystemState(object):
 
     def __init__(self, dispatcher_id, flow_name, node_args = None, retry = None, state = None, parent=None,
                  finished=None):
-        state_dict = {} if state is None else state
+        state_dict = state or {}
 
         self._dispatcher_id = dispatcher_id
         self._flow_name = flow_name
         self._node_args = node_args
-        self._parent = parent if parent else {}
+        self._parent = parent or {}
         self._finished = finished
         self._active_nodes = self._instantiate_active_nodes(state_dict.get('active_nodes', []))
         self._finished_nodes = state_dict.get('finished_nodes', {})

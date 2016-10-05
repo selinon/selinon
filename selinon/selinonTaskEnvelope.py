@@ -88,7 +88,7 @@ class SelinonTaskEnvelope(Task):
                                                       'result': result})
         except Exception as exc:
             max_retry = Config.max_retry.get(task_name, 0)
-            retried_count = 0 if retried_count is None else retried_count
+            retried_count = retried_count or 0
 
             if max_retry > retried_count and not isinstance(exc, FatalTaskError):
                 retried_count += 1

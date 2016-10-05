@@ -28,7 +28,7 @@ class StoragePool(object):
     A pool that carries all database connections for workers
     """
     def __init__(self, id_mapping=None):
-        self._id_mapping = id_mapping if id_mapping else {}
+        self._id_mapping = id_mapping or {}
 
     @classmethod
     def get_storage_name_by_task_name(cls, task_name, graceful=False):
