@@ -62,7 +62,8 @@ List of events that can be traced:
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize task retry                   | `TASK_RETRY`            | flow_name, task_name, task_id,     |
 |                                        |                         | parent, args, what, retried_count  |
-|                                        |                         | max_retry, retry_countdown         |
+|                                        |                         | max_retry, retry_countdown,        |
+|                                        |                         | user_retry                         |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize when a flow ends because of  | `FLOW_FAILURE`          | flow_name, dispatcher_id, what     |
 | error in nodes without fallback        |                         |                                    |

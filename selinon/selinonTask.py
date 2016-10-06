@@ -20,6 +20,7 @@
 
 import abc
 from .storagePool import StoragePool
+from .retry import Retry
 
 
 class SelinonTask(metaclass=abc.ABCMeta):
@@ -72,6 +73,15 @@ class SelinonTask(metaclass=abc.ABCMeta):
         """
         # TODO: we should should distinguish sub-subflows here
         return StoragePool.retrieve(task_name, self.parent[flow_name][task_name][index])
+
+    @staticmethod
+    def retry(countdown=0):
+        """
+        Retry, always raises Retry, this is compatible with Celery's self.retry() except you cannot modify arguments
+
+        :param countdown: countdown for rescheduling
+        """
+        raise Retry(countdown)
 
     @abc.abstractmethod
     def run(self, node_args):
