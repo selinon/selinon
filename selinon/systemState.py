@@ -347,12 +347,8 @@ class SystemState(object):
 
         if not self._node_args and len(new_finished) == 1 and len(self._active_nodes) == 0 and \
                 len(self._finished_nodes) == 0:
-            # propagate arguments from newly finished node only if:
-            #  1. we did not define node arguments in original Dispatcher() call
-            #  2. the flow started only with a one single node that just finished
-            #  3. node was not a subflow
-            # TODO: make this configurable from YAML
-            if not Config.is_flow(new_finished[0]['name']):
+            # propagate arguments from newly finished node if configured to do so
+            if Config.node_args_from_first.get(self._flow_name, False):
                 self._node_args = new_finished[0]['result'].result
 
         for node in new_finished:

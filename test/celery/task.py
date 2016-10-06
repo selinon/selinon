@@ -20,65 +20,36 @@
 
 
 class Task(object):
-    def __init__(self, task_name=None, flow_name=None, parent=None, node_args=None, finished=None,
-                 retried_count=None):
-        # TODO: We could introduce a new SelinonTask and remove this from test/celery since SelinonTask is
-        # not Celery.Task anymore
+    def __init__(self):
         # In case of instantiating SelinonTaskEnvelope or Dispatcher, we are not passing any arguments
-        self._task_name = task_name
-        self._flow_name = flow_name
-        self._parent = parent
-        self._node_args = node_args
-        self._retried_count = retried_count
-        self._finished = finished
-        self._queue = None
-
-    @property
-    def task_name(self):
-        return self._task_name
-
-    @property
-    def flow_name(self):
-        return self._flow_name
-
-    @property
-    def parent(self):
-        return self._parent
-
-    @property
-    def node_args(self):
-        return self._node_args
+        self.task_name = None
+        self.flow_name = None
+        self.parent = None
+        self.node_args = None
+        self.retried_count = None
+        self.finished = None
+        self.queue = None
 
     @property
     def task_id(self):
-        return "%s" % id(self)
-
-    @property
-    def task_name(self):
-        return self._task_name
-
-    @property
-    def finished(self):
-        return self._finished
-
-    @property
-    def queue(self):
-        return self._queue
-
-    @queue.setter
-    def queue(self, queue):
-        self._queue = queue
+        return id(self)
 
     def apply_async(self, kwargs, queue):
-        # Ensure that SelinonTaskEnvelope kept parameters consistent
-        assert self._task_name == kwargs['task_name']
-        assert self._flow_name == kwargs['flow_name']
-        assert self._parent == kwargs['parent']
-        assert self._finished == kwargs['finished']
+        from selinon.config import Config
 
-        self._queue = queue
-        self._node_args = kwargs['node_args']
-        self._retried_count = kwargs['retried_count']
+        # Ensure that SelinonTaskEnvelope kept parameters consistent
+        self.flow_name = kwargs['flow_name']
+        self.node_args = kwargs.get('node_args')
+        self.finished = kwargs.get('finished')
+        self.parent = kwargs.get('parent')
+
+        # None if we have flow
+        self.task_name = kwargs.get('task_name')
+        self.retried_count = kwargs.get('retried_count')
+
+        self.queue = queue
+        Config.get_task_instance.register_node(self)
+
         return self
 
     @staticmethod

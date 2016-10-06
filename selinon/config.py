@@ -63,6 +63,9 @@ class Config(object):
         cls.failures = config_module['failures']
         cls.nowait_nodes = config_module['nowait_nodes']
 
+        # misc
+        cls.node_args_from_first = config_module['node_args_from_first']
+
         # propagate_* entries
         cls.propagate_finished = config_module['propagate_finished']
         cls.propagate_node_args = config_module['propagate_node_args']

@@ -1,1 +1,1 @@
-selinon_version = '0.1.0a1'
+../../selinon/version.py

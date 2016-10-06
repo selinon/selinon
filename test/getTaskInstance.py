@@ -19,19 +19,12 @@
 # ####################################################################
 
 
-# a custom task is used, see ./test/celery/task.py
-from celery import Task
-from celery.result import AsyncResult
-
-
 class GetTaskInstance(object):
     """
     Task instance factory used in system state to instantiate tasks
     """
     _flow_instances = []
-
-    def __init__(self, task_instances=None):
-        self._task_instances = task_instances if task_instances else []
+    _task_instances = []
 
     @property
     def task_instances(self):
@@ -69,13 +62,20 @@ class GetTaskInstance(object):
         return [f for f in self._flow_instances if f.flow_name == flow_name]
 
     @classmethod
-    def register_flow(cls, flow):
+    def register_node(cls, node):
         """
-        Register flow that has started
-        :param flow: flow to be tracked
+        Register a node that was scheduled
+        :param node: flow to be tracked
         """
-        cls._flow_instances.append(flow)
-        AsyncResult.set_unfinished(flow.task_id)
+        # a custom task is used, see ./test/celery/task.py
+        from celery.result import AsyncResult
+        from selinon.dispatcher import Dispatcher
+
+        if isinstance(node, Dispatcher):
+            cls._flow_instances.append(node)
+        else:
+            cls._task_instances.append(node)
+        AsyncResult.set_unfinished(node.task_id)
 
     @classmethod
     def clear(cls):
@@ -84,14 +84,5 @@ class GetTaskInstance(object):
         :return:
         """
         cls._flow_instances = []
+        cls._task_instances = []
 
-    def __call__(self, task_name, flow_name, parent, node_args, finished, retried_count=None):
-        """
-        Instantiate a task with name task_name
-        :param task_name: a name of the task to be instantiated
-        :return: task instance
-        """
-        task_instance = Task(task_name, flow_name, parent, node_args, finished, retried_count)
-        self._task_instances.append(task_instance)
-        AsyncResult.set_unfinished(task_instance.task_id)
-        return task_instance

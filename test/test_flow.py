@@ -18,8 +18,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
+from selinon.config import Config
 from selinonTestCase import SelinonTestCase
-from selinon import SystemState
+from selinon import SystemState, Dispatcher
 
 
 class TestFlow(SelinonTestCase):
@@ -91,12 +92,11 @@ class TestFlow(SelinonTestCase):
         flow2 = self.get_flow('flow2')
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('flow2', self.instantiated_flows)
         self.assertIsNone(flow2.node_args)
         self.assertEqual(flow2.flow_name, 'flow2')
         self.assertIsNone(flow2.parent)
-        self.assertIsNone(flow2.state)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('flow2', self.instantiated_flows)
         self.assertNotIn('Task2', self.instantiated_tasks)
@@ -111,12 +111,11 @@ class TestFlow(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('flow2', self.instantiated_flows)
         self.assertIsNone(flow2.node_args)
         self.assertEqual(flow2.flow_name, 'flow2')
         self.assertIsNone(flow2.parent)
-        self.assertIsNone(flow2.state)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('flow2', self.instantiated_flows)
         self.assertNotIn('Task2', self.instantiated_tasks)
@@ -139,12 +138,11 @@ class TestFlow(SelinonTestCase):
         flow2 = self.get_flow('flow2')
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('flow2', self.instantiated_flows)
         self.assertIsNone(flow2.node_args)
         self.assertEqual(flow2.flow_name, 'flow2')
         self.assertIsNone(flow2.parent)
-        self.assertIsNone(flow2.state)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('flow2', self.instantiated_flows)
         self.assertIn('Task2', self.instantiated_tasks)
@@ -161,7 +159,7 @@ class TestFlow(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('flow2', self.instantiated_flows)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('flow2', self.instantiated_flows)
@@ -180,8 +178,8 @@ class TestFlow(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
-        self.assertEqual(task2.node_args, task1_result)
+        self.assertIsNone(system_state.node_args)
+        self.assertIsNone(task2.node_args)
         self.assertIn('flow2', self.instantiated_flows)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('flow2', self.instantiated_flows)
@@ -246,7 +244,8 @@ class TestFlow(SelinonTestCase):
         self.assertIn('flow2', self.instantiated_flows)
 
         # Create flow3 manually
-        flow3 = self.get_task_instance('flow3', None, None, None, None, None)
+        flow3 = Dispatcher().apply_async(kwargs={'flow_name': 'flow3'}, queue=Config.dispatcher_queue)
+        self.get_task_instance.register_node(flow3)
 
         flow2 = self.get_flow('flow2')
         self.set_finished(flow2)
@@ -374,7 +373,7 @@ class TestFlow(SelinonTestCase):
         retry = system_state.update()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, 0xDEADBEEF)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('flow2', self.instantiated_flows)
 
         flow2 = self.get_flow('flow2')
@@ -393,8 +392,7 @@ class TestFlow(SelinonTestCase):
         #     flow2   flow3
         #
         # Note:
-        #    Arguments are propagated to flow2 but not to flow3. Result of Task1 is also propagated to flow2 and flow3
-        #    as node_args.
+        #    Arguments are propagated to flow2 but not to flow3. Result of Task1 is not propagated to flow2 nor flow3.
         #
         edge_table = {
             'flow1': [{'from': [], 'to': ['Task1'], 'condition': self.cond_true},
@@ -424,10 +422,10 @@ class TestFlow(SelinonTestCase):
         self.assertIn('flow3', self.instantiated_flows)
 
         flow2 = self.get_flow('flow2')
-        self.assertEqual(flow2.node_args, 0xDEADBEEF)
+        self.assertIsNone(flow2.node_args)
         self.assertIn('Task1', flow2.parent)
         self.assertEqual(flow2.parent['Task1'], task1.task_id)
 
         flow3 = self.get_flow('flow3')
-        self.assertEqual(flow3.node_args, 0xDEADBEEF)
+        self.assertIsNone(flow3.node_args)
         self.assertIsNone(flow3.parent)

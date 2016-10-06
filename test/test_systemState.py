@@ -74,7 +74,7 @@ class TestSystemState(SelinonTestCase):
         self.assertIn('Task1', state_dict['finished_nodes'].keys())
         self.assertNotIn('Task2', state_dict['finished_nodes'].keys())
         # the result of Task1 should be propagated to Task2
-        self.assertEqual(system_state.node_args, 1)
+        self.assertIsNone(system_state.node_args)
 
         # Task2 has finished
         task2 = self.get_task('Task2')
@@ -662,7 +662,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, 0xDEADBEEF)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -677,7 +677,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, 0xDEADBEEF)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -695,7 +695,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, 0xDEADBEEF)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -710,7 +710,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, 0xDEADBEEF)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -728,7 +728,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
-        self.assertEqual(system_state.node_args, 0xDEADBEEF)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -778,7 +778,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, 0xDEADBEEF)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -798,7 +798,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
-        self.assertEqual(system_state.node_args, 0xDEADBEEF)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -849,7 +849,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -868,7 +868,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -887,7 +887,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -906,7 +906,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -959,7 +959,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -982,7 +982,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertIsNone(system_state.node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -1265,12 +1265,13 @@ class TestSystemState(SelinonTestCase):
         }
         self.init(edge_table)
 
-        system_state = SystemState(id(self), 'flow1')
+        node_args = "some task arguments"
+        system_state = SystemState(id(self), 'flow1', node_args)
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertNotIn('Task2', self.instantiated_tasks)
         self.assertNotIn('Task3', self.instantiated_tasks)
@@ -1285,7 +1286,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertNotIn('Task2', self.instantiated_tasks)
         self.assertNotIn('Task3', self.instantiated_tasks)
@@ -1294,24 +1295,16 @@ class TestSystemState(SelinonTestCase):
         self.assertEqual(len(state_dict.get('finished_nodes')), 0)
         self.assertEqual(len(state_dict.get('active_nodes')), 1)
 
-        task1 = self.get_task('Task1')
-        self.set_finished(task1)
-        # There was no Result set for Task1
-        with self.assertRaises(KeyError):
-            system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
-            system_state.update()
-
         # Task1 has finished
         task1 = self.get_task('Task1')
-        task1_result = "some task result"
-        self.set_finished(task1, task1_result)
+        self.set_finished(task1, "some task result")
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -1326,7 +1319,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -1344,7 +1337,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -1359,7 +1352,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -1377,7 +1370,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -1395,7 +1388,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -1416,7 +1409,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -1437,7 +1430,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -1460,7 +1453,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -1481,7 +1474,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -1505,7 +1498,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)
@@ -1526,7 +1519,7 @@ class TestSystemState(SelinonTestCase):
         state_dict = system_state.to_dict()
 
         self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, task1_result)
+        self.assertEqual(system_state.node_args, node_args)
         self.assertIn('Task1', self.instantiated_tasks)
         self.assertIn('Task2', self.instantiated_tasks)
         self.assertIn('Task3', self.instantiated_tasks)

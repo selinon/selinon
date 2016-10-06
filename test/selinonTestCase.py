@@ -61,6 +61,7 @@ class SelinonTestCase(unittest.TestCase):
         Config.strategy_function = kwargs.get('strategy_function', strategy_function)
         # TODO: this is currently unused as we do not have tests for store()
         Config.storage_readonly = kwargs.get('storage_readonly', {})
+        Config.node_args_from_first = kwargs.get('node_args_from_first', dict.fromkeys(edge_table.keys(), False))
 
     @staticmethod
     def cond_true(db, node_args):
@@ -117,7 +118,8 @@ class SelinonTestCase(unittest.TestCase):
         AsyncResult.set_failed(node.task_id)
         AsyncResult.set_result(node.task_id, exc or ValueError("Some unexpected exception in node"))
 
-    def get_task(self, task_name, idx=None):
+    @staticmethod
+    def get_task(task_name, idx=None):
         """
         Get task by its name
 
@@ -128,7 +130,8 @@ class SelinonTestCase(unittest.TestCase):
         tasks = Config.get_task_instance.task_by_name(task_name)
         return tasks[idx if idx is not None else -1]
 
-    def get_flow(self, flow_name, idx=None):
+    @staticmethod
+    def get_flow(flow_name, idx=None):
         """
         Get flow by its name
 
@@ -137,7 +140,7 @@ class SelinonTestCase(unittest.TestCase):
         :return: flow
         """
         tasks = Config.get_task_instance.flow_by_name(flow_name)
-        return tasks[idx if idx is not None else -1]
+        return tasks[idx or -1]
 
     @property
     def get_task_instance(self):
