@@ -374,6 +374,22 @@ A condition made of predicates. Boolean operators `and`, `or` and not can be use
    * condition definition
   
  * Required: True
+
+`foreach`
+*********
+To spawn multiple (let's say N, where N is variable) nodes you can specify foreach flag. This flag requires `import` and `function`. This function will be called if `condition` is evaluated as `True`. If you want to run N flows with a custom arguments, you can specify `propagate_result`, which will cause that result of defined function will be propagated to N flows.
+
+  * Possible types:
+
+    * dict with the following values:
+
+       * `function` a function that should be used in iteration. Note that this function shouldn't raise any exception, otherwise whole flow fails. This function takes 2 positional arguments - the current flow arguments and `StoragePool` instance with the current task result mapping (if you want to use results of previous tasks in your foreach function).
+       * `import` package from which function should be imported
+       * `propagate_result` - if `True`, result of function `function` will be propagated to sub-flows (cannot be propagated to tasks). This option is disjoint with `propagate_node_args`.
+
+  * Required: False
+
+Default: None
   
 `failures`
 **********
