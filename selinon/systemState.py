@@ -123,7 +123,7 @@ class SystemState(object):
 
         return ret_successful, ret_failed
 
-    def _start_node(self, node_name, parent, node_args, finished=None):
+    def _start_node(self, node_name, parent, node_args, finished=None, force_propagate_node_args=False):
         """
         Start a node in the system
 
@@ -134,13 +134,10 @@ class SystemState(object):
         """
         from .dispatcher import Dispatcher
         if Config.is_flow(node_name):
-            if Config.propagate_node_args.get(self._flow_name):
-                if Config.propagate_node_args.get(self._flow_name) is True or \
-                    (isinstance(Config.propagate_node_args.get(self._flow_name), list) and
-                     node_name in Config.propagate_node_args.get(self._flow_name)):
-                    node_args = node_args
-                else:
-                    node_args = None
+            if force_propagate_node_args or Config.propagate_node_args.get(self._flow_name) is True or \
+                (isinstance(Config.propagate_node_args.get(self._flow_name), list) and
+                 node_name in Config.propagate_node_args.get(self._flow_name)):
+                node_args = node_args
             else:
                 node_args = None
 
@@ -192,6 +189,34 @@ class SystemState(object):
             self._active_nodes.append(record)
 
         return record
+
+    def _fire_edge(self, edge, storage_pool, parent, node_args, finished=None):
+        """
+        Fire edge - start new nodes as described in edge table
+
+        :param edge: edge that should be fired
+        :param storage_pool: storage pool which makes results of previous tasks available
+        :param parent: parent nodes
+        :param node_args: node arguments
+        :param finished: finished nodes if propagated
+        :return: list of nodes that were scheduled
+        """
+        ret = []
+
+        if 'foreach' in edge:
+            for res in edge['foreach'](node_args, storage_pool):
+                for node_name in edge['to']:
+                    if edge.get('foreach_propagate_result'):
+                        record = self._start_node(node_name, parent, res, finished, force_propagate_node_args=True)
+                    else:
+                        record = self._start_node(node_name, parent, node_args, finished)
+                    ret.append(record)
+        else:
+            for node_name in edge['to']:
+                record = self._start_node(node_name, parent, node_args, finished)
+                ret.append(record)
+
+        return ret
 
     def _run_fallback(self):
         """
@@ -397,10 +422,9 @@ class SystemState(object):
                     # finished_nodes to 'condition' in order to do inspection
                     storage_pool = StoragePool(storage_id_mapping)
                     if edge['condition'](storage_pool, self._node_args):
-                        for node_name in edge['to']:
-                            record = self._start_node(node_name, parent=parent, node_args=self._node_args,
-                                                      finished=self._finished)
-                            ret.append(record)
+                        records = self._fire_edge(edge, storage_pool, parent=parent, node_args=self._node_args,
+                                                  finished=self._finished)
+                        ret.extend(records)
 
             node_name = node['name']
             if not self._finished_nodes.get(node_name):
@@ -428,11 +452,12 @@ class SystemState(object):
         for start_edge in start_edges:
             storage_pool = StoragePool()
             if start_edge['condition'](storage_pool, self._node_args):
-                for node_name in start_edge['to']:
-                    node = self._start_node(node_name, node_args=self._node_args, parent=self._parent,
-                                            finished=self._finished)
-                    if node_name not in Config.nowait_nodes.get(self._flow_name, []):
-                        self._update_waiting_edges(node_name)
+                records = self._fire_edge(start_edge, storage_pool, node_args=self._node_args, parent=self._parent,
+                                          finished=self._finished)
+
+                for node in records:
+                    if node['name'] not in Config.nowait_nodes.get(self._flow_name, []):
+                        self._update_waiting_edges(node['name'])
                         new_started_nodes.append(node)
 
         self._retry = Config.strategy_function(previous_retry=None,

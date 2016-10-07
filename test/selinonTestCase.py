@@ -131,6 +131,16 @@ class SelinonTestCase(unittest.TestCase):
         return tasks[idx if idx is not None else -1]
 
     @staticmethod
+    def get_all_tasks(task_name):
+        """
+        Get all tasks by task name
+
+        :param task_name: name of task
+        :return: tasks
+        """
+        return Config.get_task_instance.task_by_name(task_name)
+
+    @staticmethod
     def get_flow(flow_name, idx=None):
         """
         Get flow by its name
@@ -141,6 +151,16 @@ class SelinonTestCase(unittest.TestCase):
         """
         tasks = Config.get_task_instance.flow_by_name(flow_name)
         return tasks[idx or -1]
+
+    @staticmethod
+    def get_all_flows(flow_name):
+        """
+        Get all flows by its name
+
+        :param flow_name: name of flow
+        :return: flows
+        """
+        return Config.get_task_instance.flow_by_name(flow_name)
 
     @property
     def get_task_instance(self):

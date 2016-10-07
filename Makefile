@@ -24,7 +24,8 @@ clean:
 check:
 	@# We have to adjust CWD so we use our own Celery and modified Selinon Dispatcher for testing
 	@python3 --version
-	@cd test && python3 -m unittest -v test_systemState test_nodeFailures test_storage test_nowait test_flow test_node_args test_others
+	@cd test && python3 -m unittest -v test_systemState test_nodeFailures test_storage test_nowait test_flow \
+	test_node_args test_others test_foreach
 
 doc:
 	@sphinx-apidoc -e -o docs.source/api selinon -f
