@@ -188,7 +188,7 @@ class SystemState(object):
 
         record = {'name': node_name, 'id': async_result.task_id, 'result': async_result}
 
-        if node_name not in Config.nowait_nodes.get(self._flow_name, {}):
+        if node_name not in Config.nowait_nodes.get(self._flow_name, []):
             self._active_nodes.append(record)
 
         return record
@@ -431,7 +431,7 @@ class SystemState(object):
                 for node_name in start_edge['to']:
                     node = self._start_node(node_name, node_args=self._node_args, parent=self._parent,
                                             finished=self._finished)
-                    if node_name not in Config.nowait_nodes.get(self._flow_name, {}):
+                    if node_name not in Config.nowait_nodes.get(self._flow_name, []):
                         self._update_waiting_edges(node_name)
                         new_started_nodes.append(node)
 
