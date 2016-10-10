@@ -25,15 +25,16 @@ List of events that can be traced:
 | Logged event                           |  Event name             | msg_dict.keys()                    |
 +========================================+=========================+====================================+
 | Signalize Dispatcher run by Celery,    |                         | flow_name, dispatcher_id, args,    |
-| each time a Dispatcher is              | `DISPATCHER_WAKEUP`     | retry, state                       |
+| each time a Dispatcher is              | `DISPATCHER_WAKEUP`     | retry, state, queue                |
 | started/retried                        |                         |                                    |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize a flow start - called when   |                         |                                    |
-| starting nodes are run                 | `FLOW_START`            | flow_name, dispatcher_id, args     |
+| starting nodes are run                 | `FLOW_START`            | flow_name, dispatcher_id, args,    |
+|                                        |                         | queue                              |
 |                                        |                         |                                    |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize a task scheduling by         | `TASK_SCHEDULE`         | flow_name, task_name, task_id,     |
-| Dispatcher                             |                         | parent, args                       |
+| Dispatcher                             |                         | parent, args, queue                |
 |                                        |                         |                                    |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize task start by Celery         | `TASK_START`            | flow_name, task_name, task_id,     |
@@ -42,7 +43,7 @@ List of events that can be traced:
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize subflow start by Dispatcher  | `SUBFLOW_SCHEDULE`      | flow_name, dispatcher_id,          |
 |                                        |                         | child_flow_name, args, parent      |
-|                                        |                         | child_dispatcher_id,               |
+|                                        |                         | child_dispatcher_id, queue         |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize end of task from             | `TASK_END`              | flow_name, task_name, task_id,     |
 | SelinonTaskEnvelope                    |                         | parent, args, storage              |
@@ -66,12 +67,12 @@ List of events that can be traced:
 |                                        |                         | user_retry                         |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize when a flow ends because of  | `FLOW_FAILURE`          | flow_name, dispatcher_id, what     |
-| error in nodes without fallback        |                         |                                    |
+| error in nodes without fallback        |                         | queue                              |
 |                                        |                         |                                    |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize unexpected dispatcher failure| `DISPATCHER_FAILURE`    | flow_name, dispatcher_id, what     |
 | this should not occur (e.g. bug,       |                         | state, node_args, parent, finished |
-| database connection error, ...)        |                         | retry                              |
+| database connection error, ...)        |                         | retry, queue                       |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize a node failure from          | `NODE_FAILURE`          | flow_name, dispatcher_id,          |
 | Dispatcher                             |                         | node_name, node_id, what           |
@@ -82,11 +83,11 @@ List of events that can be traced:
 |                                        |                         |                                    |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize Dispatcher retry             | `DISPATCHER_RETRY`      | flow_name, dispatcher_id, retry,   |
-|                                        |                         | state_dict, args                   |
+|                                        |                         | state_dict, args, queue            |
 |                                        |                         |                                    |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signalize flow end                     | `FLOW_END`              | flow_name, dispatcher_id,          |
-|                                        |                         | finished_nodes                     |
+|                                        |                         | finished_nodes, queue              |
 |                                        |                         |                                    |
 +----------------------------------------+-------------------------+------------------------------------+
 | Signal storage connect                 | `STORAGE_CONNECT`       | storage_name                       |

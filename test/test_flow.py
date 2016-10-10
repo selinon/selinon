@@ -51,7 +51,8 @@ class TestFlow(SelinonTestCase):
         }
         flow2_queue = 'flow2_queue'
         dispatcher_queues = {
-            'flow2': flow2_queue
+            'flow2': flow2_queue,
+            'flow1': 'flow1_queue'
         }
         self.init(edge_table, task_queues=queues, dispatcher_queues=dispatcher_queues)
 

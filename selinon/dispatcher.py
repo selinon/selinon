@@ -55,6 +55,7 @@ class Dispatcher(Task):
                                             'node_args': node_args,
                                             'finished': finished,
                                             'retry': retry,
+                                            'queue': Config.dispatcher_queues[flow_name],
                                             'state': state})
         try:
             system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent, finished)
@@ -67,12 +68,14 @@ class Dispatcher(Task):
                                            'parent': parent,
                                            'finished': finished,
                                            'retry': retry,
+                                           'queue': Config.dispatcher_queues[flow_name],
                                            'what': str(flow_error)})
             # force max_retries to 0 so we are not scheduled and marked as FAILED
             raise self.retry(max_retries=0, exc=flow_error)
         except Exception as exc:
             Trace.log(Trace.DISPATCHER_FAILURE, {'flow_name': flow_name,
                                                  'dispatcher_id': self.request.id,
+                                                 'queue': Config.dispatcher_queues[flow_name],
                                                  'what': traceback.format_exc()})
             raise self.retry(max_retries=0, exc=exc)
 
@@ -91,12 +94,14 @@ class Dispatcher(Task):
                                                'dispatcher_id': self.request.id,
                                                'retry': retry,
                                                'state_dict': state_dict,
-                                               'node_args': node_args
+                                               'node_args': node_args,
+                                               'queue': Config.dispatcher_queues[flow_name]
                                                })
             raise self.retry(args=[], kwargs=kwargs, countdown=retry, queue=Config.dispatcher_queues[flow_name])
         else:
             Trace.log(Trace.FLOW_END, {'flow_name': flow_name,
                                        'dispatcher_id': self.request.id,
+                                       'queue': Config.dispatcher_queues[flow_name],
                                        'finished_nodes': state_dict['finished_nodes']})
             return {
                 'finished_nodes': state_dict['finished_nodes'],

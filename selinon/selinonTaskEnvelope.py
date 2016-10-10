@@ -74,6 +74,7 @@ class SelinonTaskEnvelope(Task):
                                      'retry_countdown': retry_countdown,
                                      'retried_count': retried_count,
                                      'user_retry': user_retry,
+                                     'queue': Config.task_queues[task_name],
                                      'max_retry': max_retry})
         raise self.retry(kwargs=kwargs, countdown=retry_countdown, queue=Config.task_queues[task_name])
 
@@ -94,6 +95,7 @@ class SelinonTaskEnvelope(Task):
                                      'task_id': self.request.id,
                                      'parent': parent,
                                      'finished': finished,
+                                     'queue': Config.task_queues[task_name],
                                      'args': node_args})
         try:
             task = Config.get_task_instance(task_name=task_name, flow_name=flow_name, parent=parent, finished=finished)
@@ -110,6 +112,7 @@ class SelinonTaskEnvelope(Task):
                                                       'parent': parent,
                                                       'args': node_args,
                                                       'finished': finished,
+                                                      'queue': Config.task_queues[task_name],
                                                       'result': result})
         except Retry as retry:
             # we do not touch retried_count
@@ -131,6 +134,7 @@ class SelinonTaskEnvelope(Task):
                                                'finished': finished,
                                                'args': node_args,
                                                'what': traceback.format_exc(),
+                                               'queue': Config.task_queues[task_name],
                                                'retried_count': retried_count})
                 raise self.retry(max_retries=0, exc=exc)
 
@@ -140,5 +144,6 @@ class SelinonTaskEnvelope(Task):
                                    'parent': parent,
                                    'finished': finished,
                                    'args': node_args,
+                                   'queue': Config.task_queues[task_name],
                                    'storage': StoragePool.get_storage_name_by_task_name(task_name, graceful=True)})
 

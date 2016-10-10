@@ -181,6 +181,7 @@ class SystemState(object):
             # reuse kwargs for trace log entry
             kwargs['dispatcher_id'] = self._dispatcher_id
             kwargs['task_id'] = async_result.task_id
+            kwargs['queue'] = Config.task_queues[node_name]
             Trace.log(Trace.TASK_SCHEDULE, kwargs)
 
         record = {'name': node_name, 'id': async_result.task_id, 'result': async_result}
@@ -443,6 +444,7 @@ class SystemState(object):
 
         Trace.log(Trace.FLOW_START, {'flow_name': self._flow_name,
                                      'dispatcher_id': self._dispatcher_id,
+                                     'queue': Config.dispatcher_queues[self._flow_name],
                                      'args': self._node_args})
         start_edges = [edge for edge in Config.edge_table[self._flow_name] if len(edge['from']) == 0]
         if len(start_edges) == 0:
