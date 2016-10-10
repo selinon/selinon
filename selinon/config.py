@@ -50,7 +50,7 @@ class Config(object):
     task_mapping = None
     dispatcher_queues = None
     task_queues = None
-    strategy_function = None
+    strategies = None
 
     @classmethod
     def _set_config(cls, config_module):
@@ -86,7 +86,7 @@ class Config(object):
         cls.task_queues = config_module['task_queues']
 
         # Dispatcher scheduling strategy
-        cls.strategy_function = config_module['strategy_function']
+        cls.strategies = config_module['strategies']
 
         # call config init with Config class to set up other configuration specific values
         config_module['init'](cls)

@@ -460,11 +460,11 @@ class SystemState(object):
                         self._update_waiting_edges(node['name'])
                         new_started_nodes.append(node)
 
-        self._retry = Config.strategy_function(previous_retry=None,
-                                               active_nodes=self._active_nodes,
-                                               failed_nodes=self._failed_nodes,
-                                               new_started_nodes=new_started_nodes,
-                                               new_fallback_nodes=[])
+        self._retry = Config.strategies[self._flow_name](previous_retry=None,
+                                                         active_nodes=self._active_nodes,
+                                                         failed_nodes=self._failed_nodes,
+                                                         new_started_nodes=new_started_nodes,
+                                                         new_fallback_nodes=[])
 
     def update(self):
         """
@@ -504,15 +504,15 @@ class SystemState(object):
                         }
                         raise FlowError(json.dumps(state_info))
 
-                self._retry = Config.strategy_function(previous_retry=self._retry,
-                                                       active_nodes=self._active_nodes,
-                                                       failed_nodes=self._failed_nodes,
-                                                       new_started_nodes=started,
-                                                       new_fallback_nodes=fallback_started)
+                self._retry = Config.strategies[self._flow_name](previous_retry=self._retry,
+                                                                 active_nodes=self._active_nodes,
+                                                                 failed_nodes=self._failed_nodes,
+                                                                 new_started_nodes=started,
+                                                                 new_fallback_nodes=fallback_started)
             else:
-                self._retry = Config.strategy_function(previous_retry=self._retry,
-                                                       active_nodes=self._active_nodes,
-                                                       failed_nodes=self._failed_nodes,
-                                                       new_started_nodes=[],
-                                                       new_fallback_nodes=[])
+                self._retry = Config.strategies[self._flow_name](previous_retry=self._retry,
+                                                                 active_nodes=self._active_nodes,
+                                                                 failed_nodes=self._failed_nodes,
+                                                                 new_started_nodes=[],
+                                                                 new_fallback_nodes=[])
         return self._retry

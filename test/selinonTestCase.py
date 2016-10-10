@@ -58,7 +58,7 @@ class SelinonTestCase(unittest.TestCase):
         Config.retry_countdown = kwargs.get('retry_countdown', {})
         Config.task_queues = kwargs.get('task_queues', QueueMock())
         Config.dispatcher_queues = kwargs.get('dispatcher_queues', QueueMock())
-        Config.strategy_function = kwargs.get('strategy_function', strategy_function)
+        Config.strategies = kwargs.get('strategies', dict.fromkeys(edge_table.keys(), strategy_function))
         # TODO: this is currently unused as we do not have tests for store()
         Config.storage_readonly = kwargs.get('storage_readonly', {})
         Config.node_args_from_first = kwargs.get('node_args_from_first', dict.fromkeys(edge_table.keys(), False))
