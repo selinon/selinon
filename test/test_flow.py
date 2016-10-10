@@ -49,8 +49,11 @@ class TestFlow(SelinonTestCase):
             'Task1': 'mytask1queue',
             'Task2': 'mytask2queue',
         }
-        dispatcher_queue = 'mydispatcher'
-        self.init(edge_table, task_queues=queues, dispatcher_queue=dispatcher_queue)
+        flow2_queue = 'flow2_queue'
+        dispatcher_queues = {
+            'flow2': flow2_queue
+        }
+        self.init(edge_table, task_queues=queues, dispatcher_queues=dispatcher_queues)
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -126,7 +129,7 @@ class TestFlow(SelinonTestCase):
 
         # check flow queue propagation
         flow2 = self.get_flow('flow2')
-        self.assertEqual(flow2.queue, dispatcher_queue)
+        self.assertEqual(flow2.queue, flow2_queue)
 
         # flow2 has finished
         self.set_finished(flow2, {'TaskSubflow': [1]})
@@ -244,7 +247,7 @@ class TestFlow(SelinonTestCase):
         self.assertIn('flow2', self.instantiated_flows)
 
         # Create flow3 manually
-        flow3 = Dispatcher().apply_async(kwargs={'flow_name': 'flow3'}, queue=Config.dispatcher_queue)
+        flow3 = Dispatcher().apply_async(kwargs={'flow_name': 'flow3'}, queue=Config.dispatcher_queues['flow3'])
         self.get_task_instance.register_node(flow3)
 
         flow2 = self.get_flow('flow2')

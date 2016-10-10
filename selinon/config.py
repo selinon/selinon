@@ -48,7 +48,7 @@ class Config(object):
 
     storage_mapping = None
     task_mapping = None
-    dispatcher_queue = None
+    dispatcher_queues = None
     task_queues = None
     strategy_function = None
 
@@ -82,7 +82,7 @@ class Config(object):
         cls.storage_readonly = config_module['storage_readonly']
 
         # queues
-        cls.dispatcher_queue = config_module['dispatcher_queue']
+        cls.dispatcher_queues = config_module['dispatcher_queues']
         cls.task_queues = config_module['task_queues']
 
         # Dispatcher scheduling strategy

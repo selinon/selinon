@@ -158,14 +158,14 @@ class SystemState(object):
                 'finished': finished
             }
 
-            async_result = Dispatcher().apply_async(kwargs=kwargs, queue=Config.dispatcher_queue)
+            async_result = Dispatcher().apply_async(kwargs=kwargs, queue=Config.dispatcher_queues[node_name])
 
             # reuse kwargs for trace log entry
             kwargs['flow_name'] = self._flow_name
             kwargs['child_flow_name'] = node_name
             kwargs['dispatcher_id'] = self._dispatcher_id
             kwargs['child_dispatcher_id'] = async_result.task_id,
-            kwargs['queue'] = Config.dispatcher_queue
+            kwargs['queue'] = Config.dispatcher_queues[node_name]
             Trace.log(Trace.SUBFLOW_SCHEDULE, kwargs)
         else:
             kwargs = {
