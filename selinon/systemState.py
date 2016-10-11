@@ -247,7 +247,7 @@ class SystemState(object):
         ret = []
 
         if 'foreach' in edge:
-            for res in edge['foreach'](node_args, storage_pool):
+            for res in edge['foreach'](storage_pool, node_args):
                 for node_name in edge['to']:
                     if edge.get('foreach_propagate_result'):
                         record = self._start_node(node_name, parent, res, finished, force_propagate_node_args=True)
