@@ -494,7 +494,7 @@ class SystemState(object):
             raise ValueError("No starting node found for flow '%s'!" % self._flow_name)
 
         for start_edge in start_edges:
-            storage_pool = StoragePool()
+            storage_pool = StoragePool(self._parent)
             if start_edge['condition'](storage_pool, self._node_args):
                 records = self._fire_edge(start_edge, storage_pool, node_args=self._node_args, parent=self._parent,
                                           finished=self._finished)
