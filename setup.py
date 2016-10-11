@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import sys
 from setuptools import setup
 
 
@@ -7,6 +8,8 @@ def get_requirements():
     with open('requirements.txt') as fd:
         return fd.read().splitlines()
 
+if sys.version_info[0] != 3:
+    sys.exit("Python3 is required in order to install selinon")
 
 setup(
     name='selinon',
