@@ -20,6 +20,7 @@
 
 import itertools
 import json
+import datetime
 from functools import reduce
 from celery.result import AsyncResult
 from .flowError import FlowError
@@ -33,6 +34,9 @@ class SystemState(object):
     """
     Main system actions done by Selinon
     """
+    # Throttled nodes in the current worker node name -> next schedule time
+    _throttled_tasks = {}
+    _throttled_flows = {}
 
     @property
     def node_args(self):
@@ -89,6 +93,36 @@ class SystemState(object):
                 'failed_nodes': self._failed_nodes,
                 'waiting_edges': self._waiting_edges_idx
                 }
+
+    def _get_countdown(self, node_name, is_flow):
+        """
+        Get countdown for throttling
+
+        :param node_name: node name
+        :param is_flow: true if node_name is a flow
+        :return: countdown seconds for the current schedule
+        """
+        if is_flow:
+            throttle_conf = Config.throttle_flows
+            throttled_nodes = self._throttled_flows
+        else:
+            throttle_conf = Config.throttle_tasks
+            throttled_nodes = self._throttled_tasks
+
+        if throttle_conf[node_name]:
+            current_datetime = datetime.datetime.now()
+            if node_name not in throttled_nodes:
+                # we throttle for the first time
+                throttled_nodes[node_name] = current_datetime
+                return None
+
+            next_run = current_datetime + throttle_conf[node_name]
+            countdown = (throttled_nodes[node_name] + throttle_conf[node_name] - current_datetime).total_seconds()
+            throttled_nodes[node_name] = next_run
+
+            return countdown if countdown > 0 else None
+        else:
+            return None
 
     def _get_successful_and_failed(self):
         """
@@ -158,7 +192,10 @@ class SystemState(object):
                 'finished': finished
             }
 
-            async_result = Dispatcher().apply_async(kwargs=kwargs, queue=Config.dispatcher_queues[node_name])
+            countdown = self._get_countdown(node_name, is_flow=True)
+            async_result = Dispatcher().apply_async(kwargs=kwargs,
+                                                    queue=Config.dispatcher_queues[node_name],
+                                                    countdown=countdown)
 
             # reuse kwargs for trace log entry
             kwargs['flow_name'] = self._flow_name
@@ -166,6 +203,7 @@ class SystemState(object):
             kwargs['dispatcher_id'] = self._dispatcher_id
             kwargs['child_dispatcher_id'] = async_result.task_id,
             kwargs['queue'] = Config.dispatcher_queues[node_name]
+            kwargs['countdown'] = countdown
             Trace.log(Trace.SUBFLOW_SCHEDULE, kwargs)
         else:
             kwargs = {
@@ -176,12 +214,16 @@ class SystemState(object):
                 'finished': finished
             }
 
-            async_result = SelinonTaskEnvelope().apply_async(kwargs=kwargs, queue=Config.task_queues[node_name])
+            countdown = self._get_countdown(node_name, is_flow=False)
+            async_result = SelinonTaskEnvelope().apply_async(kwargs=kwargs,
+                                                             queue=Config.task_queues[node_name],
+                                                             countdown=countdown)
 
             # reuse kwargs for trace log entry
             kwargs['dispatcher_id'] = self._dispatcher_id
             kwargs['task_id'] = async_result.task_id
             kwargs['queue'] = Config.task_queues[node_name]
+            kwargs['countdown'] = countdown
             Trace.log(Trace.TASK_SCHEDULE, kwargs)
 
         record = {'name': node_name, 'id': async_result.task_id, 'result': async_result}

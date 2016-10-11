@@ -29,12 +29,13 @@ class Task(object):
         self.retried_count = None
         self.finished = None
         self.queue = None
+        self.countdown = None
 
     @property
     def task_id(self):
         return id(self)
 
-    def apply_async(self, kwargs, queue):
+    def apply_async(self, kwargs, queue, countdown=None):
         from selinon.config import Config
 
         # Ensure that SelinonTaskEnvelope kept parameters consistent
@@ -46,6 +47,7 @@ class Task(object):
         # None if we have flow
         self.task_name = kwargs.get('task_name')
         self.retried_count = kwargs.get('retried_count')
+        self.countdown = countdown
 
         self.queue = queue
         Config.get_task_instance.register_node(self)

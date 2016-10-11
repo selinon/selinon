@@ -81,6 +81,10 @@ class Config(object):
         cls.retry_countdown = config_module['retry_countdown']
         cls.storage_readonly = config_module['storage_readonly']
 
+        # throttle configuration
+        cls.throttle_tasks = config_module['throttle_tasks']
+        cls.throttle_flows = config_module['throttle_flows']
+
         # queues
         cls.dispatcher_queues = config_module['dispatcher_queues']
         cls.task_queues = config_module['task_queues']

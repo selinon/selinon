@@ -28,6 +28,17 @@ from celery.result import AsyncResult
 from selinon.config import Config
 
 
+class _ThrottleTasks(object):
+    def __init__(self, is_flow, throttle_conf=None):
+        self._is_flow = is_flow
+        self._throttle_conf = throttle_conf or {}
+
+    def __getitem__(self, item):
+        if self._is_flow(item):
+            raise KeyError("Unable to find throttle flow configuration in task throttle configuration")
+        return self._throttle_conf.get(item)
+
+
 class SelinonTestCase(unittest.TestCase):
     """
     Main class for Selinon testing
@@ -46,10 +57,9 @@ class SelinonTestCase(unittest.TestCase):
         :param kwargs: additional parameters for test configuration
         """
         Config.edge_table = edge_table
-
         Config.is_flow = IsFlow(kwargs.get('is_flow', list(edge_table.keys())))
-        Config.nowait_nodes = kwargs.get('nowait_nodes', dict.fromkeys(edge_table.keys(), []))
 
+        Config.nowait_nodes = kwargs.get('nowait_nodes', dict.fromkeys(edge_table.keys(), []))
         Config.get_task_instance = kwargs.get('get_task_instance', GetTaskInstance())
         Config.failures = kwargs.get('failures', {})
         Config.propagate_finished = kwargs.get('propagate_finished', {})
@@ -62,6 +72,9 @@ class SelinonTestCase(unittest.TestCase):
         # TODO: this is currently unused as we do not have tests for store()
         Config.storage_readonly = kwargs.get('storage_readonly', {})
         Config.node_args_from_first = kwargs.get('node_args_from_first', dict.fromkeys(edge_table.keys(), False))
+        Config.throttle_flows = kwargs.get('throttle_flows', dict.fromkeys(edge_table.keys(), None))
+        Config.throttle_tasks = kwargs.get('throttle_tasks', _ThrottleTasks(Config.is_flow,
+                                                                            kwargs.get('throttle_tasks_conf')))
 
     @staticmethod
     def cond_true(db, node_args):

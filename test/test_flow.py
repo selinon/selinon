@@ -18,6 +18,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
+import time
+import datetime
 from selinon.config import Config
 from selinonTestCase import SelinonTestCase
 from selinon import SystemState, Dispatcher
@@ -433,3 +435,38 @@ class TestFlow(SelinonTestCase):
         flow3 = self.get_flow('flow3')
         self.assertIsNone(flow3.node_args)
         self.assertIsNone(flow3.parent)
+
+    def test_throttle(self):
+        #
+        # flow1:
+        #           |
+        #         flow2
+        #
+        # Note:
+        #    flow2 should be throttled by 2s in next flow1 run
+        #
+        edge_table = {
+            'flow1': [{'from': [], 'to': ['flow2'], 'condition': self.cond_true}],
+            'flow2': []
+        }
+        self.init(edge_table, throttle_flows={'flow2': datetime.timedelta(seconds=2)})
+
+        system_state = SystemState(id(self), 'flow1')
+        retry = system_state.update()
+
+        self.assertIsNotNone(retry)
+        self.assertIn('flow2', self.instantiated_flows)
+        self.assertIsNone(self.get_flow('flow2').countdown)
+
+        # Let's sleep to ensure we get less then 2s delay
+        time.sleep(0.01)
+
+        # run flow for the second time, we should be postponed by ~2s
+        system_state = SystemState(id(self), 'flow1')
+        retry = system_state.update()
+
+        self.assertIsNotNone(retry)
+        self.assertIsNotNone(self.get_flow('flow2').countdown)
+        self.assertLess(self.get_flow('flow2').countdown, 2)
+
+
