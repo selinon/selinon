@@ -19,7 +19,32 @@
 # ####################################################################
 
 from selinon import SystemState
+from selinon.storage import DataStorage
 from selinonTestCase import SelinonTestCase
+
+
+class _MyStorage(DataStorage):
+    result = None
+
+    def __init__(self):
+        pass
+
+    def connect(self):
+        pass
+
+    def disconnect(self):
+        pass
+
+    def is_connected(self):
+        # return True so we can test retrieve()
+        return True
+
+    def store(self, node_args, flow_name, task_name, task_id, result):
+        pass
+
+    def retrieve(self, task_name, task_id):
+        return self.result
+
 
 
 class TestNodeArgs(SelinonTestCase):
@@ -39,7 +64,7 @@ class TestNodeArgs(SelinonTestCase):
             'flow1': [{'from': ['Task1'], 'to': ['Task2'], 'condition': self.cond_true},
                       {'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
         }
-        self.init(edge_table, node_args_from_first={'flow1': True})
+        self.init(edge_table, node_args_from_first={'flow1': True}, storage_mapping={'Storage1': _MyStorage()})
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -58,6 +83,7 @@ class TestNodeArgs(SelinonTestCase):
         task1 = self.get_task('Task1')
         task1_result = "propagated result of Task1"
         self.set_finished(task1, task1_result)
+        _MyStorage.result = task1_result
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -86,7 +112,7 @@ class TestNodeArgs(SelinonTestCase):
                       {'from': [], 'to': ['Task1'], 'condition': self.cond_true}],
             'flow2': []
         }
-        self.init(edge_table, node_args_from_first={'flow1': True})
+        self.init(edge_table, node_args_from_first={'flow1': True}, storage_mapping={'Storage1': _MyStorage()})
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -109,6 +135,7 @@ class TestNodeArgs(SelinonTestCase):
         task1 = self.get_task('Task1')
         task1_result = "propagated result of Task1"
         self.set_finished(task1, task1_result)
+        _MyStorage.result = task1_result
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -136,7 +163,10 @@ class TestNodeArgs(SelinonTestCase):
                       {'from': [], 'to': ['Task1'], 'condition': self.cond_true}],
             'flow2': []
         }
-        self.init(edge_table, node_args_from_first={'flow1': True}, propagate_node_args={'flow1': True})
+        self.init(edge_table,
+                  node_args_from_first={'flow1': True},
+                  propagate_node_args={'flow1': True},
+                  storage_mapping={'Storage1': _MyStorage()})
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -150,6 +180,7 @@ class TestNodeArgs(SelinonTestCase):
         task1 = self.get_task('Task1')
         task1_result = "propagated result of Task1"
         self.set_finished(task1, task1_result)
+        _MyStorage.result = task1_result
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -176,7 +207,7 @@ class TestNodeArgs(SelinonTestCase):
             'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3'], 'condition': self.cond_true},
                       {'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
         }
-        self.init(edge_table, node_args_from_first={'flow1': True})
+        self.init(edge_table, node_args_from_first={'flow1': True}, storage_mapping={'Storage1': _MyStorage()})
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -190,6 +221,7 @@ class TestNodeArgs(SelinonTestCase):
         task1 = self.get_task('Task1')
         task1_result = "propagated result of Task1"
         self.set_finished(task1, task1_result)
+        _MyStorage.result = task1_result
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
@@ -220,7 +252,7 @@ class TestNodeArgs(SelinonTestCase):
             'flow1': [{'from': ['Task1'], 'to': ['Task1'], 'condition': self.cond_true},
                       {'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
         }
-        self.init(edge_table, node_args_from_first={'flow1': True})
+        self.init(edge_table, node_args_from_first={'flow1': True}, storage_mapping={'Storage1': _MyStorage()})
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -234,6 +266,7 @@ class TestNodeArgs(SelinonTestCase):
         task1_1 = self.get_task('Task1')
         task1_result = "propagated result of Task1"
         self.set_finished(task1_1, task1_result)
+        _MyStorage.result = task1_result
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()

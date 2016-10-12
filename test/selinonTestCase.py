@@ -26,6 +26,7 @@ from isFlow import IsFlow
 
 from celery.result import AsyncResult
 from selinon.config import Config
+from selinon.systemState import SystemState
 
 
 class _ThrottleTasks(object):
@@ -50,6 +51,8 @@ class SelinonTestCase(unittest.TestCase):
         AsyncResult.clear()
         GetTaskInstance.clear()
         Config.storage_mapping = {}
+        SystemState._throttled_tasks = {}
+        SystemState._throttled_flows = {}
 
     def init(self, edge_table, **kwargs):
         """
@@ -75,6 +78,7 @@ class SelinonTestCase(unittest.TestCase):
         Config.throttle_flows = kwargs.get('throttle_flows', dict.fromkeys(edge_table.keys(), None))
         Config.throttle_tasks = kwargs.get('throttle_tasks', _ThrottleTasks(Config.is_flow,
                                                                             kwargs.get('throttle_tasks_conf')))
+        Config.storage_mapping = kwargs.get('storage_mapping')
 
     @staticmethod
     def cond_true(db, node_args):
