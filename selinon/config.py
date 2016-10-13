@@ -31,8 +31,8 @@ class Config(object):
     """
     celery_app = None
 
-    get_task_instance = None
-    is_flow = None
+    flows = None
+    task_classes = None
     edge_table = None
     failures = None
     nowait_nodes = None
@@ -40,10 +40,10 @@ class Config(object):
     retry_countdown = None
     storage_readonly = None
     propagate_node_args = None
-    propagate_finished = None
     propagate_parent = None
-    propagate_compound_finished = None
     propagate_compound_parent = None
+    propagate_finished = None
+    propagate_compound_finished = None
     output_schemas = None
 
     storage_mapping = None
@@ -57,11 +57,11 @@ class Config(object):
         """
         Set configuration from Python's module
         """
-        cls.get_task_instance = config_module['get_task_instance']
-        cls.is_flow = config_module['is_flow']
+        cls.task_classes = config_module['task_classes']
         cls.edge_table = config_module['edge_table']
         cls.failures = config_module['failures']
         cls.nowait_nodes = config_module['nowait_nodes']
+        cls.flows = list(cls.edge_table.keys())
 
         # misc
         cls.node_args_from_first = config_module['node_args_from_first']
@@ -157,4 +157,89 @@ class Config(object):
         cls.celery_app = celery_app
         celery_app.tasks.register(Dispatcher())
         celery_app.tasks.register(SelinonTaskEnvelope())
+
+    @staticmethod
+    def _should_config(node_name, dst_node_name, configuration):
+        """
+        :param node_name: node name
+        :param dst_node_name: destination node to which configuration should be propagated
+        :param configuration: configuration that should be checked
+        :return: true if node_name satisfies configuration
+        """
+        if configuration[node_name] is True:
+            return True
+
+        if isinstance(configuration[node_name], list):
+            return dst_node_name in configuration[node_name]
+
+        return False
+
+    @classmethod
+    def should_propagate_finished(cls, node_name, dst_node_name):
+        """
+        :param node_name: node name that should be checked for propagate_finished
+        :param dst_node_name: destination node to which configuration should be propagated
+        :return: True if should propagate_finish
+        """
+        return cls._should_config(node_name, dst_node_name, cls.propagate_finished)
+
+    @classmethod
+    def should_propagate_node_args(cls, node_name, dst_node_name):
+        """
+        :param node_name: node name that should be checked for propagate_node_args
+        :param dst_node_name: destination node to which configuration should be propagated
+        :return: True if should propagate_node_args
+        """
+        return cls._should_config(node_name, dst_node_name, cls.propagate_node_args)
+
+    @classmethod
+    def should_propagate_parent(cls, node_name, dst_node_name):
+        """
+        :param node_name: node name that should be checked for propagate_parent
+        :param dst_node_name: destination node to which configuration should be propagated
+        :return: True if should propagate_parent
+        """
+        return cls._should_config(node_name, dst_node_name, cls.propagate_parent)
+
+    @classmethod
+    def should_propagate_compound_finished(cls, node_name, dst_node_name):
+        """
+        :param node_name: node name that should be checked for propagate_compound_finished
+        :param dst_node_name: destination node to which configuration should be propagated
+        :return: True if should propagate_compound_finished
+        """
+        return cls._should_config(node_name, dst_node_name, cls.propagate_compound_finished)
+
+    @classmethod
+    def should_propagate_compound_parent(cls, node_name, dst_node_name):
+        """
+        :param node_name: node name that should be checked for propagate_compound_parent
+        :param dst_node_name: destination node to which configuration should be propagated
+        :return: True if should propagate_compound_parent
+        """
+        return cls._should_config(node_name, dst_node_name, cls.propagate_compound_parent)
+
+    @classmethod
+    def get_task_instance(cls, task_name, flow_name, parent, finished):
+        """
+        Get instance of SelinonTask
+
+        :param task_name: task name that should be instantiated (it is not necessarily SelinonTask)
+        :param flow_name: flow name
+        :param parent: parent nodes for instance
+        :param finished: finished nodes for instance
+        :return: instance of the task
+        """
+        task_class = Config.task_classes[task_name]
+        return task_class(task_name=task_name, flow_name=flow_name, parent=parent, finished=finished)
+
+    @classmethod
+    def is_flow(cls, node_name):
+        """
+        Check if given node is a flow by its name
+
+        :param node_name: name of the node to be checked
+        :return: True if given node is a flow
+        """
+        return node_name in cls.flows
 

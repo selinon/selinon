@@ -22,7 +22,6 @@ import unittest
 from getTaskInstance import GetTaskInstance
 from queueMock import QueueMock
 from strategyMock import strategy_function
-from isFlow import IsFlow
 
 from celery.result import AsyncResult
 from selinon.config import Config
@@ -60,22 +59,23 @@ class SelinonTestCase(unittest.TestCase):
         :param kwargs: additional parameters for test configuration
         """
         Config.edge_table = edge_table
-        Config.is_flow = IsFlow(kwargs.get('is_flow', list(edge_table.keys())))
+        flows = list(edge_table.keys())
 
-        Config.nowait_nodes = kwargs.get('nowait_nodes', dict.fromkeys(edge_table.keys(), []))
+        Config.flows = kwargs.get('flows', flows)
+        Config.nowait_nodes = kwargs.get('nowait_nodes', dict.fromkeys(flows, []))
         Config.get_task_instance = kwargs.get('get_task_instance', GetTaskInstance())
         Config.failures = kwargs.get('failures', {})
-        Config.propagate_finished = kwargs.get('propagate_finished', {})
-        Config.propagate_node_args = kwargs.get('propagate_node_args', {})
-        Config.propagate_parent = kwargs.get('propagate_parent', {})
+        Config.propagate_node_args = kwargs.get('propagate_node_args', dict.fromkeys(flows, False))
+        Config.propagate_parent = kwargs.get('propagate_parent', dict.fromkeys(flows, False))
+        Config.propagate_compound_parent = kwargs.get('propagate_compound_parent', dict.fromkeys(flows, False))
         Config.retry_countdown = kwargs.get('retry_countdown', {})
         Config.task_queues = kwargs.get('task_queues', QueueMock())
         Config.dispatcher_queues = kwargs.get('dispatcher_queues', QueueMock())
-        Config.strategies = kwargs.get('strategies', dict.fromkeys(edge_table.keys(), strategy_function))
+        Config.strategies = kwargs.get('strategies', dict.fromkeys(flows, strategy_function))
         # TODO: this is currently unused as we do not have tests for store()
         Config.storage_readonly = kwargs.get('storage_readonly', {})
-        Config.node_args_from_first = kwargs.get('node_args_from_first', dict.fromkeys(edge_table.keys(), False))
-        Config.throttle_flows = kwargs.get('throttle_flows', dict.fromkeys(edge_table.keys(), None))
+        Config.node_args_from_first = kwargs.get('node_args_from_first', dict.fromkeys(flows, False))
+        Config.throttle_flows = kwargs.get('throttle_flows', dict.fromkeys(flows, None))
         Config.throttle_tasks = kwargs.get('throttle_tasks', _ThrottleTasks(Config.is_flow,
                                                                             kwargs.get('throttle_tasks_conf')))
         Config.storage_mapping = kwargs.get('storage_mapping')

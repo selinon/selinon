@@ -643,7 +643,7 @@ class TestNodeFailures(SelinonTestCase):
                                        node_args=system_state.node_args)
             system_state.update()
 
-    def test_propagate_finished_in_failure(self):
+    def test_propagate_parent_in_failure(self):
         #
         # flow1:
         #
@@ -701,7 +701,7 @@ class TestNodeFailures(SelinonTestCase):
             },
             'fallback': []
         }
-        self.init(edge_table, failures=failures, propagate_finished={'flow1': True})
+        self.init(edge_table, failures=failures, propagate_parent=dict.fromkeys(edge_table, True))
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()

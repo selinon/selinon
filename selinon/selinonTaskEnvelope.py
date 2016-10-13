@@ -54,7 +54,7 @@ class SelinonTaskEnvelope(Task):
             jsonschema.validate(result, schema)
 
     def selinon_retry(self, task_name, flow_name, parent, node_args, retry_countdown, finished, retried_count,
-                      user_retry):
+                      user_retry=False):
         max_retry = Config.max_retry.get(task_name, 0)
         kwargs = {
             'task_name': task_name,

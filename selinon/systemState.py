@@ -34,7 +34,8 @@ class SystemState(object):
     """
     Main system actions done by Selinon
     """
-    # Throttled nodes in the current worker node name -> next schedule time
+    # Throttled nodes in the current worker: node name -> next schedule time
+    # TODO: make this safe to be used with concurrency
     _throttled_tasks = {}
     _throttled_flows = {}
 
@@ -164,24 +165,17 @@ class SystemState(object):
         :param node_name: name of a node to be started
         :param parent: parent nodes of the starting node
         :param node_args: arguments for the starting node
-        :param finished: finished nodes for starting node in case of subflow and propagate_finished flag
+        :param finished: finished nodes for starting node
         """
         from .dispatcher import Dispatcher
         if Config.is_flow(node_name):
-            if force_propagate_node_args or Config.propagate_node_args.get(self._flow_name) is True or \
-                (isinstance(Config.propagate_node_args.get(self._flow_name), list) and
-                 node_name in Config.propagate_node_args.get(self._flow_name)):
+            if force_propagate_node_args or Config.should_propagate_node_args(self._flow_name, node_name):
                 node_args = node_args
             else:
                 node_args = None
 
-            if Config.propagate_parent.get(self._flow_name):
-                if Config.propagate_parent.get(self._flow_name) is True or \
-                    (isinstance(Config.propagate_parent.get(self._flow_name), list) and
-                     node_name in Config.propagate_parent.get(self._flow_name)):
-                    parent = parent
-                else:
-                    parent = None
+            if Config.should_propagate_parent(self._flow_name, node_name):
+                parent = parent
             else:
                 parent = None
 
@@ -290,7 +284,9 @@ class SystemState(object):
                     for node in combination:
                         traced_nodes_arr.append((node[0], self._failed_nodes[node[0]],))
 
-                        if Config.is_flow(node[0]) and Config.propagate_finished:
+                        if Config.is_flow(node[0]) \
+                                and (Config.should_propagate_parent(self._flow_name, node[0])
+                                     or Config.should_propagate_compound_parent(self._flow_name, node[0])):
                             # we have to add all subsequent finished nodes to list to track info about finished
                             task_id = self._failed_nodes[node[0]][0]
                             # Celery stores exception that was raised in case of failure in result property
@@ -299,7 +295,9 @@ class SystemState(object):
                             flow_info = json.loads(raw_result)
                             parent[node[0]] = {}
                             finished[node[0]] = {}
-                            self._extend_parent_finished(parent[node[0]], finished[node[0]], flow_info)
+                            self._extend_parent_finished(parent[node[0]], finished[node[0]], flow_info,
+                                                         Config.should_propagate_compound_parent(self._flow_name,
+                                                                                                 node[0]))
                             self._failed_nodes[node[0]].pop(0)
                         else:
                             parent[node[0]] = self._failed_nodes[node[0]].pop(0)
@@ -346,31 +344,42 @@ class SystemState(object):
                 self._waiting_edges.append(edge)
                 self._waiting_edges_idx.append(idx)
 
-    def _extend_parent_finished(self, parent_dict, finished_dict, flow_info):
+    def _extend_parent_finished(self, parent_dict, finished_dict, flow_info, compound=False):
         """"
-        Compute finished and parent for starting node in case of propagate_finished flag
+        Compute finished and parent for starting node in case of propagate_parent
 
         :param parent_dict: parent dict that should be extended
         :param finished_dict: finished dict that should be extended
         :param flow_info: flow info propagated from a flow
+        :param compound: if True info about flow will be discarded and only tasks will be keys in resulting dict
         """
         for node_name, node_val in flow_info['finished_nodes'].items():
             if Config.is_flow(node_name):
-                finished_dict[node_name] = {}
-                if node_name not in parent_dict:
-                    parent_dict[node_name] = {}
+                if not compound:
+                    finished_dict[node_name] = {}
+                    if node_name not in parent_dict:
+                        parent_dict[node_name] = {}
                 for node_id in node_val:
                     raw_result = str(AsyncResult(node_id).result)
                     child_flow_info = json.loads(raw_result)
-                    self._extend_parent_finished(parent_dict[node_name], finished_dict[node_name], child_flow_info)
+                    self._extend_parent_finished(parent_dict if compound else parent_dict[node_name],
+                                                 finished_dict if compound else finished_dict[node_name],
+                                                 child_flow_info,
+                                                 compound)
             else:
-                finished_dict[node_name] = node_val
+                if compound:
+                    if node_name not in finished_dict:
+                        finished_dict[node_name] = []
+                    finished_dict[node_name].append(node_val)
+                else:
+                    finished_dict[node_name] = node_val
 
         for node_name, node_val in flow_info['failed_nodes'].items():
             if Config.is_flow(node_name):
-                parent_dict[node_name] = {}
-                if node_name not in finished_dict:
-                    finished_dict[node_name] = {}
+                if not compound:
+                    parent_dict[node_name] = {}
+                    if node_name not in finished_dict:
+                        finished_dict[node_name] = {}
                 for node_id in node_val:
                     result = AsyncResult(node_id).result
 
@@ -380,9 +389,17 @@ class SystemState(object):
                         raise result
 
                     child_flow_info = json.loads(str(result))
-                    self._extend_parent_finished(parent_dict[node_name], finished_dict[node_name], child_flow_info)
+                    self._extend_parent_finished(parent_dict if compound else parent_dict[node_name],
+                                                 finished_dict if compound else finished_dict[node_name],
+                                                 child_flow_info,
+                                                 compound)
             else:
-                parent_dict[node_name] = node_val
+                if compound:
+                    if node_name not in parent_dict:
+                        parent_dict[node_name] = []
+                    parent_dict[node_name].append(node_val)
+                else:
+                    parent_dict[node_name] = node_val
 
     def _extend_parent_from_flow(self, parent_dict, flow_id):
         """
@@ -451,9 +468,7 @@ class SystemState(object):
 
                     for start_node in start_nodes:
                         if Config.is_flow(start_node['name']):
-                            propagate_finished = Config.propagate_finished.get(self._flow_name, False)
-                            if propagate_finished is True or (isinstance(propagate_finished, list) and
-                                                              start_node['name'] in propagate_finished):
+                            if Config.should_propagate_parent(self._flow_name, start_node['name']):
                                 parent[start_node['name']] = {}
                                 self._extend_parent_from_flow(parent[start_node['name']], start_node['id'])
                         else:
