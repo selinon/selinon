@@ -205,7 +205,8 @@ class SystemState(object):
                 'flow_name': self._flow_name,
                 'parent': parent,
                 'node_args': node_args,
-                'finished': finished
+                'finished': finished,
+                'dispatcher_id': self._dispatcher_id
             }
 
             countdown = self._get_countdown(node_name, is_flow=False)
@@ -214,7 +215,6 @@ class SystemState(object):
                                                              countdown=countdown)
 
             # reuse kwargs for trace log entry
-            kwargs['dispatcher_id'] = self._dispatcher_id
             kwargs['task_id'] = async_result.task_id
             kwargs['queue'] = Config.task_queues[node_name]
             kwargs['countdown'] = countdown

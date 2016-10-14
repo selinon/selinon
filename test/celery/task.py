@@ -30,6 +30,7 @@ class Task(object):
         self.finished = None
         self.queue = None
         self.countdown = None
+        self.dispatcher_id = None
 
     @property
     def task_id(self):
@@ -43,6 +44,7 @@ class Task(object):
         self.node_args = kwargs.get('node_args')
         self.finished = kwargs.get('finished')
         self.parent = kwargs.get('parent')
+        self.dispatcher_id = kwargs.get('dispatcher_id')
 
         # None if we have flow
         self.task_name = kwargs.get('task_name')

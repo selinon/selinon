@@ -220,7 +220,7 @@ class Config(object):
         return cls._should_config(node_name, dst_node_name, cls.propagate_compound_parent)
 
     @classmethod
-    def get_task_instance(cls, task_name, flow_name, parent, finished):
+    def get_task_instance(cls, task_name, flow_name, parent, finished, dispatcher_id):
         """
         Get instance of SelinonTask
 
@@ -228,10 +228,12 @@ class Config(object):
         :param flow_name: flow name
         :param parent: parent nodes for instance
         :param finished: finished nodes for instance
+        :param dispatcher_id: id of dispatcher for flow flow
         :return: instance of the task
         """
         task_class = Config.task_classes[task_name]
-        return task_class(task_name=task_name, flow_name=flow_name, parent=parent, finished=finished)
+        return task_class(task_name=task_name, flow_name=flow_name, parent=parent, finished=finished,
+                          dispatcher_id=dispatcher_id)
 
     @classmethod
     def is_flow(cls, node_name):

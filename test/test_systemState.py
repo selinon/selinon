@@ -63,6 +63,9 @@ class TestSystemState(SelinonTestCase):
         task1 = self.get_task('Task1')
         self.set_finished(task1, 1)
 
+        # check dispatcher_id propagation
+        self.assertEqual(task1.dispatcher_id, id(self))
+
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
         state_dict = system_state.to_dict()
