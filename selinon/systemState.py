@@ -21,6 +21,7 @@
 import itertools
 import json
 import datetime
+from threading import Lock
 from functools import reduce
 from celery.result import AsyncResult
 from .flowError import FlowError
@@ -35,7 +36,8 @@ class SystemState(object):
     Main system actions done by Selinon
     """
     # Throttled nodes in the current worker: node name -> next schedule time
-    # TODO: make this safe to be used with concurrency
+    # Throttle should be safe with concurrency
+    _throttle_lock = Lock()
     _throttled_tasks = {}
     _throttled_flows = {}
 
@@ -110,20 +112,21 @@ class SystemState(object):
             throttle_conf = Config.throttle_tasks
             throttled_nodes = self._throttled_tasks
 
-        if throttle_conf[node_name]:
-            current_datetime = datetime.datetime.now()
-            if node_name not in throttled_nodes:
-                # we throttle for the first time
-                throttled_nodes[node_name] = current_datetime
+        with self._throttle_lock:
+            if throttle_conf[node_name]:
+                current_datetime = datetime.datetime.now()
+                if node_name not in throttled_nodes:
+                    # we throttle for the first time
+                    throttled_nodes[node_name] = current_datetime
+                    return None
+
+                next_run = current_datetime + throttle_conf[node_name]
+                countdown = (throttled_nodes[node_name] + throttle_conf[node_name] - current_datetime).total_seconds()
+                throttled_nodes[node_name] = next_run
+
+                return countdown if countdown > 0 else None
+            else:
                 return None
-
-            next_run = current_datetime + throttle_conf[node_name]
-            countdown = (throttled_nodes[node_name] + throttle_conf[node_name] - current_datetime).total_seconds()
-            throttled_nodes[node_name] = next_run
-
-            return countdown if countdown > 0 else None
-        else:
-            return None
 
     def _get_successful_and_failed(self):
         """
