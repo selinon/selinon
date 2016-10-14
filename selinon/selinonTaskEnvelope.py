@@ -42,9 +42,10 @@ class SelinonTaskEnvelope(Task):
     @classmethod
     def validate_result(cls, task_name, result):
         """
-        :param task_name:
-        :param result:
-        :return:
+        Validate result of the task for the given schema, if fails an Exception is raised
+
+        :param task_name: name of task
+        :param result: result of task
         """
         schema_path = Config.output_schemas.get(task_name)
         if schema_path:
@@ -81,14 +82,16 @@ class SelinonTaskEnvelope(Task):
 
     def run(self, task_name, flow_name, parent, node_args, dispatcher_id, finished=None, retried_count=None):
         """
-        :param task_name:
-        :param flow_name:
-        :param parent:
-        :param node_args:
-        :param dispatcher_id
-        :param finished:
-        :param retried_count:
-        :return:
+        Task entry-point called by Celery
+
+        :param task_name: task to be run
+        :param flow_name: flow in which this task run
+        :param parent: dict of parent nodes
+        :param node_args: node arguments within the flow
+        :param dispatcher_id: dispatcher id that handles flow
+        :param finished: finished nodes in the flow
+        :param retried_count: number of already attempts that failed so task was retried
+        :rtype: None
         """
         # we are passing args as one argument explicitly for now not to have troubles with *args and **kwargs mapping
         # since we depend on previous task and the result can be anything
