@@ -246,6 +246,7 @@ class SystemState(object):
                             'nodes_to': edge['to'],
                             'nodes_from': edge['from'],
                             'flow_name': self._flow_name,
+                            'foreach_str': edge['foreach_str'],
                             'parent': parent,
                             'node_args': self._node_args,
                             'dispatcher_id': self._dispatcher_id
@@ -462,6 +463,7 @@ class SystemState(object):
                         Trace.log(Trace.EDGE_COND_FALSE, {
                             'nodes_to': edge['to'],
                             'nodes_from': edge['from'],
+                            'condition': edge['condition_str'],
                             'flow_name': self._flow_name,
                             'parent': parent,
                             'node_args': self._node_args,
