@@ -106,7 +106,11 @@ List of events that can be traced:
 |                                        |                         | storage, result, record_id         |
 |                                        |                         |                                    |
 +----------------------------------------+-------------------------+------------------------------------+
-| Signal storage access for writing      | `EDGE_COND_FALSE`       | nodes_to, nodes_from, flow_name,   |
+| Signalized when edge condition is      | `EDGE_COND_FALSE`       | nodes_to, nodes_from, flow_name,   |
+| is evaluated as false                  |                         | parent, node_args, dispatcher_id   |
+|                                        |                         |                                    |
++----------------------------------------+-------------------------+------------------------------------+
+| Signalized result of foreach  ing      | `FOREACH_RESULT`        | nodes_to, nodes_from, flow_name,   |
 |                                        |                         | parent, node_args, dispatcher_id   |
 |                                        |                         |                                    |
 +----------------------------------------+-------------------------+------------------------------------+
@@ -154,7 +158,8 @@ class Trace(object):
     STORAGE_DISCONNECT, \
     STORAGE_RETRIEVE, \
     STORAGE_STORE, \
-    EDGE_COND_FALSE = range(21)
+    EDGE_COND_FALSE, \
+    FOREACH_RESULT = range(22)
 
     _event_strings = [
         'DISPATCHER_WAKEUP',
@@ -177,7 +182,8 @@ class Trace(object):
         'STORAGE_DISCONNECT',
         'STORAGE_RETRIEVE',
         'STORAGE_STORE',
-        'EDGE_COND_FALSE'
+        'EDGE_COND_FALSE',
+        'FOREACH_RESULT'
     ]
 
     def __init__(self):

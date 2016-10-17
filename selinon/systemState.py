@@ -239,7 +239,20 @@ class SystemState(object):
         ret = []
 
         if 'foreach' in edge:
-            for res in edge['foreach'](storage_pool, node_args):
+            iterable = edge['foreach'](storage_pool, node_args)
+            # TODO: we should consider to include foreach debug string
+            Trace.log(Trace.FOREACH_RESULT, {
+                            'nodes_to': edge['to'],
+                            'nodes_from': edge['from'],
+                            'flow_name': self._flow_name,
+                            'parent': parent,
+                            'node_args': self._node_args,
+                            'dispatcher_id': self._dispatcher_id
+            })
+            # handle None as well
+            if not iterable:
+                return ret
+            for res in iterable:
                 for node_name in edge['to']:
                     if edge.get('foreach_propagate_result'):
                         record = self._start_node(node_name, parent, res, force_propagate_node_args=True)
