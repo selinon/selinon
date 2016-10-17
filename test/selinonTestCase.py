@@ -82,6 +82,16 @@ class SelinonTestCase(unittest.TestCase):
         Config.throttle_tasks = kwargs.get('throttle_tasks', _ThrottleTasks(Config.is_flow,
                                                                             kwargs.get('throttle_tasks_conf')))
         Config.storage_mapping = kwargs.get('storage_mapping')
+        self._update_edge_table()
+
+    def _update_edge_table(self):
+        """
+        As edge table stores some metadata for debugging, let's fake them during testing
+        """
+        for key in Config.edge_table.keys():
+            for entry in Config.edge_table[key]:
+                entry['foreach_str'] = 'foreach_str'
+                entry['condition_str'] = 'condition_str'
 
     @staticmethod
     def cond_true(db, node_args):
