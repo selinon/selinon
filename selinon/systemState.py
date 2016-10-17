@@ -441,6 +441,16 @@ class SystemState(object):
                     if edge['condition'](storage_pool, self._node_args):
                         records = self._fire_edge(edge, storage_pool, parent=parent, node_args=self._node_args)
                         ret.extend(records)
+                    else:
+                        # TODO: we should consider to include condition
+                        Trace.log(Trace.EDGE_COND_FALSE, {
+                            'nodes_to': edge['to'],
+                            'nodes_from': edge['from'],
+                            'flow_name': self._flow_name,
+                            'parent': parent,
+                            'node_args': self._node_args,
+                            'dispatcher_id': self._dispatcher_id
+                        })
 
             node_name = node['name']
             if not self._finished_nodes.get(node_name):
