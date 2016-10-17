@@ -21,6 +21,7 @@
 import itertools
 import json
 import datetime
+import copy
 from threading import Lock
 from functools import reduce
 from collections import deque
@@ -366,7 +367,9 @@ class SystemState(object):
         def push_flow(s, p_n_name, flow_result, k):
             for n_name, n_ids in flow_result[key].items():
                 if not compound:
-                    s.append((n_name, n_ids, k + deque([p_n_name])))
+                    shallow_k = copy.copy(k)
+                    shallow_k.append(p_n_name)
+                    s.append((n_name, n_ids, shallow_k))
                 else:
                     s.append((n_name, n_ids, k))
 
