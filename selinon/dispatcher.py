@@ -37,14 +37,13 @@ class Dispatcher(Task):
     max_retries = None
     name = "Dispatcher"
 
-    def run(self, flow_name, node_args=None, parent=None, finished=None, retry=None, state=None):
+    def run(self, flow_name, node_args=None, parent=None, retry=None, state=None):
         """
         Dispatcher entry-point - run each time a dispatcher is scheduled
 
         :param flow_name: name of the flow
         :param parent: flow parent nodes
         :param node_args: arguments for workers
-        :param finished: finished tasks in case of fallback is run, otherwise None
         :param retry: last retry countdown
         :param state: the current system state
         :raises: FlowError
@@ -53,12 +52,11 @@ class Dispatcher(Task):
         Trace.log(Trace.DISPATCHER_WAKEUP, {'flow_name': flow_name,
                                             'dispatcher_id': self.request.id,
                                             'node_args': node_args,
-                                            'finished': finished,
                                             'retry': retry,
                                             'queue': Config.dispatcher_queues[flow_name],
                                             'state': state})
         try:
-            system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent, finished)
+            system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent)
             retry = system_state.update()
         except FlowError as flow_error:
             Trace.log(Trace.FLOW_FAILURE, {'flow_name': flow_name,
@@ -66,7 +64,6 @@ class Dispatcher(Task):
                                            'state': state,
                                            'node_args': node_args,
                                            'parent': parent,
-                                           'finished': finished,
                                            'retry': retry,
                                            'queue': Config.dispatcher_queues[flow_name],
                                            'what': str(flow_error)})

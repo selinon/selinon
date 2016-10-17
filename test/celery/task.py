@@ -27,7 +27,6 @@ class Task(object):
         self.parent = None
         self.node_args = None
         self.retried_count = None
-        self.finished = None
         self.queue = None
         self.countdown = None
         self.dispatcher_id = None
@@ -42,7 +41,6 @@ class Task(object):
         # Ensure that SelinonTaskEnvelope kept parameters consistent
         self.flow_name = kwargs['flow_name']
         self.node_args = kwargs.get('node_args')
-        self.finished = kwargs.get('finished')
         self.parent = kwargs.get('parent')
         self.dispatcher_id = kwargs.get('dispatcher_id')
 
@@ -59,6 +57,6 @@ class Task(object):
     @staticmethod
     def retry(exc, max_retry):
         # ensure that we are raising with max_retry equal to 0 so we will not get into an infinite loop
-        assert(max_retry == 0)
+        assert max_retry == 0
         raise exc
 

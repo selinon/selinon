@@ -643,7 +643,7 @@ class TestNodeFailures(SelinonTestCase):
                                        node_args=system_state.node_args)
             system_state.update()
 
-    def test_propagate_parent_in_failure(self):
+    def test_flow_failure(self):
         #
         # flow1:
         #
@@ -875,35 +875,5 @@ class TestNodeFailures(SelinonTestCase):
 
         self.assertIn('TaskX', self.instantiated_tasks)
 
-        expected_finished = {
-            'flow2': {
-                'Task1_f2': [task1_f2.task_id],
-                'Task3_f2': [task3_f2.task_id],
-                'flow3': {
-                    'Task1_f3': [task1_f3.task_id]
-                }
-            },
-            'flow4': {
-                'Task1_f4': [task1_f4.task_id],
-                'Task3_f4': [task3_f4.task_id]
-            },
-        }
-
-        expected_parent = {
-            'Task2_f1': task2_f1.task_id,
-            'flow2': {
-                'Task2_f2': [task2_f2.task_id],
-                'flow3': {
-                    'Task2_f3': [task2_f3.task_id],
-                    'Task3_f3': [task3_f3.task_id]
-                }
-            },
-            'flow4': {
-                'Task2_f4': [task2_f4.task_id]
-            }
-        }
-
         task_x = self.get_task('TaskX')
-
-        self.assertEqual(expected_parent, task_x.parent)
-        self.assertEqual(expected_finished, task_x.finished)
+        self.assertIsNone(task_x.parent)

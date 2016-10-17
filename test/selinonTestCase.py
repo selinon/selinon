@@ -52,6 +52,8 @@ class SelinonTestCase(unittest.TestCase):
         Config.storage_mapping = {}
         SystemState._throttled_tasks = {}
         SystemState._throttled_flows = {}
+        # If you would like to have a really verbose debug messages, just comment this out
+        #Config.trace_by_logging()
 
     def init(self, edge_table, **kwargs):
         """
@@ -67,7 +69,8 @@ class SelinonTestCase(unittest.TestCase):
         Config.failures = kwargs.get('failures', {})
         Config.propagate_node_args = kwargs.get('propagate_node_args', dict.fromkeys(flows, False))
         Config.propagate_parent = kwargs.get('propagate_parent', dict.fromkeys(flows, False))
-        Config.propagate_compound_parent = kwargs.get('propagate_compound_parent', dict.fromkeys(flows, False))
+        Config.propagate_finished = kwargs.get('propagate_finished', dict.fromkeys(flows, False))
+        Config.propagate_compound_finished = kwargs.get('propagate_compound_finished', dict.fromkeys(flows, False))
         Config.retry_countdown = kwargs.get('retry_countdown', {})
         Config.task_queues = kwargs.get('task_queues', QueueMock())
         Config.dispatcher_queues = kwargs.get('dispatcher_queues', QueueMock())

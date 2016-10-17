@@ -27,17 +27,17 @@ class SelinonTask(metaclass=abc.ABCMeta):
     """
     Base class for user-defined tasks
     """
-    def __init__(self, flow_name, task_name, parent, finished):
+    def __init__(self, flow_name, task_name, parent, dispatcher_id):
         """
         :param flow_name: name of flow under which this tasks runs on
         :param task_name: name of task, note it can be aliased since we can have different task name and class name
         :param parent: direct task's predecessors stated in flow dependency
-        :param finished: tasks that were finished in parent subflow in case task is fallback from fallback
+        :parent dispatcher_id: id of dispatcher handling the current flow
         """
         self.flow_name = flow_name
         self.task_name = task_name
         self.parent = parent
-        self.finished = finished
+        self.dispatcher_id = dispatcher_id
 
     @property
     def storage(self):
@@ -51,28 +51,47 @@ class SelinonTask(metaclass=abc.ABCMeta):
         :param parent_name: name of parent task to retrieve result from
         :return: result of parent task
         """
-        return StoragePool.retrieve(parent_name, self.parent[parent_name])
+        try:
+            parent_task_id = self.parent[parent_name]
+        except KeyError:
+            raise KeyError("No such parent '%s' in task '%s' in flow '%s', check your configuration"
+                           % (parent_name, self.task_name, self.flow_name))
 
-    def finished_task_result(self, finished_name):
-        """
-        :param finished_name: name of finished node in parent subflow
-        :return: result of finished task in parent subflow
-        """
-        # TODO: we should should distinguish sub-subflows here
-        return StoragePool.retrieve(finished_name, self.finished[finished_name])
+        return StoragePool.retrieve(parent_name, parent_task_id)
 
-    def parent_flow_result(self, flow_name, task_name, index):
+    def parent_flow_result(self, flow_names, task_name, index):
         """
         Get parent subflow results; note that parent flows can return multiple results from task of same type
         because of loops in flows
 
-        :param flow_name: name of parent flow
+        :param flow_names: name of parent flow or list of flow names in case of nested flows
         :param task_name: name of task in parent flow
         :param index: index of result if more than one subflow was run
         :return: result of task in parent subflow
         """
-        # TODO: we should should distinguish sub-subflows here
-        return StoragePool.retrieve(task_name, self.parent[flow_name][task_name][index])
+        if not isinstance(flow_names, list):
+            flow_names = [flow_names]
+
+        parent_flow = self.parent
+        for flow_name in flow_names:
+            try:
+                parent_flow = parent_flow[flow_name]
+            except KeyError:
+                raise KeyError("No such parent flow '%s' for task '%s', check your configuration; nested "
+                               "as %s from flow %s"
+                               % (flow_name, self.task_name, flow_names, self.flow_name))
+        try:
+            task_id = parent_flow[task_name][index]
+        except KeyError:
+            raise KeyError("No such parent task '%s' dereferenced by '%s' was run for task '%s' in flow '%s'"
+                           % (task_name, flow_names, self.task_name, self.flow_name))
+        except IndexError:
+            raise IndexError("Requested index %s in parent task '%s' dereferencered by '%s', but there were run only "
+                             "%s tasks in task %s flow %s"
+                             % (index, task_name, flow_names, len(parent_flow[task_name]), self.task_name,
+                                self.flow_name))
+
+        return StoragePool.retrieve(task_name, task_id)
 
     @staticmethod
     def retry(countdown=0):

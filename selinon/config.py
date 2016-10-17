@@ -34,14 +34,12 @@ class Config(object):
     flows = None
     task_classes = None
     edge_table = None
-    failures = None
     nowait_nodes = None
     max_retry = None
     retry_countdown = None
     storage_readonly = None
     propagate_node_args = None
     propagate_parent = None
-    propagate_compound_parent = None
     propagate_finished = None
     propagate_compound_finished = None
     output_schemas = None
@@ -71,7 +69,6 @@ class Config(object):
         cls.propagate_node_args = config_module['propagate_node_args']
         cls.propagate_parent = config_module['propagate_parent']
         cls.propagate_compound_finished = config_module['propagate_compound_finished']
-        cls.propagate_compound_parent = config_module['propagate_compound_parent']
 
         # task configuration
         cls.output_schemas = config_module['output_schemas']
@@ -211,29 +208,18 @@ class Config(object):
         return cls._should_config(node_name, dst_node_name, cls.propagate_compound_finished)
 
     @classmethod
-    def should_propagate_compound_parent(cls, node_name, dst_node_name):
-        """
-        :param node_name: node name that should be checked for propagate_compound_parent
-        :param dst_node_name: destination node to which configuration should be propagated
-        :return: True if should propagate_compound_parent
-        """
-        return cls._should_config(node_name, dst_node_name, cls.propagate_compound_parent)
-
-    @classmethod
-    def get_task_instance(cls, task_name, flow_name, parent, finished, dispatcher_id):
+    def get_task_instance(cls, task_name, flow_name, parent, dispatcher_id):
         """
         Get instance of SelinonTask
 
         :param task_name: task name that should be instantiated (it is not necessarily SelinonTask)
         :param flow_name: flow name
         :param parent: parent nodes for instance
-        :param finished: finished nodes for instance
         :param dispatcher_id: id of dispatcher for flow flow
         :return: instance of the task
         """
         task_class = Config.task_classes[task_name]
-        return task_class(task_name=task_name, flow_name=flow_name, parent=parent, finished=finished,
-                          dispatcher_id=dispatcher_id)
+        return task_class(task_name=task_name, flow_name=flow_name, parent=parent, dispatcher_id=dispatcher_id)
 
     @classmethod
     def is_flow(cls, node_name):

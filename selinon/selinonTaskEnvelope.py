@@ -54,7 +54,7 @@ class SelinonTaskEnvelope(Task):
 
             jsonschema.validate(result, schema)
 
-    def selinon_retry(self, task_name, flow_name, parent, node_args, retry_countdown, finished, retried_count,
+    def selinon_retry(self, task_name, flow_name, parent, node_args, retry_countdown, retried_count,
                       dispatcher_id, user_retry=False):
         max_retry = Config.max_retry.get(task_name, 0)
         kwargs = {
@@ -69,7 +69,6 @@ class SelinonTaskEnvelope(Task):
                                      'task_name': task_name,
                                      'task_id': self.request.id,
                                      'parent': parent,
-                                     'finished': finished,
                                      'args': node_args,
                                      'what': traceback.format_exc(),
                                      'retry_countdown': retry_countdown,
@@ -80,7 +79,7 @@ class SelinonTaskEnvelope(Task):
                                      'max_retry': max_retry})
         raise self.retry(kwargs=kwargs, countdown=retry_countdown, queue=Config.task_queues[task_name])
 
-    def run(self, task_name, flow_name, parent, node_args, dispatcher_id, finished=None, retried_count=None):
+    def run(self, task_name, flow_name, parent, node_args, dispatcher_id, retried_count=None):
         """
         Task entry-point called by Celery
 
@@ -89,7 +88,6 @@ class SelinonTaskEnvelope(Task):
         :param parent: dict of parent nodes
         :param node_args: node arguments within the flow
         :param dispatcher_id: dispatcher id that handles flow
-        :param finished: finished nodes in the flow
         :param retried_count: number of already attempts that failed so task was retried
         :rtype: None
         """
@@ -99,12 +97,11 @@ class SelinonTaskEnvelope(Task):
                                      'task_name': task_name,
                                      'task_id': self.request.id,
                                      'parent': parent,
-                                     'finished': finished,
                                      'queue': Config.task_queues[task_name],
                                      'dispatcher_id': dispatcher_id,
                                      'args': node_args})
         try:
-            task = Config.get_task_instance(task_name=task_name, flow_name=flow_name, parent=parent, finished=finished,
+            task = Config.get_task_instance(task_name=task_name, flow_name=flow_name, parent=parent,
                                             dispatcher_id=dispatcher_id)
             result = task.run(node_args)
             self.validate_result(task_name, result)
@@ -118,13 +115,12 @@ class SelinonTaskEnvelope(Task):
                                                       'task_id': self.request.id,
                                                       'parent': parent,
                                                       'args': node_args,
-                                                      'finished': finished,
                                                       'queue': Config.task_queues[task_name],
                                                       'dispatcher_id': dispatcher_id,
                                                       'result': result})
         except Retry as retry:
             # we do not touch retried_count
-            self.selinon_retry(task_name, flow_name, parent, node_args, retry.countdown, finished, retried_count,
+            self.selinon_retry(task_name, flow_name, parent, node_args, retry.countdown, retried_count,
                                dispatcher_id, user_retry=True)
         except Exception as exc:
             max_retry = Config.max_retry.get(task_name, 0)
@@ -133,13 +129,12 @@ class SelinonTaskEnvelope(Task):
             if max_retry > retried_count and not isinstance(exc, FatalTaskError):
                 retried_count += 1
                 retry_countdown = Config.retry_countdown.get(task_name, 0)
-                self.selinon_retry(task_name, flow_name, parent, node_args, retry_countdown, finished, retried_count)
+                self.selinon_retry(task_name, flow_name, parent, node_args, retry_countdown, retried_count)
             else:
                 Trace.log(Trace.TASK_FAILURE, {'flow_name': flow_name,
                                                'task_name': task_name,
                                                'task_id': self.request.id,
                                                'parent': parent,
-                                               'finished': finished,
                                                'args': node_args,
                                                'what': traceback.format_exc(),
                                                'queue': Config.task_queues[task_name],
@@ -151,7 +146,6 @@ class SelinonTaskEnvelope(Task):
                                    'task_name': task_name,
                                    'task_id': self.request.id,
                                    'parent': parent,
-                                   'finished': finished,
                                    'args': node_args,
                                    'queue': Config.task_queues[task_name],
                                    'dispatcher_id': dispatcher_id,
