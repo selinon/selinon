@@ -241,7 +241,6 @@ class SystemState(object):
 
         if 'foreach' in edge:
             iterable = edge['foreach'](storage_pool, node_args)
-            # TODO: we should consider to include foreach debug string
             Trace.log(Trace.FOREACH_RESULT, {
                             'nodes_to': edge['to'],
                             'nodes_from': edge['from'],
