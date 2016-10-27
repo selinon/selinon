@@ -38,7 +38,7 @@ class StoragePool(object):
         :return: storage name for task
         """
         try:
-            return Config.task_mapping[task_name]
+            return Config.task2storage_mapping[task_name]
         except KeyError:
             if graceful:
                 return None
@@ -97,7 +97,7 @@ class StoragePool(object):
         """
         storage = cls.get_storage_by_task_name(task_name)
         Trace.log(Trace.STORAGE_RETRIEVE, {'task_name': task_name,
-                                           'storage_name': Config.task_mapping[task_name]})
+                                           'storage_name': Config.task2storage_mapping[task_name]})
         return storage.retrieve(task_name, task_id)
 
     @classmethod
@@ -119,7 +119,7 @@ class StoragePool(object):
                                         'node_args': node_args,
                                         'task_name': task_name,
                                         'task_id': task_id,
-                                        'storage_name': Config.task_mapping[task_name],
+                                        'storage_name': Config.task2storage_mapping[task_name],
                                         'result': result,
                                         'record_id': record_id})
         return record_id

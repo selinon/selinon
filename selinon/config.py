@@ -45,7 +45,7 @@ class Config(object):
     output_schemas = None
 
     storage_mapping = None
-    task_mapping = None
+    task2storage_mapping = None
     dispatcher_queues = None
     task_queues = None
     strategies = None
@@ -73,10 +73,11 @@ class Config(object):
         # task configuration
         cls.output_schemas = config_module['output_schemas']
         cls.storage_mapping = config_module['storage2instance_mapping']
-        cls.task_mapping = config_module['task2storage_mapping']
+        cls.task2storage_mapping = config_module['task2storage_mapping']
         cls.max_retry = config_module['max_retry']
         cls.retry_countdown = config_module['retry_countdown']
         cls.storage_readonly = config_module['storage_readonly']
+        cls.storage_cached = config_module['storage_cached']
 
         # throttle configuration
         cls.throttle_tasks = config_module['throttle_tasks']

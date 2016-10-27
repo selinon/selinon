@@ -81,7 +81,7 @@ class TestStorageAccess(SelinonTestCase):
         self.set_finished(task1, 1)
 
         Config.storage_mapping = {'Storage1': MyStorage()}
-        Config.task_mapping = {'Task1': 'Storage1'}
+        Config.task2storage_mapping = {'Task1': 'Storage1'}
 
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         system_state.update()
@@ -145,7 +145,7 @@ class TestStorageAccess(SelinonTestCase):
         self.set_finished(task1, 1)
 
         Config.storage_mapping = {'Storage1': MyStorage()}
-        Config.task_mapping = {'Task1': 'Storage1'}
+        Config.task2storage_mapping = {'Task1': 'Storage1'}
 
         with self.assertRaises(ConnectionError):
             system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
