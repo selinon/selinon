@@ -240,7 +240,6 @@ class Trace(object):
         :param event: event
         :return: string representation of event
         """
-        # We could make a hack here in order to have O(1), but let's keep it this way
         return cls._event_strings[event]
 
     @classmethod
