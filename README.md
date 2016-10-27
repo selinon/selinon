@@ -1,6 +1,18 @@
 # Selinon
 Python Celery dispatcher worker for dynamically scheduling tasks
 
+## TLDR;
+
+Advanced flow management above Celery written in Python3, that allows you:
+
+  - Dynamically schedule tasks based on results of previous tasks
+  - Group tasks to flows
+  - Schedule flows from other flows (even recursively)
+  - Store results of tasks in defined storages transparently, validate results against defined JSON schemas
+  - Track flow progress via the build-in tracing mechanism
+  - Complex per-task or per-flow failure handling with fallback tasks
+  - And (of course) much more...
+
 ## About
 
 This tool is an implementation above Celery that enables you to define flows and dependencies in flows, schedule tasks based on results of Celery workers, their success or any external events.
