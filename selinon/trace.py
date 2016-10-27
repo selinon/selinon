@@ -243,17 +243,19 @@ class Trace(object):
         return cls._event_strings[event]
 
     @classmethod
-    def logging_trace_func(cls, event, msg_dict):
+    def logging_trace_func(cls, event, msg_dict, logger=None):
         """
         Trace to Python's logging facilities
 
         :param event: event that triggered trace point
         :param msg_dict: a dict holding additional trace information for event
+        :param logger: a logger to be used, if None, logger from trace_by_logging will be used
         """
         message = "%s: %s" % (cls.event2str(event), msg_dict)
 
+        logger = logger or cls._logger
         if event in [Trace.NODE_FAILURE, Trace.DISPATCHER_FAILURE, Trace.TASK_DISCARD_RESULT, Trace.TASK_RETRY]:
-            return Trace._logger.warn(message)
+            return logger.warn(message)
         else:
-            return Trace._logger.info(message)
+            return logger.info(message)
 
