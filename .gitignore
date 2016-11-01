@@ -6,4 +6,5 @@ dist
 TODO
 docs.source/api
 .cache
-
+.codecov
+coverage.xml
