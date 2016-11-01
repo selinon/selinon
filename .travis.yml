@@ -7,3 +7,6 @@ python:
   - "nightly" # currently points to 3.6-dev
 install: "pip3 install -r requirements.txt && pip3 install -r dev_requirements.txt"
 script: make check
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
