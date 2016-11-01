@@ -5,3 +5,5 @@ selinon.egg-info
 dist
 TODO
 docs.source/api
+.cache
+
