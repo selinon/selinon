@@ -1,6 +1,7 @@
 # Selinon
 Python Celery dispatcher worker for dynamically scheduling tasks
 
+![codecov](https://codecov.io/gh/selinon/selinon/branch/master/graph/badge.svg)](https://codecov.io/gh/selinon/selinon)
 ![PyPI Current Version](https://img.shields.io/pypi/v/selinon.svg)
 ![PyPI Implementation](https://img.shields.io/pypi/implementation/selinon.svg)
 ![PyPI Wheel](https://img.shields.io/pypi/wheel/selinon.svg)
