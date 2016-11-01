@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
-import unittest
+import pytest
 from selinonTestCase import SelinonTestCase
 
 from selinon import SystemState
@@ -74,7 +74,7 @@ class TestStorageAccess(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
+        assert retry is not None
 
         # Task1 has finished, we should access the database
         task1 = self.get_task('Task1')
@@ -86,9 +86,9 @@ class TestStorageAccess(SelinonTestCase):
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         system_state.update()
 
-        self.assertIn('Task2', self.instantiated_tasks)
+        assert 'Task2' in self.instantiated_tasks
 
-    @unittest.skip("store() currently not tested")
+    @pytest.mark.skip(reason="store() currently not tested")
     def test_store(self):
         # store() is called transparently by SelinonTask - not possible to directly check it without running a task
         pass
@@ -138,7 +138,7 @@ class TestStorageAccess(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
+        assert retry is not None
 
         # Task1 has finished, we should access the database
         task1 = self.get_task('Task1')
@@ -147,6 +147,6 @@ class TestStorageAccess(SelinonTestCase):
         Config.storage_mapping = {'Storage1': MyStorage()}
         Config.task2storage_mapping = {'Task1': 'Storage1'}
 
-        with self.assertRaises(ConnectionError):
+        with pytest.raises(ConnectionError):
             system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
             system_state.update()

@@ -18,7 +18,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
-import unittest
 from getTaskInstance import GetTaskInstance
 from queueMock import QueueMock
 from strategyMock import strategy_function
@@ -39,17 +38,16 @@ class _ThrottleTasks(object):
         return self._throttle_conf.get(item)
 
 
-class SelinonTestCase(unittest.TestCase):
+class SelinonTestCase(object):
     """
     Main class for Selinon testing
     """
-    def setUp(self):
+    def setup_method(self, method):
         """
         Clean up all class attributes from previous runs
         """
         AsyncResult.clear()
         GetTaskInstance.clear()
-        Config.storage_mapping = {}
         SystemState._throttled_tasks = {}
         SystemState._throttled_flows = {}
         # If you would like to have a really verbose debug messages, just comment this out
@@ -77,6 +75,7 @@ class SelinonTestCase(unittest.TestCase):
         Config.strategies = kwargs.get('strategies', dict.fromkeys(flows, strategy_function))
         # TODO: this is currently unused as we do not have tests for store()
         Config.storage_readonly = kwargs.get('storage_readonly', {})
+        Config.task2storage_mapping = kwargs.get('task2storage_mapping', {})
         Config.node_args_from_first = kwargs.get('node_args_from_first', dict.fromkeys(flows, False))
         Config.throttle_flows = kwargs.get('throttle_flows', dict.fromkeys(flows, None))
         Config.throttle_tasks = kwargs.get('throttle_tasks', _ThrottleTasks(Config.is_flow,

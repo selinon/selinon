@@ -42,12 +42,12 @@ class TestPropagate(SelinonTestCase):
         system_state = SystemState(id(self), 'flow1', node_args=node_args)
         retry = system_state.update()
 
-        self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, node_args)
-        self.assertIn('flow2', self.instantiated_flows)
+        assert retry is not None
+        assert system_state.node_args == node_args
+        assert 'flow2' in self.instantiated_flows
 
         flow2 = self.get_flow('flow2')
-        self.assertEqual(flow2.node_args, node_args)
+        assert flow2.node_args == node_args
 
     def test_propagate_node_args_flow(self):
         #
@@ -69,16 +69,16 @@ class TestPropagate(SelinonTestCase):
         system_state = SystemState(id(self), 'flow1', node_args=node_args)
         retry = system_state.update()
 
-        self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, node_args)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIn('flow3', self.instantiated_flows)
+        assert retry is not None
+        assert system_state.node_args == node_args
+        assert 'flow2' in self.instantiated_flows
+        assert 'flow3' in self.instantiated_flows
 
         flow2 = self.get_flow('flow2')
-        self.assertEqual(flow2.node_args, node_args)
+        assert flow2.node_args == node_args
 
         flow3 = self.get_flow('flow3')
-        self.assertIsNone(flow3.node_args)
+        assert flow3.node_args is None
 
     def test_propagate_parent_true(self):
         #
@@ -103,10 +103,10 @@ class TestPropagate(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertNotIn('flow2', self.instantiated_flows)
-        self.assertIn('Task1', self.instantiated_tasks)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'flow2' not in self.instantiated_flows
+        assert 'Task1' in self.instantiated_tasks
 
         task1 = self.get_task('Task1')
         self.set_finished(task1, 0xDEADBEEF)
@@ -114,15 +114,15 @@ class TestPropagate(SelinonTestCase):
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('flow2', self.instantiated_flows)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'flow2' in self.instantiated_flows
 
         flow2 = self.get_flow('flow2')
 
-        self.assertIsNone(flow2.node_args)
-        self.assertIn('Task1', flow2.parent)
-        self.assertEqual(flow2.parent['Task1'], task1.task_id)
+        assert flow2.node_args is None
+        assert 'Task1' in flow2.parent
+        assert flow2.parent['Task1'] == task1.task_id
 
     def test_propagate_parent_flow(self):
         #
@@ -149,10 +149,10 @@ class TestPropagate(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertNotIn('flow2', self.instantiated_flows)
-        self.assertNotIn('flow3', self.instantiated_flows)
+        assert retry is not None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'flow2' not in self.instantiated_flows
+        assert 'flow3' not in self.instantiated_flows
 
         task1 = self.get_task('Task1')
         self.set_finished(task1, 0xDEADBEEF)
@@ -160,18 +160,18 @@ class TestPropagate(SelinonTestCase):
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
 
-        self.assertIsNotNone(retry)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIn('flow3', self.instantiated_flows)
+        assert retry is not None
+        assert 'flow2' in self.instantiated_flows
+        assert 'flow3' in self.instantiated_flows
 
         flow2 = self.get_flow('flow2')
-        self.assertEqual(flow2.node_args, args)
-        self.assertIn('Task1', flow2.parent)
-        self.assertEqual(flow2.parent['Task1'], task1.task_id)
+        assert flow2.node_args == args
+        assert 'Task1' in flow2.parent
+        assert flow2.parent['Task1'] == task1.task_id
 
         flow3 = self.get_flow('flow3')
-        self.assertIsNone(flow3.node_args)
-        self.assertIsNone(flow3.parent)
+        assert flow3.node_args is None
+        assert flow3.parent is None
 
     def test_propagate_parent(self):
         #
@@ -207,11 +207,11 @@ class TestPropagate(SelinonTestCase):
         retry = system_state.update()
         state_dict_1 = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertNotIn('flow2', self.instantiated_flows)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' in self.instantiated_tasks
+        assert 'flow2' not in self.instantiated_flows
 
         # Task1 and Task2 have finished
         task1 = self.get_task('Task1')
@@ -224,8 +224,8 @@ class TestPropagate(SelinonTestCase):
         retry = system_state.update()
         state_dict_1 = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIn('flow2', self.instantiated_flows)
+        assert retry is not None
+        assert 'flow2' in self.instantiated_flows
 
         # Create flow3 manually
         flow3 = Dispatcher().apply_async(kwargs={'flow_name': 'flow3'}, queue=Config.dispatcher_queues['flow3'])
@@ -249,7 +249,7 @@ class TestPropagate(SelinonTestCase):
         system_state = SystemState(id(self), 'flow1', state=state_dict_1, node_args=system_state.node_args)
         retry = system_state.update()
 
-        self.assertIsNotNone(retry)
+        assert retry is not None
 
         task_x = self.get_task('TaskX')
 
@@ -261,7 +261,7 @@ class TestPropagate(SelinonTestCase):
                                              }
                                    }
                          }
-        self.assertEqual(task_x.parent, task_x_parent)
+        assert task_x.parent == task_x_parent
 
     def test_propagate_parent_2(self):
         #
@@ -301,11 +301,11 @@ class TestPropagate(SelinonTestCase):
         retry = system_state.update()
         state_dict_1 = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertNotIn('flow2', self.instantiated_flows)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' in self.instantiated_tasks
+        assert 'flow2' not in self.instantiated_flows
 
         # Task1 and Task2 have finished
         task1 = self.get_task('Task1')
@@ -318,8 +318,8 @@ class TestPropagate(SelinonTestCase):
         retry = system_state.update()
         state_dict_1 = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIn('flow2', self.instantiated_flows)
+        assert retry is not None
+        assert 'flow2' in self.instantiated_flows
 
         # Create flow3 manually
         flow3 = Dispatcher().apply_async(kwargs={'flow_name': 'flow3'}, queue=Config.dispatcher_queues['flow3'])
@@ -342,7 +342,7 @@ class TestPropagate(SelinonTestCase):
         system_state = SystemState(id(self), 'flow1', state=state_dict_1, node_args=system_state.node_args)
         retry = system_state.update()
 
-        self.assertIsNotNone(retry)
+        assert retry is not None
 
         task_x = self.get_task('TaskX')
 
@@ -354,17 +354,17 @@ class TestPropagate(SelinonTestCase):
                          }
 
         # we have to check this as a set due to dict randomization
-        self.assertIn('Task2', task_x.parent)
-        self.assertEqual(task_x.parent['Task2'], task_x_parent['Task2'])
+        assert 'Task2' in task_x.parent
+        assert task_x.parent['Task2'] == task_x_parent['Task2']
 
-        self.assertIn('flow2', task_x.parent)
-        self.assertIn('Task2', task_x.parent['flow2'])
-        self.assertIn('Task3', task_x.parent['flow2'])
-        self.assertIn('Task4', task_x.parent['flow2'])
+        assert 'flow2' in task_x.parent
+        assert 'Task2' in task_x.parent['flow2']
+        assert 'Task3' in task_x.parent['flow2']
+        assert 'Task4' in task_x.parent['flow2']
 
-        self.assertEqual(set(task_x.parent['flow2']['Task2']), set(task_x_parent['flow2']['Task2']))
-        self.assertEqual(set(task_x.parent['flow2']['Task3']), set(task_x_parent['flow2']['Task3']))
-        self.assertEqual(set(task_x.parent['flow2']['Task4']), set(task_x_parent['flow2']['Task4']))
+        assert set(task_x.parent['flow2']['Task2']) == set(task_x_parent['flow2']['Task2'])
+        assert set(task_x.parent['flow2']['Task3']) == set(task_x_parent['flow2']['Task3'])
+        assert set(task_x.parent['flow2']['Task4']) == set(task_x_parent['flow2']['Task4'])
 
     def test_propagate_compound_parent_mixed(self):
         #
@@ -406,8 +406,8 @@ class TestPropagate(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIn('flow2', self.instantiated_flows)
+        assert retry is not None
+        assert 'flow2' in self.instantiated_flows
 
         # Create flow4 manually, we will reuse it, but we pretend that there are 2 instances - one run in flow2
         # another one in flow3
@@ -435,8 +435,8 @@ class TestPropagate(SelinonTestCase):
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
 
-        self.assertIsNotNone(retry)
-        self.assertIn('TaskX', self.instantiated_tasks)
+        assert retry is not None
+        assert 'TaskX' in self.instantiated_tasks
 
         task_x_parent = {'flow2': {'Task2': ['<task2-id21>'],
                                    'Task3': ['<task3-id21>', '<task3-id22>'],
@@ -447,20 +447,20 @@ class TestPropagate(SelinonTestCase):
         task_x = self.get_task('TaskX')
 
         # we have to check this as a set due to dict randomization
-        self.assertIn('flow2', task_x.parent)
-        self.assertIn('flow3', task_x.parent)
+        assert 'flow2' in task_x.parent
+        assert 'flow3' in task_x.parent
 
-        self.assertIn('Task2', task_x.parent['flow2'])
-        self.assertIn('Task3', task_x.parent['flow2'])
-        self.assertEqual(set(task_x.parent['flow2']['Task2']), set(task_x_parent['flow2']['Task2']))
-        self.assertEqual(set(task_x.parent['flow2']['Task3']), set(task_x_parent['flow2']['Task3']))
+        assert 'Task2' in task_x.parent['flow2']
+        assert 'Task3' in task_x.parent['flow2']
+        assert set(task_x.parent['flow2']['Task2']) == set(task_x_parent['flow2']['Task2'])
+        assert set(task_x.parent['flow2']['Task3']) == set(task_x_parent['flow2']['Task3'])
 
-        self.assertIn('Task2', task_x.parent['flow3'])
-        self.assertIn('Task3', task_x.parent['flow3'])
-        self.assertEqual(set(task_x.parent['flow3']['Task2']), set(task_x_parent['flow3']['Task2']))
-        self.assertEqual(set(task_x.parent['flow3']['Task3']), set(task_x_parent['flow3']['Task3']))
+        assert 'Task2' in task_x.parent['flow3']
+        assert 'Task3' in task_x.parent['flow3']
+        assert set(task_x.parent['flow3']['Task2']) == set(task_x_parent['flow3']['Task2'])
+        assert set(task_x.parent['flow3']['Task3']) == set(task_x_parent['flow3']['Task3'])
 
-        self.assertIn('flow4', task_x.parent['flow2'])
-        self.assertEqual(set(task_x.parent['flow2']['flow4']), set(task_x_parent['flow2']['flow4']))
+        assert 'flow4' in task_x.parent['flow2']
+        assert set(task_x.parent['flow2']['flow4']) == set(task_x_parent['flow2']['flow4'])
 
 

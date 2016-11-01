@@ -61,30 +61,30 @@ class TestFlow(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertNotIn('flow2', self.instantiated_flows)
-        self.assertNotIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'flow2' not in self.instantiated_flows
+        assert 'Task2' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
 
         # check task's queue configuration
         task1 = self.get_task('Task1')
-        self.assertEqual(task1.queue, queues.get(task1.task_name))
+        assert task1.queue == queues.get(task1.task_name)
 
         # No change
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertNotIn('flow2', self.instantiated_flows)
-        self.assertNotIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'flow2' not in self.instantiated_flows
+        assert 'Task2' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
 
         # Task1 has finished
         task1_result = [1, 2, 3, 4]
@@ -96,42 +96,42 @@ class TestFlow(SelinonTestCase):
 
         flow2 = self.get_flow('flow2')
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIsNone(flow2.node_args)
-        self.assertEqual(flow2.flow_name, 'flow2')
-        self.assertIsNone(flow2.parent)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertNotIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
-        self.assertEqual(len(state_dict['finished_nodes']), 1)
-        self.assertEqual(len(state_dict['active_nodes']), 1)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'flow2' in self.instantiated_flows
+        assert flow2.node_args is None
+        assert flow2.flow_name == 'flow2'
+        assert flow2.parent is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'flow2' in self.instantiated_flows
+        assert 'Task2' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
+        assert len(state_dict['finished_nodes']) == 1
+        assert len(state_dict['active_nodes']) == 1
 
         # No change
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIsNone(flow2.node_args)
-        self.assertEqual(flow2.flow_name, 'flow2')
-        self.assertIsNone(flow2.parent)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertNotIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
-        self.assertEqual(len(state_dict['finished_nodes']), 1)
-        self.assertEqual(len(state_dict['active_nodes']), 1)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'flow2' in self.instantiated_flows
+        assert flow2.node_args is None
+        assert flow2.flow_name == 'flow2'
+        assert flow2.parent is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'flow2' in self.instantiated_flows
+        assert 'Task2' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
+        assert len(state_dict['finished_nodes']) == 1
+        assert len(state_dict['active_nodes']) == 1
 
         # check flow queue propagation
         flow2 = self.get_flow('flow2')
-        self.assertEqual(flow2.queue, flow2_queue)
+        assert flow2.queue == flow2_queue
 
         # flow2 has finished
         self.set_finished(flow2, {'TaskSubflow': [1]})
@@ -142,37 +142,37 @@ class TestFlow(SelinonTestCase):
 
         flow2 = self.get_flow('flow2')
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIsNone(flow2.node_args)
-        self.assertEqual(flow2.flow_name, 'flow2')
-        self.assertIsNone(flow2.parent)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertIsNone(flow2.node_args)
-        self.assertIsNone(flow2.parent)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 2)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
-        self.assertEqual(len(state_dict['finished_nodes']), 2)
-        self.assertEqual(len(state_dict['active_nodes']), 1)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'flow2' in self.instantiated_flows
+        assert flow2.node_args is None
+        assert flow2.flow_name == 'flow2'
+        assert flow2.parent is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'flow2' in self.instantiated_flows
+        assert 'Task2' in self.instantiated_tasks
+        assert flow2.node_args is None
+        assert flow2.parent is None
+        assert len(state_dict.get('waiting_edges')) == 2
+        assert state_dict['waiting_edges'][0] == 0
+        assert len(state_dict['finished_nodes']) == 2
+        assert len(state_dict['active_nodes']) == 1
 
         # No change
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 2)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
-        self.assertEqual(len(state_dict['finished_nodes']), 2)
-        self.assertEqual(len(state_dict['active_nodes']), 1)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'flow2' in self.instantiated_flows
+        assert 'Task1' in self.instantiated_tasks
+        assert 'flow2' in self.instantiated_flows
+        assert 'Task2' in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 2
+        assert state_dict['waiting_edges'][0] == 0
+        assert len(state_dict['finished_nodes']) == 2
+        assert len(state_dict['active_nodes']) == 1
 
         # Task2 has finished
         task2 = self.get_task('Task2')
@@ -182,17 +182,17 @@ class TestFlow(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIsNone(task2.node_args)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 2)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
-        self.assertEqual(len(state_dict['finished_nodes']), 3)
-        self.assertEqual(len(state_dict['active_nodes']), 0)
+        assert retry is None
+        assert system_state.node_args is None
+        assert task2.node_args is None
+        assert 'flow2' in self.instantiated_flows
+        assert 'Task1' in self.instantiated_tasks
+        assert 'flow2' in self.instantiated_flows
+        assert 'Task2' in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 2
+        assert state_dict['waiting_edges'][0] == 0
+        assert len(state_dict['finished_nodes']) == 3
+        assert len(state_dict['active_nodes']) == 0
 
     def test_throttle(self):
         #
@@ -212,9 +212,9 @@ class TestFlow(SelinonTestCase):
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
 
-        self.assertIsNotNone(retry)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIsNone(self.get_flow('flow2').countdown)
+        assert retry is not None
+        assert 'flow2' in self.instantiated_flows
+        assert self.get_flow('flow2').countdown is None
 
         # Let's sleep to ensure we get less then 2s delay
         time.sleep(0.01)
@@ -223,8 +223,8 @@ class TestFlow(SelinonTestCase):
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNotNone(self.get_flow('flow2').countdown)
-        self.assertLess(self.get_flow('flow2').countdown, 2)
+        assert retry is not None
+        assert self.get_flow('flow2').countdown is not None
+        assert self.get_flow('flow2').countdown < 2
 
 

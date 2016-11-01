@@ -22,10 +22,9 @@ clean:
 	rm -rf dist selinon.egg-info build docs.source/api docs/build/
 
 check:
-	@# We have to adjust CWD so we use our own Celery and modified Selinon Dispatcher for testing
-	@python3 --version
-	@cd test && python3 -m unittest -v test_systemState test_nodeFailures test_storage test_nowait test_flow \
-	test_node_args test_others test_foreach test_propagate
+	@# We have to adjust PYTHONPATH so we use our own Celery and modified Selinon Dispatcher for testing
+	@# Make sure we have -p no:celery otherwise py.test is trying to do dirty stuff with loading celery.contrib
+	cd test && PYTHONPATH=".:${PYTHONPATH}" py.test -vvl --timeout=2 -p no:celery
 
 doc:
 	@sphinx-apidoc -e -o docs.source/api selinon -f

@@ -157,9 +157,11 @@ class Trace(object):
     STORAGE_CONNECT, \
     STORAGE_DISCONNECT, \
     STORAGE_RETRIEVE, \
+    STORAGE_RETRIEVED, \
     STORAGE_STORE, \
+    STORAGE_STORED, \
     EDGE_COND_FALSE, \
-    FOREACH_RESULT = range(22)
+    FOREACH_RESULT = range(24)
 
     _event_strings = [
         'DISPATCHER_WAKEUP',
@@ -181,7 +183,9 @@ class Trace(object):
         'STORAGE_CONNECT',
         'STORAGE_DISCONNECT',
         'STORAGE_RETRIEVE',
+        'STORAGE_RETRIEVED',
         'STORAGE_STORE',
+        'STORAGE_STORED',
         'EDGE_COND_FALSE',
         'FOREACH_RESULT'
     ]

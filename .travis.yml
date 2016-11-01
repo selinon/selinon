@@ -5,5 +5,5 @@ python:
   - "3.5"
   - "3.5-dev" # 3.5 development branch
   - "nightly" # currently points to 3.6-dev
-install: "pip install -r requirements.txt"
+install: "pip3 install -r requirements.txt && pip3 install -r dev_requirements.txt"
 script: make check

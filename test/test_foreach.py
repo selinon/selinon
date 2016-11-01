@@ -48,12 +48,12 @@ class TestForeach(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertEqual(len(self.get_all_tasks('Task1')), _FOREACH_COUNT)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert len(self.get_all_tasks('Task1')) == _FOREACH_COUNT
         tasks_state_dict = [node for node in state_dict['active_nodes'] if node['name'] == 'Task1']
-        self.assertEqual(len(tasks_state_dict), _FOREACH_COUNT)
+        assert len(tasks_state_dict) == _FOREACH_COUNT
 
     def test_foreach_basic(self):
         #
@@ -81,10 +81,10 @@ class TestForeach(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertNotIn('Task2', self.instantiated_tasks)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' not in self.instantiated_tasks
 
         # Task1 has finished
         task1 = self.get_task('Task1')
@@ -95,14 +95,14 @@ class TestForeach(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task2', self.instantiated_tasks)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' in self.instantiated_tasks
 
-        self.assertEqual(len(self.get_all_tasks('Task2')), _FOREACH_COUNT)
+        assert len(self.get_all_tasks('Task2')) == _FOREACH_COUNT
         tasks_state_dict = [node for node in state_dict['active_nodes'] if node['name'] == 'Task2']
-        self.assertEqual(len(tasks_state_dict), _FOREACH_COUNT)
+        assert len(tasks_state_dict) == _FOREACH_COUNT
 
     def test_foreach_propagate_result(self):
         #
@@ -131,10 +131,10 @@ class TestForeach(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertNotIn('Task2', self.instantiated_tasks)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' not in self.instantiated_tasks
 
         # Task1 has finished
         task1 = self.get_task('Task1')
@@ -145,15 +145,15 @@ class TestForeach(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('flow2', self.instantiated_flows)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'flow2' in self.instantiated_flows
 
         tasks_state_dict = [node for node in state_dict['active_nodes'] if node['name'] == 'flow2']
-        self.assertEqual(len(tasks_state_dict), _FOREACH_COUNT)
+        assert len(tasks_state_dict) == _FOREACH_COUNT
 
         # Inspect node_args as we set propagate_result for foreach
         all_flow_args = [flow.node_args for flow in self.get_all_flows('flow2')]
-        self.assertEqual(all_flow_args, list(range(_FOREACH_COUNT)))
+        assert all_flow_args == list(range(_FOREACH_COUNT))
 

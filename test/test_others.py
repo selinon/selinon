@@ -25,5 +25,5 @@ from selinon.trace import Trace
 class TestOthers(SelinonTestCase):
     def test_trace_naming(self):
         for i, event_string in enumerate(Trace._event_strings):
-            self.assertEqual(getattr(Trace, event_string), i)
+            assert getattr(Trace, event_string) == i
 

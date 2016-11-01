@@ -72,6 +72,10 @@ class SystemState(object):
             ret.append(edge_node_table[i])
         return ret
 
+    def __repr__(self):
+        # Make tests more readable
+        return str(self.to_dict())
+
     def __init__(self, dispatcher_id, flow_name, node_args = None, retry = None, state = None, parent=None):
         state_dict = state or {}
 

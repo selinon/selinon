@@ -46,7 +46,6 @@ class _MyStorage(DataStorage):
         return self.result
 
 
-
 class TestNodeArgs(SelinonTestCase):
     def test_task2task(self):
         #
@@ -64,7 +63,10 @@ class TestNodeArgs(SelinonTestCase):
             'flow1': [{'from': ['Task1'], 'to': ['Task2'], 'condition': self.cond_true},
                       {'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
         }
-        self.init(edge_table, node_args_from_first={'flow1': True}, storage_mapping={'Storage1': _MyStorage()})
+        self.init(edge_table,
+                  node_args_from_first={'flow1': True},
+                  task2storage_mapping={'Task1': 'Storage1'},
+                  storage_mapping={'Storage1': _MyStorage()})
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
@@ -75,9 +77,9 @@ class TestNodeArgs(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNone(system_state.node_args)
-        self.assertIsNotNone(retry)
-        self.assertIn('Task1', self.instantiated_tasks)
+        assert system_state.node_args is None
+        assert retry is not None
+        assert 'Task1' in self.instantiated_tasks
 
         # Task1 has finished
         task1 = self.get_task('Task1')
@@ -90,9 +92,9 @@ class TestNodeArgs(SelinonTestCase):
         system_state.to_dict()
 
         task2 = self.get_task('Task2')
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertEqual(task2.node_args, task1_result)
-        self.assertIsNotNone(retry)
+        assert 'Task2' in self.instantiated_tasks
+        assert task2.node_args == task1_result
+        assert retry is not None
 
     def test_task2flow(self):
         #
@@ -112,24 +114,27 @@ class TestNodeArgs(SelinonTestCase):
                       {'from': [], 'to': ['Task1'], 'condition': self.cond_true}],
             'flow2': []
         }
-        self.init(edge_table, node_args_from_first={'flow1': True}, storage_mapping={'Storage1': _MyStorage()})
+        self.init(edge_table,
+                  node_args_from_first={'flow1': True},
+                  task2storage_mapping={'Task1': 'Storage1'},
+                  storage_mapping={'Storage1': _MyStorage()})
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
 
         # Run without change at first
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNone(system_state.node_args)
-        self.assertIsNotNone(retry)
-        self.assertIn('Task1', self.instantiated_tasks)
+        assert system_state.node_args is None
+        assert retry is not None
+        assert 'Task1' in self.instantiated_tasks
 
         # Task1 has finished
         task1 = self.get_task('Task1')
@@ -141,9 +146,9 @@ class TestNodeArgs(SelinonTestCase):
         retry = system_state.update()
 
         flow2 = self.get_flow('flow2')
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIsNone(flow2.node_args)
-        self.assertIsNotNone(retry)
+        assert 'flow2' in self.instantiated_flows
+        assert flow2.node_args is None
+        assert retry is not None
 
     def test_task2flow_propagate(self):
         #
@@ -166,15 +171,16 @@ class TestNodeArgs(SelinonTestCase):
         self.init(edge_table,
                   node_args_from_first={'flow1': True},
                   propagate_node_args={'flow1': True},
+                  task2storage_mapping={'Task1': 'Storage1'},
                   storage_mapping={'Storage1': _MyStorage()})
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
 
         # Task1 has finished
         task1 = self.get_task('Task1')
@@ -186,9 +192,9 @@ class TestNodeArgs(SelinonTestCase):
         retry = system_state.update()
 
         flow2 = self.get_flow('flow2')
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertEqual(flow2.node_args, task1_result)
-        self.assertIsNotNone(retry)
+        assert 'flow2' in self.instantiated_flows
+        assert flow2.node_args == task1_result
+        assert retry is not None
 
     def test_task2tasks(self):
         #
@@ -207,15 +213,18 @@ class TestNodeArgs(SelinonTestCase):
             'flow1': [{'from': ['Task1'], 'to': ['Task2', 'Task3'], 'condition': self.cond_true},
                       {'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
         }
-        self.init(edge_table, node_args_from_first={'flow1': True}, storage_mapping={'Storage1': _MyStorage()})
+        self.init(edge_table,
+                  node_args_from_first={'flow1': True},
+                  task2storage_mapping={'Task1': 'Storage1'},
+                  storage_mapping={'Storage1': _MyStorage()})
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
 
         # Task1 has finished
         task1 = self.get_task('Task1')
@@ -226,15 +235,15 @@ class TestNodeArgs(SelinonTestCase):
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
 
-        self.assertIsNotNone(retry)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertIn('Task3', self.instantiated_tasks)
+        assert retry is not None
+        assert 'Task2' in self.instantiated_tasks
+        assert 'Task3' in self.instantiated_tasks
 
         task2 = self.get_task('Task2')
         task3 = self.get_task('Task3')
 
-        self.assertEqual(task2.node_args, task1_result)
-        self.assertEqual(task3.node_args, task1_result)
+        assert task2.node_args == task1_result
+        assert task3.node_args == task1_result
 
     def test_recurse(self):
         #
@@ -252,15 +261,18 @@ class TestNodeArgs(SelinonTestCase):
             'flow1': [{'from': ['Task1'], 'to': ['Task1'], 'condition': self.cond_true},
                       {'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
         }
-        self.init(edge_table, node_args_from_first={'flow1': True}, storage_mapping={'Storage1': _MyStorage()})
+        self.init(edge_table,
+                  node_args_from_first={'flow1': True},
+                  task2storage_mapping={'Task1': 'Storage1'},
+                  storage_mapping={'Storage1': _MyStorage()})
 
         system_state = SystemState(id(self), 'flow1')
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
 
         # Task1 has finished
         task1_1 = self.get_task('Task1')
@@ -271,7 +283,7 @@ class TestNodeArgs(SelinonTestCase):
         system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
         retry = system_state.update()
 
-        self.assertIn('Task1', self.instantiated_tasks)
+        assert 'Task1' in self.instantiated_tasks
         task1_2 = self.get_task('Task1')
-        self.assertEqual(task1_2.node_args, task1_result)
-        self.assertIsNotNone(retry)
+        assert task1_2.node_args == task1_result
+        assert retry is not None

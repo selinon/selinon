@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
+import pytest
 from selinonTestCase import SelinonTestCase
 
 from selinon import FlowError
@@ -50,23 +51,23 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertNotIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
 
         # Task1 has failed
         task1 = self.get_task('Task1')
         self.set_failed(task1, KeyError("Some exception raised"))
 
-        with self.assertRaises(FlowError):
+        with pytest.raises(FlowError):
             system_state = SystemState(id(self), 'flow1', state=state_dict,
                                        node_args=system_state.node_args)
             system_state.update()
 
-        self.assertNotIn('Task2', self.instantiated_tasks)
+        assert 'Task2' not in self.instantiated_tasks
 
     def test_single_failure_flow_fallback_true(self):
         #
@@ -94,12 +95,12 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertNotIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
 
         # Task1 has failed
         task1 = self.get_task('Task1')
@@ -110,12 +111,12 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertNotIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
+        assert retry is None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
 
     def test_single_failure_flow_fallback_start(self):
         #
@@ -145,12 +146,12 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertNotIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
+        assert retry is not None
+        assert system_state.node_args == node_args
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
 
         # Task1 has failed
         task1 = self.get_task('Task1')
@@ -161,16 +162,16 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task3', self.instantiated_tasks)
-        self.assertNotIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
+        assert retry is not None
+        assert system_state.node_args == node_args
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task3' in self.instantiated_tasks
+        assert 'Task2' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
 
         task3 = self.get_task('Task3')
-        self.assertEqual(task3.node_args, node_args)
+        assert task3.node_args == node_args
 
     def test_single_failure_flow_fallback_start2(self):
         #
@@ -206,12 +207,12 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertNotIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
+        assert retry is not None
+        assert system_state.node_args == node_args
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
 
         # Task1 has failed
         task1 = self.get_task('Task1')
@@ -222,20 +223,20 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task3', self.instantiated_tasks)
-        self.assertIn('Task4', self.instantiated_tasks)
-        self.assertNotIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
+        assert retry is not None
+        assert system_state.node_args == node_args
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task3' in self.instantiated_tasks
+        assert 'Task4' in self.instantiated_tasks
+        assert 'Task2' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
 
         task3 = self.get_task('Task3')
         task4 = self.get_task('Task4')
 
-        self.assertEqual(task3.node_args, node_args)
-        self.assertEqual(task4.node_args, node_args)
+        assert task3.node_args == node_args
+        assert task4.node_args == node_args
 
         # Now let's finish Task3 and Task4 to see that they correctly continue
         self.set_finished(task3)
@@ -246,20 +247,20 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task3', self.instantiated_tasks)
-        self.assertIn('Task4', self.instantiated_tasks)
-        self.assertIn('Task5', self.instantiated_tasks)
-        self.assertIn('Task6', self.instantiated_tasks)
-        self.assertNotIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 3)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
-        self.assertIn(2, state_dict['waiting_edges'])
-        self.assertIn(3, state_dict['waiting_edges'])
-        self.assertIn('Task3', state_dict['finished_nodes'])
-        self.assertIn('Task4', state_dict['finished_nodes'])
+        assert retry is not None
+        assert system_state.node_args == node_args
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task3' in self.instantiated_tasks
+        assert 'Task4' in self.instantiated_tasks
+        assert 'Task5' in self.instantiated_tasks
+        assert 'Task6' in self.instantiated_tasks
+        assert 'Task2' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 3
+        assert state_dict['waiting_edges'][0] == 0
+        assert 2 in state_dict['waiting_edges']
+        assert 3 in state_dict['waiting_edges']
+        assert 'Task3' in state_dict['finished_nodes']
+        assert 'Task4' in state_dict['finished_nodes']
 
         # Finish the flow!
         task5 = self.get_task('Task5')
@@ -271,7 +272,7 @@ class TestNodeFailures(SelinonTestCase):
         system_state = SystemState(id(self), 'flow1', state=state_dict,
                                    node_args=system_state.node_args)
         retry = system_state.update()
-        self.assertIsNone(retry)
+        assert retry is None
 
     def test_single_failure_flow_fallback_to_flow(self):
         #
@@ -300,12 +301,12 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertNotIn('flow2', self.instantiated_flows)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
+        assert retry is not None
+        assert system_state.node_args == node_args
+        assert 'Task1' in self.instantiated_tasks
+        assert 'flow2' not in self.instantiated_flows
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
 
         # Task1 has failed
         task1 = self.get_task('Task1')
@@ -316,13 +317,13 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertEqual(system_state.node_args, node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertNotIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
+        assert retry is not None
+        assert system_state.node_args == node_args
+        assert 'Task1' in self.instantiated_tasks
+        assert 'flow2' in self.instantiated_flows
+        assert 'Task2' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
 
     def test_singe_failure_flow_fallback(self):
         #
@@ -350,12 +351,12 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertNotIn('Task1', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'flow2' in self.instantiated_flows
+        assert 'Task1' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
 
         # flow2 has failed
         flow2 = self.get_flow('flow2')
@@ -366,12 +367,12 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 1)
-        self.assertEqual(state_dict['waiting_edges'][0], 0)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'flow2' in self.instantiated_flows
+        assert 'Task2' in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 1
+        assert state_dict['waiting_edges'][0] == 0
 
     def test_two_failures_no_fallback(self):
         #
@@ -401,16 +402,16 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertNotIn('Task3', self.instantiated_tasks)
-        self.assertNotIn('Task4', self.instantiated_tasks)
-        self.assertNotIn('Task5', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 2)
-        self.assertIn(0, state_dict['waiting_edges'])
-        self.assertIn(1, state_dict['waiting_edges'])
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' in self.instantiated_tasks
+        assert 'Task3' not in self.instantiated_tasks
+        assert 'Task4' not in self.instantiated_tasks
+        assert 'Task5' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 2
+        assert 0 in state_dict['waiting_edges']
+        assert 1 in state_dict['waiting_edges']
 
         task1 = self.get_task('Task1')
         self.set_failed(task1)
@@ -420,17 +421,17 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertNotIn('Task3', self.instantiated_tasks)
-        self.assertNotIn('Task4', self.instantiated_tasks)
-        self.assertNotIn('Task5', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 2)
-        self.assertIn(0, state_dict['waiting_edges'])
-        self.assertIn(1, state_dict['waiting_edges'])
-        self.assertIn('Task1', state_dict['failed_nodes'])
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' in self.instantiated_tasks
+        assert 'Task3' not in self.instantiated_tasks
+        assert 'Task4' not in self.instantiated_tasks
+        assert 'Task5' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 2
+        assert 0 in state_dict['waiting_edges']
+        assert 1 in state_dict['waiting_edges']
+        assert 'Task1' in state_dict['failed_nodes']
 
         # No change so far
         system_state = SystemState(id(self), 'flow1', state=state_dict,
@@ -438,23 +439,23 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertNotIn('Task3', self.instantiated_tasks)
-        self.assertNotIn('Task4', self.instantiated_tasks)
-        self.assertNotIn('Task5', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 2)
-        self.assertIn(0, state_dict['waiting_edges'])
-        self.assertIn(1, state_dict['waiting_edges'])
-        self.assertIn('Task1', state_dict['failed_nodes'])
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' in self.instantiated_tasks
+        assert 'Task3' not in self.instantiated_tasks
+        assert 'Task4' not in self.instantiated_tasks
+        assert 'Task5' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 2
+        assert 0 in state_dict['waiting_edges']
+        assert 1 in state_dict['waiting_edges']
+        assert 'Task1' in state_dict['failed_nodes']
 
         # Task2 has failed
         task2 = self.get_task('Task2')
         self.set_failed(task2)
 
-        with self.assertRaises(FlowError):
+        with pytest.raises(FlowError):
             system_state = SystemState(id(self), 'flow1', state=state_dict,
                                        node_args=system_state.node_args)
             system_state.update()
@@ -487,16 +488,16 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertNotIn('Task3', self.instantiated_tasks)
-        self.assertNotIn('Task4', self.instantiated_tasks)
-        self.assertNotIn('Task5', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 2)
-        self.assertIn(0, state_dict['waiting_edges'])
-        self.assertIn(1, state_dict['waiting_edges'])
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' in self.instantiated_tasks
+        assert 'Task3' not in self.instantiated_tasks
+        assert 'Task4' not in self.instantiated_tasks
+        assert 'Task5' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 2
+        assert 0 in state_dict['waiting_edges']
+        assert 1 in state_dict['waiting_edges']
 
         task1 = self.get_task('Task1')
         self.set_failed(task1, KeyError("Some exception raised"))
@@ -506,17 +507,17 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertNotIn('Task3', self.instantiated_tasks)
-        self.assertNotIn('Task4', self.instantiated_tasks)
-        self.assertNotIn('Task5', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 2)
-        self.assertIn(0, state_dict['waiting_edges'])
-        self.assertIn(1, state_dict['waiting_edges'])
-        self.assertIn('Task1', state_dict['failed_nodes'])
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' in self.instantiated_tasks
+        assert 'Task3' not in self.instantiated_tasks
+        assert 'Task4' not in self.instantiated_tasks
+        assert 'Task5' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 2
+        assert 0 in state_dict['waiting_edges']
+        assert 1 in state_dict['waiting_edges']
+        assert 'Task1' in state_dict['failed_nodes']
 
         # Task2 has failed
         task2 = self.get_task('Task2')
@@ -527,18 +528,18 @@ class TestNodeFailures(SelinonTestCase):
         system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertNotIn('Task3', self.instantiated_tasks)
-        self.assertNotIn('Task4', self.instantiated_tasks)
-        self.assertIn('Task5', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 2)
-        self.assertIn(0, state_dict['waiting_edges'])
-        self.assertIn(1, state_dict['waiting_edges'])
-        self.assertNotIn('Task1', state_dict['failed_nodes'])
-        self.assertNotIn('Task2', state_dict['failed_nodes'])
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' in self.instantiated_tasks
+        assert 'Task3' not in self.instantiated_tasks
+        assert 'Task4' not in self.instantiated_tasks
+        assert 'Task5' in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 2
+        assert 0 in state_dict['waiting_edges']
+        assert 1 in state_dict['waiting_edges']
+        assert 'Task1' not in state_dict['failed_nodes']
+        assert 'Task2' not in state_dict['failed_nodes']
 
     def test_single_failure_finish_wait(self):
         #
@@ -570,16 +571,16 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertNotIn('Task3', self.instantiated_tasks)
-        self.assertNotIn('Task4', self.instantiated_tasks)
-        self.assertNotIn('Task5', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 2)
-        self.assertIn(0, state_dict['waiting_edges'])
-        self.assertIn(1, state_dict['waiting_edges'])
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' in self.instantiated_tasks
+        assert 'Task3' not in self.instantiated_tasks
+        assert 'Task4' not in self.instantiated_tasks
+        assert 'Task5' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 2
+        assert 0 in state_dict['waiting_edges']
+        assert 1 in state_dict['waiting_edges']
 
         # Task2 has failed
         task2 = self.get_task('Task2')
@@ -590,17 +591,17 @@ class TestNodeFailures(SelinonTestCase):
         system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertNotIn('Task3', self.instantiated_tasks)
-        self.assertNotIn('Task4', self.instantiated_tasks)
-        self.assertNotIn('Task5', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 2)
-        self.assertIn(0, state_dict['waiting_edges'])
-        self.assertIn(1, state_dict['waiting_edges'])
-        self.assertIn('Task2', state_dict['failed_nodes'])
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' in self.instantiated_tasks
+        assert 'Task3' not in self.instantiated_tasks
+        assert 'Task4' not in self.instantiated_tasks
+        assert 'Task5' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 2
+        assert 0 in state_dict['waiting_edges']
+        assert 1 in state_dict['waiting_edges']
+        assert 'Task2' in state_dict['failed_nodes']
 
         # No change so far, still wait
         system_state = SystemState(id(self), 'flow1', state=state_dict,
@@ -608,17 +609,17 @@ class TestNodeFailures(SelinonTestCase):
         system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1', self.instantiated_tasks)
-        self.assertIn('Task2', self.instantiated_tasks)
-        self.assertNotIn('Task3', self.instantiated_tasks)
-        self.assertNotIn('Task4', self.instantiated_tasks)
-        self.assertNotIn('Task5', self.instantiated_tasks)
-        self.assertEqual(len(state_dict.get('waiting_edges')), 2)
-        self.assertIn(0, state_dict['waiting_edges'])
-        self.assertIn(1, state_dict['waiting_edges'])
-        self.assertIn('Task2', state_dict['failed_nodes'])
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' in self.instantiated_tasks
+        assert 'Task3' not in self.instantiated_tasks
+        assert 'Task4' not in self.instantiated_tasks
+        assert 'Task5' not in self.instantiated_tasks
+        assert len(state_dict.get('waiting_edges')) == 2
+        assert 0 in state_dict['waiting_edges']
+        assert 1 in state_dict['waiting_edges']
+        assert 'Task2' in state_dict['failed_nodes']
 
         # Task1 has finished successfully
         task1 = self.get_task('Task1')
@@ -630,15 +631,15 @@ class TestNodeFailures(SelinonTestCase):
         system_state.update()
         state_dict = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIn('Task3', self.instantiated_tasks)
-        self.assertNotIn('Task4', self.instantiated_tasks)
+        assert retry is not None
+        assert 'Task3' in self.instantiated_tasks
+        assert 'Task4' not in self.instantiated_tasks
 
         # Task3 has finished successfully
         task3 = self.get_task('Task3')
         self.set_finished(task3, 0)
 
-        with self.assertRaises(FlowError):
+        with pytest.raises(FlowError):
             system_state = SystemState(id(self), 'flow1', state=state_dict,
                                        node_args=system_state.node_args)
             system_state.update()
@@ -707,14 +708,14 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict_1 = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('flow2', self.instantiated_flows)
-        self.assertIn('flow4', self.instantiated_flows)
-        self.assertIn('flow5', self.instantiated_flows)
-        self.assertIn('Task1_f1', self.instantiated_tasks)
-        self.assertIn('Task2_f1', self.instantiated_tasks)
-        self.assertNotIn('flow3', self.instantiated_flows)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'flow2' in self.instantiated_flows
+        assert 'flow4' in self.instantiated_flows
+        assert 'flow5' in self.instantiated_flows
+        assert 'Task1_f1' in self.instantiated_tasks
+        assert 'Task2_f1' in self.instantiated_tasks
+        assert 'flow3' not in self.instantiated_flows
 
         # Task1_f1 have finished
         task1_f1 = self.get_task('Task1_f1')
@@ -728,9 +729,9 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict_1 = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertNotIn('flow3', self.instantiated_flows)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'flow3' not in self.instantiated_flows
 
         # flow2
 
@@ -739,12 +740,12 @@ class TestNodeFailures(SelinonTestCase):
         state_dict_2 = system_state.to_dict()
         flow2 = self.get_flow('flow2')
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1_f2', self.instantiated_tasks)
-        self.assertIn('Task2_f2', self.instantiated_tasks)
-        self.assertIn('Task3_f2', self.instantiated_tasks)
-        self.assertIn('flow3', self.instantiated_flows)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1_f2' in self.instantiated_tasks
+        assert 'Task2_f2' in self.instantiated_tasks
+        assert 'Task3_f2' in self.instantiated_tasks
+        assert 'flow3' in self.instantiated_flows
 
         # Task1_f2, Task3_f2 have finished
         task1_f2 = self.get_task('Task1_f2')
@@ -761,8 +762,8 @@ class TestNodeFailures(SelinonTestCase):
         retry = system_state.update()
         state_dict_2 = system_state.to_dict()
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
+        assert retry is not None
+        assert system_state.node_args is None
 
         # flow 3
 
@@ -771,11 +772,11 @@ class TestNodeFailures(SelinonTestCase):
         state_dict_3 = system_state.to_dict()
         flow3 = self.get_flow('flow3')
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1_f3', self.instantiated_tasks)
-        self.assertIn('Task2_f3', self.instantiated_tasks)
-        self.assertIn('Task3_f3', self.instantiated_tasks)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1_f3' in self.instantiated_tasks
+        assert 'Task2_f3' in self.instantiated_tasks
+        assert 'Task3_f3' in self.instantiated_tasks
 
         # Task1_f3 has finished
         task1_f3 = self.get_task('Task1_f3')
@@ -794,7 +795,7 @@ class TestNodeFailures(SelinonTestCase):
         except FlowError as exc:
             self.set_failed(flow3, exc)
         else:
-            self.assertFalse("Expected FlowError not raised")
+            assert not "Expected FlowError not raised"
 
         # flow4
 
@@ -803,11 +804,11 @@ class TestNodeFailures(SelinonTestCase):
         state_dict_4 = system_state.to_dict()
         flow4 = self.get_flow('flow4')
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1_f4', self.instantiated_tasks)
-        self.assertIn('Task2_f4', self.instantiated_tasks)
-        self.assertIn('Task3_f4', self.instantiated_tasks)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1_f4' in self.instantiated_tasks
+        assert 'Task2_f4' in self.instantiated_tasks
+        assert 'Task3_f4' in self.instantiated_tasks
 
         # Task1_f2, Task3_f2 have finished
         task1_f4 = self.get_task('Task1_f4')
@@ -826,7 +827,7 @@ class TestNodeFailures(SelinonTestCase):
         except FlowError as exc:
             self.set_failed(flow4, exc)
         else:
-            self.assertFalse("Expected FlowError not raised")
+            assert not "Expected FlowError not raised"
 
         # flow5
 
@@ -835,10 +836,10 @@ class TestNodeFailures(SelinonTestCase):
         state_dict_5 = system_state.to_dict()
         flow5 = self.get_flow('flow5')
 
-        self.assertIsNotNone(retry)
-        self.assertIsNone(system_state.node_args)
-        self.assertIn('Task1_f5', self.instantiated_tasks)
-        self.assertIn('Task2_f5', self.instantiated_tasks)
+        assert retry is not None
+        assert system_state.node_args is None
+        assert 'Task1_f5' in self.instantiated_tasks
+        assert 'Task2_f5' in self.instantiated_tasks
 
         # Task1_f5, Task2_f5 have finished
         task1_f5 = self.get_task('Task1_f5')
@@ -849,7 +850,7 @@ class TestNodeFailures(SelinonTestCase):
         system_state = SystemState(id(self), 'flow5', state=state_dict_5, node_args=system_state.node_args)
         retry = system_state.update()
 
-        self.assertIsNone(retry)
+        assert retry is None
         state_info = {
             'finished_nodes': system_state.to_dict()['finished_nodes'],
             'failed_nodes': system_state.to_dict()['failed_nodes']
@@ -864,16 +865,16 @@ class TestNodeFailures(SelinonTestCase):
         except FlowError as exc:
             self.set_failed(flow2, exc)
         else:
-            self.assertFalse("Expected FlowError not raised")
+            assert not "Expected FlowError not raised"
 
         # finally inspect flow1 result and finished that is propagated at fallback to TaskX
 
-        self.assertNotIn('TaskX', self.instantiated_tasks)
+        assert 'TaskX' not in self.instantiated_tasks
 
         system_state = SystemState(id(self), 'flow1', state=state_dict_1, node_args=system_state.node_args)
         system_state.update()
 
-        self.assertIn('TaskX', self.instantiated_tasks)
+        assert 'TaskX' in self.instantiated_tasks
 
         task_x = self.get_task('TaskX')
-        self.assertIsNone(task_x.parent)
+        assert task_x.parent is None
