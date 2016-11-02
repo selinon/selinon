@@ -37,7 +37,7 @@ class SelinonTaskEnvelope(Task):
     acks_late = True
     track_started = True
     max_retries = None
-    name = "SelinonTaskEnvelope"
+    name = "selinon.SelinonTaskEnvelope"
 
     @classmethod
     def validate_result(cls, task_name, result):
