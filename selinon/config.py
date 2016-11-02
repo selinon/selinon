@@ -37,6 +37,7 @@ class Config(object):
     nowait_nodes = None
     max_retry = None
     retry_countdown = None
+    storage2storage_cache = None
     storage_readonly = None
     propagate_node_args = None
     propagate_parent = None
@@ -77,7 +78,7 @@ class Config(object):
         cls.max_retry = config_module['max_retry']
         cls.retry_countdown = config_module['retry_countdown']
         cls.storage_readonly = config_module['storage_readonly']
-        cls.storage_cached = config_module['storage_cached']
+        cls.storage2storage_cache = config_module['storage2storage_cache']
 
         # throttle configuration
         cls.throttle_tasks = config_module['throttle_tasks']
