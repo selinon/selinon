@@ -12,6 +12,10 @@ uninstall:
 		cat ${TEMPFILE} | xargs rm -rf && \
 		rm -f ${TEMPFILE}
 
+devenv:
+	@echo "Installing latest development requirements"
+	pip3 install -U -r dev_requirements.txt
+
 venv:
 	virtualenv -p python3 venv && source venv/bin/activate && pip3 install -r requirements.txt
 	@echo "Run 'source venv/bin/activate' to enter virtual environment and 'deactivate' to return from it"
