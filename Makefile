@@ -24,7 +24,7 @@ clean:
 check:
 	@# We have to adjust PYTHONPATH so we use our own Celery and modified Selinon Dispatcher for testing
 	@# Make sure we have -p no:celery otherwise py.test is trying to do dirty stuff with loading celery.contrib
-	PYTHONPATH="test/:${PYTHONPATH}" py.test --cov=./selinon -vvl --timeout=2 -p no:celery
+	PYTHONPATH="test/:${PYTHONPATH}" py.test --cov=./selinon -vvl --timeout=2 -p no:celery test/*.py
 
 doc:
 	@sphinx-apidoc -e -o docs.source/api selinon -f
