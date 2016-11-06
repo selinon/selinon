@@ -30,7 +30,7 @@ def run_flow(flow_name, node_args=None):
     :param node_args: arguments that will be supplied to flow
     :return: flow ID (dispatcher ID)
     """
-    if flow_name not in Config.dispatcher_queues:
+    if Config.dispatcher_queues is None or flow_name not in Config.dispatcher_queues:
         raise KeyError("No flow with name '%s' defined" % flow_name)
 
     return Dispatcher().apply_async(kwargs={'flow_name': flow_name,
