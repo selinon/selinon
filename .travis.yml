@@ -1,11 +1,12 @@
 language: python
 python:
-  - "3.3"
   - "3.4"
   - "3.5"
   - "3.5-dev" # 3.5 development branch
   - "nightly" # currently points to 3.6-dev
-install: "pip3 install -r requirements.txt && pip3 install -r dev_requirements.txt"
+# we force update dev_requirements.txt so we get latest master of selinonlib to
+# be consistent with test
+install: "pip3 install -r requirements.txt && pip3 install -U -r dev_requirements.txt"
 script: make check
 after_success:
   - bash <(curl -s https://codecov.io/bash)

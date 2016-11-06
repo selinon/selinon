@@ -22,7 +22,7 @@ import pytest
 from selinonTestCase import SelinonTestCase
 
 from selinon import SystemState
-from selinon.storage import DataStorage
+from selinonlib.storages import DataStorage
 from selinon.config import Config
 
 

@@ -19,7 +19,7 @@
 # ####################################################################
 
 from selinon import SystemState
-from selinon.storage import DataStorage
+from selinonlib.storages import DataStorage
 from selinonTestCase import SelinonTestCase
 
 

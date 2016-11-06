@@ -8,3 +8,4 @@ docs.source/api
 .cache
 .codecov
 coverage.xml
+.coverage
