@@ -37,4 +37,4 @@ doc:
 
 docs: doc
 html: doc
-
+test: check
