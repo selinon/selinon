@@ -1,4 +1,4 @@
 selinonlib
-celery>=4.0.0rc3
-jsonschema>=2.5.1
-redis>=2.10.5
+celery
+jsonschema
+redis
