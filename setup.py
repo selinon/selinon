@@ -14,7 +14,7 @@ if sys.version_info[0] != 3:
 setup(
     name='selinon',
     version='0.1.0rc3',
-    packages=['selinon', 'selinon.storage'],
+    packages=['selinon'],
     install_requires=get_requirements(),
     author='Fridolin Pokorny',
     author_email='fpokorny@redhat.com',
