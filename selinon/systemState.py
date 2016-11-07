@@ -502,7 +502,6 @@ class SystemState(object):
             if start_edge['condition'](storage_pool, self._node_args):
                 records = self._fire_edge(start_edge, storage_pool, node_args=self._node_args, parent=self._parent)
 
-
                 for node in records:
                     if node['name'] not in Config.nowait_nodes.get(self._flow_name, []):
                         self._update_waiting_edges(node['name'])
@@ -512,7 +511,8 @@ class SystemState(object):
                                                          active_nodes=self._active_nodes,
                                                          failed_nodes=self._failed_nodes,
                                                          new_started_nodes=new_started_nodes,
-                                                         new_fallback_nodes=[])
+                                                         new_fallback_nodes=[],
+                                                         finished_nodes=self._finished_nodes)
 
     def update(self):
         """
@@ -556,11 +556,13 @@ class SystemState(object):
                                                                  active_nodes=self._active_nodes,
                                                                  failed_nodes=self._failed_nodes,
                                                                  new_started_nodes=started,
-                                                                 new_fallback_nodes=fallback_started)
+                                                                 new_fallback_nodes=fallback_started,
+                                                                 finished_nodes=self._finished_nodes)
             else:
                 self._retry = Config.strategies[self._flow_name](previous_retry=self._retry,
                                                                  active_nodes=self._active_nodes,
                                                                  failed_nodes=self._failed_nodes,
                                                                  new_started_nodes=[],
-                                                                 new_fallback_nodes=[])
+                                                                 new_fallback_nodes=[],
+                                                                 finished_nodes=self._finished_nodes)
         return self._retry
