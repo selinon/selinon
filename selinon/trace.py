@@ -120,6 +120,8 @@ List of events that can be traced:
 import logging
 import platform
 
+from celery.utils.log import get_task_logger
+
 
 def _default_trace_func(event, msg_dict):
     """
@@ -194,25 +196,14 @@ class Trace(object):
         raise NotImplementedError()
 
     @classmethod
-    def trace_by_logging(cls, level=logging.DEBUG, logger=None):
+    def trace_by_logging(cls, logger=None):
         """
         Trace by using Python's logging
 
-        :param level: logging level
         :param logger: optional logger that should be used
         """
-        prefix = 'DISPATCHER %10s' % platform.node()
-
         if not logger:
-            logger = logging.getLogger('selinon_trace')
-            formatter = logging.Formatter(prefix + ' - %(asctime)s.%(msecs)d %(levelname)s: %(message)s',
-                                          datefmt="%Y-%m-%d %H:%M:%S")
-            sh = logging.StreamHandler()
-            sh.setFormatter(formatter)
-            logger.addHandler(sh)
-            logger.setLevel(level)
-            # do not propagate to parent loggers so we don't get duplicate output
-            logger.propagate = False
+            logger = get_task_logger('selinon')
 
         cls._logger = logger
         cls._trace_func = cls.logging_trace_func
@@ -255,7 +246,7 @@ class Trace(object):
         :param msg_dict: a dict holding additional trace information for event
         :param logger: a logger to be used, if None, logger from trace_by_logging will be used
         """
-        message = "%s: %s" % (cls.event2str(event), msg_dict)
+        message = "SELINON %10s - %s: %s" % (platform.node(), cls.event2str(event), msg_dict)
 
         logger = logger or cls._logger
         if event in [Trace.NODE_FAILURE, Trace.DISPATCHER_FAILURE, Trace.TASK_DISCARD_RESULT, Trace.TASK_RETRY]:
