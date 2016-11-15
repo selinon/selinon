@@ -62,6 +62,7 @@ class SelinonTaskEnvelope(Task):
             'flow_name': flow_name,
             'parent': parent,
             'node_args': node_args,
+            'dispatcher_id': dispatcher_id,
             'retried_count': retried_count
         }
 
