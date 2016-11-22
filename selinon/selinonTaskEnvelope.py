@@ -130,7 +130,8 @@ class SelinonTaskEnvelope(Task):
             if max_retry > retried_count and not isinstance(exc, FatalTaskError):
                 retried_count += 1
                 retry_countdown = Config.retry_countdown.get(task_name, 0)
-                self.selinon_retry(task_name, flow_name, parent, node_args, retry_countdown, retried_count)
+                self.selinon_retry(task_name, flow_name, parent, node_args, retry_countdown, retried_count,
+                                   dispatcher_id)
             else:
                 Trace.log(Trace.TASK_FAILURE, {'flow_name': flow_name,
                                                'task_name': task_name,
