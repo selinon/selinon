@@ -37,6 +37,9 @@ Selinon was designed to serve millions of tasks in clusters or data centers orch
 ## A Quick First Overview
 
 
+![Main dinner flow](/example/graph/dinnerFlow.png?raw=true "Main dinner flow")
+![Buy ingredients flow](/example/graph/buyIngredientsFlow.png?raw=true "How to buy ingredients")
+![Preparation](/example/graph/prepareFlow.png?raw=true "How to prepare dinner")
 
 ## More info
 

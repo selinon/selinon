@@ -1,0 +1,145 @@
+---
+  tasks:
+    - name: BuyEggsTask
+      import: myapp.tasks
+      storage: Basket
+      queue: BuyEggsTask_v0
+
+    - name: BuyFlourTask
+      import: myapp.tasks
+      storage: Basket
+      queue: BuyFlourTask_v0
+
+    - name: BuyFlowerTask
+      import: myapp.tasks
+      storage: Basket
+      queue: BuyFlowerTask_v0
+
+    - name: BuyAllRemainingTask
+      import: myapp.tasks
+      storage: Basket
+      queue: BuyFlowerTask_v0
+
+    - name: OrderPizzaTask
+      import: myapp.tasks
+      queue: OrderPizzaTask_v0
+
+    - name: OrderBeerTask
+      import: myapp.tasks
+      storage: Fridge
+      queue: OrderBeerTask_v0
+
+    - name: BakeTask
+      import: myapp.tasks
+      queue: BakeTask_v0
+      storage: Oven
+
+    - name: WarmUpOvenTask
+      import: myapp.tasks
+      queue: WarmUpOvenTask_v0
+      storage: Oven
+
+    - name: MakeDoughTask
+      import: myapp.tasks
+      queue: MakeDoughTask_v0
+
+    - name: ServeDinnerTask
+      import: myapp.tasks
+      queue: ServeDinnerTask_v0
+
+  flows:
+    - prepareFlow
+    - buyIngredientsFlow
+    - dinnerFlow
+
+  storages:
+    - name: Oven
+      import: myapp.storages
+      configuration:
+        max_temperature: 250
+    - name: Fridge
+      import: myapp.storages
+      configuration:
+        temperature: 5
+    - name: Basket
+      import: myapp.storages
+      configuration:
+        pay_with_visa: true
+
+
+  flow-definitions:
+    - name: dinnerFlow
+      queue: dinner_v0
+      edges:
+        - from:
+          to: buyIngredientsFlow
+        - from: buyIngredientsFlow
+          to: prepareFlow
+        - from: prepareFlow
+          to: ServeDinnerTask
+      failures:
+        - nodes:
+            - buyIngredientsFlow
+          fallback:
+            - OrderPizzaTask
+            - OrderBeerTask
+        - nodes:
+            - prepareFlow
+          fallback:
+            - OrderPizzaTask
+            - OrderBeerTask
+
+    - name: buyIngredientsFlow
+      queue: buyIngredients_v0
+      edges:
+        - from:
+          to:
+            - BuyFlourTask
+            - BuyEggsTask
+            - BuyAllRemainingTask
+        - from:
+          to: BuyFlowerTask
+          condition:
+            and:
+              - name: argsFieldEqual
+                args:
+                  key: in_love
+                  value: true
+              - not:
+                  name: argsFieldEqual
+                  args:
+                    key: single
+                    value: true
+
+    - name: prepareFlow
+      queue: prepare_v0
+      edges:
+        - from:
+          to:
+             - WarmUpOvenTask
+             - MakeDoughTask
+          condition:
+            name: httpStatus
+            args:
+              host: recipes.lan
+              path: recipes/how-to-bake-pie.html
+              status: 200
+
+        - from: WarmUpOvenTask
+          to: WarmUpOvenTask
+          condition:
+            not:
+              name: fieldGreater
+              args:
+                key: temperature
+                value: 200
+        - from:
+             - WarmUpOvenTask
+             - MakeDoughTask
+          to: BakeTask
+          condition:
+            name: fieldGreater
+            node: WarmUpOvenTask
+            args:
+              key: temperature
+              value: 200
