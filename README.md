@@ -26,7 +26,7 @@ An advanced flow management above Celery (an asynchronous distributed task queue
 
 ## About
 
-This tool is an implementation above Celery that enables you to define flows and dependencies in flows, schedule tasks based on results of Celery workers, their success or any external events.
+This tool is an implementation above Celery that enables you to define flows and dependencies in flows, schedule tasks based on results of Celery workers, their success or any external events. If you are not familiar with Celery, check out its homepage [www.celeryproject.org](http://www.celeryproject.org) or [this nice tutorial](https://tests4geeks.com/distribute-tasks-python-celery-rabbitmq/).
 
 Selinon was originally designed to take care of advanced flows in one of Red Hat products, where it already served thousands of flows and tasks. Its main aim is to simplify specifying group of tasks, grouping tasks into flows, handle data and execution dependencies between tasks and flows, easily reuse tasks and flows, model advanced execution units in YAML configuration files and make the whole system easy to model, easy to maintain and easy to debug.
 
