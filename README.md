@@ -13,7 +13,7 @@ An advanced task flow management on top of [Celery](https://www.celeryproject.or
 
 ## TLDR;
 
-An advanced flow management above Celery written in Python3, that allows you to:
+An advanced flow management above Celery (an asynchronous distributed task queue) written in Python3, that allows you to:
 
   - Dynamically schedule tasks based on results of previous tasks
   - Group tasks to flows
@@ -36,23 +36,37 @@ Selinon was designed to serve millions of tasks in clusters or data centers orch
 
 ## A Quick First Overview
 
+Selinon is serving recipes in a distributed environment, so let's make a dinner!
+
+If we want to make a dinner, we need to buy ingredients. These ingredients are bought in `buyIngredientsFlow`. This flow consists of multiple tasks, but let's focus on our main flow. Once all ingredients are bought, we can start preparing our dinner in `prepareFlow`. Again, this flow consists of some additional steps that need to be done in order to accomplish our future needs. As you can see, if anything goes wrong in mentioned flows (see red arrows), we make a fallback to pizza with beer which we order. To make beer cool, we place it to our `Fridge` storage. If we successfully finished `prepareFlow` after successful shopping, we can proceed to `ServeDinnerTask`.
+
+Just to point out - grey nodes represent flows (which can be made of other flows or tasks) and white (rounded) nodes are tasks. Conditions are represented in hexagons (see bellow). Black arrows represent time or data dependencies between our nodes, grey arrows pinpoint where results of tasks are stored.
 
 ![Main dinner flow](/example/graph/dinnerFlow.png?raw=true "Main dinner flow")
+
+For our dinner we need eggs, flour and some additional ingredients. Moreover, we conditionally buy a flower based on our condition. Our task `BuyFlowerTask` will not be scheduled (or executed) if our condition is `False`. Conditions are made of predicates and these predicates can be grouped as desired with logical operators. You can define your own predicates if you want (default are available in `selinonlib.predicates`). Everything that is bought is stored in `Basket` storage transparently.
+
+Let's visualise our `buyIngredientsFlow`:
 ![Buy ingredients flow](/example/graph/buyIngredientsFlow.png?raw=true "How to buy ingredients")
+
+As stated in our main flow after buying ingredients, we proceed to dinner preparation but first we need to check our recipe that is hosted at `http://recipes.lan/how-to-bake-pie.html`. Any ingredients we bought are transparently retrieved from defined storage as defined in our YAML configuration file. We warm up our oven to expected temperature and once the temperature is reached and we have finished with dough, we can proceed to baking.
+
+Based on the description above, our `prepareFlow` will look like the following graph:
 ![Preparation](/example/graph/prepareFlow.png?raw=true "How to prepare dinner")
+
+This example demonstrates very simple flows. The whole configuration can be found [here](/example/dinner.yaml). Just check it out how you can easily define your flows! You can find a script that visualises graphs based on the YAML configuration in [this repo](/example/) as well.
 
 ## More info
 
-See [Documentation](https://selinon.github.io/selinon) for examples, documentation and more info about project.
+The example was intentionally simplified. You can also parametrize your flows, schedule N tasks (where N is a run-time evaluated variable), do result caching, placing tasks on separate queues in order to be capable of doing fluent system updates, throttle execution of certain tasks in time, propagate results of tasks to sub-flows etc. Just check [documentation](https://selinon.github.io/selinon) for more info.
 
-## Requirements
+## Live Demo
 
-See documentation for more info. 
+A live demo with few examples can be found [here](https://github.com/selinon/demo). Feel free to check it out.
 
 ## Installation
 
 ```
 $ pip3 install selinon
 ```
-
 
