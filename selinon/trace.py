@@ -117,9 +117,7 @@ List of events that can be traced:
 
 """
 
-import logging
 import platform
-
 from celery.utils.log import get_task_logger
 
 
