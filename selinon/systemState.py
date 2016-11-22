@@ -284,47 +284,55 @@ class SystemState(object):
 
         for i in range(len(failed_nodes), 0, -1):
             for combination in itertools.combinations(failed_nodes, i):
-                try:
-                    failure_nodes = Config.failures[self._flow_name]
-                    failure_node = reduce(lambda n, c: n['next'][c[0]], combination[1:], failure_nodes[combination[0][0]])
-                except KeyError:
-                    # such failure not found in the tree of permutations - this means that this flow will always fail,
-                    # but run defined fallbacks for defined failures first
-                    continue
+                change = True
+                while change:
+                    change = False
+                    try:
+                        failure_nodes = Config.failures[self._flow_name]
+                        failure_node = reduce(lambda n, c: n['next'][c[0]], combination[1:],
+                                              failure_nodes[combination[0][0]])
+                    except KeyError:
+                        # such failure not found in the tree of permutations - this means that this
+                        # flow will always fail, but run defined fallbacks for defined failures first
+                        continue
 
-                if isinstance(failure_node['fallback'], list) and len(failure_node['fallback']) > 0:
-                    traced_nodes_arr = []
+                    if isinstance(failure_node['fallback'], list) and len(failure_node['fallback']) > 0:
+                        traced_nodes_arr = []
 
-                    for node in combination:
-                        traced_nodes_arr.append((node[0], self._failed_nodes[node[0]],))
-                        self._failed_nodes[node[0]].pop(0)
-                        if len(self._failed_nodes[node[0]]) == 0:
-                            del self._failed_nodes[node[0]]
+                        for node in combination:
+                            traced_nodes_arr.append((node[0], self._failed_nodes[node[0]],))
+                            self._failed_nodes[node[0]].pop(0)
+                            if len(self._failed_nodes[node[0]]) == 0:
+                                del self._failed_nodes[node[0]]
 
-                    Trace.log(Trace.FALLBACK_START, {'flow_name': self._flow_name,
-                                                     'dispatcher_id': self._dispatcher_id,
-                                                     'nodes': traced_nodes_arr,
-                                                     'fallback': failure_node['fallback']})
+                        Trace.log(Trace.FALLBACK_START, {'flow_name': self._flow_name,
+                                                         'dispatcher_id': self._dispatcher_id,
+                                                         'nodes': traced_nodes_arr,
+                                                         'fallback': failure_node['fallback']})
 
-                    for node in failure_node['fallback']:
-                        record = self._start_node(node, parent=None, node_args=self._node_args)
-                        ret.append(record)
+                        for node in failure_node['fallback']:
+                            record = self._start_node(node, parent=None, node_args=self._node_args)
+                            ret.append(record)
 
-                    # wait for fallback to finish in order to avoid time dependent flow evaluation
-                    return ret
-                elif failure_node['fallback'] is True:
-                    traced_nodes_arr = []
-                    for node in combination:
-                        traced_nodes_arr.append((node[0], self._failed_nodes[node[0]],))
-                        self._failed_nodes[node[0]].pop(0)
-                        if len(self._failed_nodes[node[0]]) == 0:
-                            del self._failed_nodes[node[0]]
+                        # wait for fallback to finish in order to avoid time dependent flow evaluation
+                        return ret
+                    elif failure_node['fallback'] is True:
+                        change = True
+                        traced_nodes_arr = []
+                        for node in combination:
+                            traced_nodes_arr.append((node[0], self._failed_nodes[node[0]],))
+                            self._failed_nodes[node[0]].pop(0)
+                            if len(self._failed_nodes[node[0]]) == 0:
+                                del self._failed_nodes[node[0]]
+                                # we have reached zero in failed nodes, we cannot continue with failure
+                                # combination otherwise we get KeyError
+                                change = False
 
-                    Trace.log(Trace.FALLBACK_START, {'flow_name': self._flow_name,
-                                                     'dispatcher_id': self._dispatcher_id,
-                                                     'nodes': traced_nodes_arr,
-                                                     'fallback': True})
-                    # continue with fallback in other combinations, nothing started
+                        Trace.log(Trace.FALLBACK_START, {'flow_name': self._flow_name,
+                                                         'dispatcher_id': self._dispatcher_id,
+                                                         'nodes': traced_nodes_arr,
+                                                         'fallback': True})
+                        # continue with fallback in other combinations, nothing started
 
         return ret
 

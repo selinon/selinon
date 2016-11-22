@@ -878,3 +878,89 @@ class TestNodeFailures(SelinonTestCase):
 
         task_x = self.get_task('TaskX')
         assert task_x.parent is None
+
+    def test_multiple_failures_from_subflow(self):
+        #
+        # flow2:
+        #    Task0   Task1 X   Task1 X
+        #
+        # flow1:
+        #
+        #    flow2X..... Task3
+        #
+        # Note:
+        # flow2 will fail with two tasks of type Task1. flow1 defines fallback as True, so
+        # it should recover from failure
+        edge_table = {'flow1': [{'from': [], 'to': ['flow2'], 'condition': self.cond_true}],
+                      'flow2': []}  # flow2 handled manually
+        failures = {
+            'flow1': {'flow2': {'next': {}, 'fallback': True}},
+            'flow2': {}
+        }
+        self.init(edge_table, failures=failures)
+
+        system_state = SystemState(id(self), 'flow1')
+        retry = system_state.update()
+        state_dict = system_state.to_dict()
+
+        assert 'flow2' in self.instantiated_flows
+        assert retry is not None
+        assert system_state.node_args is None
+
+        flow_info = {'finished_nodes': {'Task0': ['<id-tak0_0>']},
+                     'failed_nodes': {'Task2': ['<id-task1_0>', '<id-task1_1>']}}
+        flow2 = self.get_flow('flow2')
+        self.set_failed(flow2, FlowError(flow_info))
+
+        system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
+        retry = system_state.update()
+
+        assert retry is None
+
+    def test_multiple_failured_tasks(self):
+        #
+        # flow1:
+        #    Task0   Task1 X   Task1 X
+        #
+        # Note:
+        #  flow1 will have three tasks, Task1 will be instantiated twice. We will provide fallback for Task1
+        edge_table = {'flow1': [{'from': [], 'to': ['Task0', 'Task1'], 'condition': self.cond_true}]}
+        failures = {
+            'flow1': {'Task1': {'next': {}, 'fallback': True}},
+        }
+        self.init(edge_table, failures=failures)
+
+        system_state = SystemState(id(self), 'flow1')
+        retry = system_state.update()
+        state_dict = system_state.to_dict()
+
+        assert 'Task0' in self.instantiated_tasks
+        assert 'Task1' in self.instantiated_tasks
+        assert retry is not None
+        assert system_state.node_args is None
+
+        # Manually append new Task1 instance to simplify this test
+        task1 = self.get_task('Task1')
+        self.set_failed(task1, ValueError("Some exception raised"))
+
+        system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
+        retry = system_state.update()
+        state_dict = system_state.to_dict()
+
+        assert 'Task1' in state_dict.get('failed_nodes')
+        assert retry is not None
+
+        state_dict['failed_nodes']['Task1'].append('<injected-task1-id>')
+        system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
+        retry = system_state.update()
+
+        assert retry is not None
+
+        task0 = self.get_task('Task0')
+        self.set_finished(task0)
+
+        system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
+        retry = system_state.update()
+
+        assert retry is None
+
