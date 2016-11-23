@@ -37,13 +37,12 @@ class StoragePool(object):
         :param graceful: return None instead of raising an exception
         :return: storage name for task
         """
-        try:
-            return Config.task2storage_mapping[task_name]
-        except KeyError:
-            if graceful:
-                return None
-            else:
-                raise
+        storage = Config.task2storage_mapping.get(task_name)
+
+        if storage is None and not graceful:
+            raise KeyError("No storage for task '%s' defined" % task_name)
+
+        return storage
 
     @classmethod
     def get_storage_by_task_name(cls, task_name):
