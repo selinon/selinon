@@ -54,6 +54,9 @@ As stated in our main flow after buying ingredients, we proceed to dinner prepar
 Based on the description above, our `prepareFlow` will look like the following graph:
 ![Preparation](/example/graph/prepareFlow.png?raw=true "How to prepare dinner")
 
+Once everything is done we serve plates. As we want to serve plates for all guests we need to make sure we schedule N tasks of type `ServePlateTask`. Each time we run our whole dinner flow, number of guests may vary so make sure no guest stays hungry. Our `serveDinnerFlow` would look like the following graph:
+![Serving plates](/example/graph/serveDinnerFlow.png?raw=true "How to serve plates")
+
 This example demonstrates very simple flows. The whole configuration can be found [here](/example/dinner.yaml). Just check it out how you can easily define your flows! You can find a script that visualises graphs based on the YAML configuration in [this repo](/example/) as well.
 
 ## More info

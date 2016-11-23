@@ -43,14 +43,15 @@
       import: myapp.tasks
       queue: MakeDoughTask_v0
 
-    - name: ServeDinnerTask
+    - name: ServePlateTask
       import: myapp.tasks
-      queue: ServeDinnerTask_v0
+      queue: ServePlateTask_v0
 
   flows:
     - prepareFlow
     - buyIngredientsFlow
     - dinnerFlow
+    - serveDinnerFlow
 
   storages:
     - name: Oven
@@ -76,7 +77,7 @@
         - from: buyIngredientsFlow
           to: prepareFlow
         - from: prepareFlow
-          to: ServeDinnerTask
+          to: serveDinnerFlow
       failures:
         - nodes:
             - buyIngredientsFlow
@@ -143,3 +144,12 @@
             args:
               key: temperature
               value: 200
+
+    - name: serveDinnerFlow
+      queue: dinner_v0
+      edges:
+        - from:
+          to: ServePlateTask
+          foreach:
+            import: myapp.helpers
+            function: iter_guests
