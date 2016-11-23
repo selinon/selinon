@@ -1,0 +1,58 @@
+
+---
+  tasks:
+    - name: task1
+      classname: Task1
+      import: testapp.tasks
+      max_retry: 10
+      retry_countdown: 120
+      storage: MyStorage
+      queue: Task1_v0
+      throttle:
+         seconds: 5
+      output_schema: schema.json
+
+    - name: task2
+      # defaults to 'name' by default
+      #classname: task2
+      import: testapp.tasks
+      max_retry: 10
+      retry_countdown: 120
+      # Default Selinon queue is default Celery queue
+      #queue: celery
+
+    - name: task3
+      import: testapp.tasks
+      # max_retry is not limited by default (null)
+      #max_retry:
+      #retry_countdown:
+
+
+  flows:
+    - flow1
+    #- flow2
+
+  storages:
+    - name: MyStorage
+      classname: MySimpleStorage
+      import: testapp.storages
+      configuration:
+        connection_string: foo
+
+  global:
+    # trace using Python's logging
+    trace: true
+
+  flow-definitions:
+    - name: flow1
+      nowait: task1
+      edges:
+        - from:
+          to:
+           - task1
+           - task2
+           - task3
+      failures:
+        - nodes: task2
+          fallback: task3
+

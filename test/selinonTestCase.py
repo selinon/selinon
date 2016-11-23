@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
+import os
 from getTaskInstance import GetTaskInstance
 from queueMock import QueueMock
 from strategyMock import strategy_function
@@ -25,6 +26,7 @@ from strategyMock import strategy_function
 from celery.result import AsyncResult
 from selinon.config import Config
 from selinon.systemState import SystemState
+from selinon.trace import Trace, _default_trace_func
 
 
 class _ThrottleTasks(object):
@@ -42,6 +44,9 @@ class SelinonTestCase(object):
     """
     Main class for Selinon testing
     """
+    # dir for data files for tests
+    DATA_DIR = os.path.join('test', 'data')
+
     def setup_method(self, method):
         """
         Clean up all class attributes from previous runs
@@ -82,6 +87,9 @@ class SelinonTestCase(object):
                                                                             kwargs.get('throttle_tasks_conf')))
         Config.storage_mapping = kwargs.get('storage_mapping')
         self._update_edge_table()
+
+        # Make sure we restore tracing function in tests
+        Trace._trace_func = _default_trace_func
 
     def _update_edge_table(self):
         """
