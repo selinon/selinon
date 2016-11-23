@@ -25,6 +25,7 @@ from selinonTestCase import SelinonTestCase
 from selinon.trace import Trace
 from selinon import run_flow
 from selinon.dispatcher import Dispatcher
+from selinon.retry import Retry
 
 
 class TestOthers(SelinonTestCase):
@@ -46,4 +47,8 @@ class TestOthers(SelinonTestCase):
 
         with pytest.raises(KeyError):
             run_flow('some_flow', node_args={'foo': 'bar'})
+
+    def test_retry(self):
+        countdown = 10
+        assert Retry(countdown=countdown).countdown == countdown
 
