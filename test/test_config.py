@@ -23,7 +23,7 @@ from selinon import Config
 from selinonTestCase import SelinonTestCase
 
 
-class TestFlow(SelinonTestCase):
+class TestConfig(SelinonTestCase):
     def test_set_config_yaml_simple(self):
         test_file = os.path.join(self.DATA_DIR, 'test_set_config.yaml')
         Config.set_config_yaml(test_file, flow_definition_files=[test_file])
