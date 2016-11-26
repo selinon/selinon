@@ -66,6 +66,10 @@ class TestSelinonTaskEnvelope(SelinonTestCase):
             'user_retry': False
         }
 
-        # we should check params here
-        with pytest.raises(ValueError):
-            task.selinon_retry(**params)
+        try:
+            # we need to make context for traceback, otherwise this test will fail on Python3.4
+            raise KeyError()
+        except KeyError:
+            # we should check params here
+            with pytest.raises(ValueError):
+                task.selinon_retry(**params)
