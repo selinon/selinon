@@ -66,27 +66,31 @@ class SelinonTestCase(object):
         Config.edge_table = edge_table
         flows = list(edge_table.keys())
 
-        Config.flows = kwargs.get('flows', flows)
-        Config.nowait_nodes = kwargs.get('nowait_nodes', dict.fromkeys(flows, []))
-        Config.get_task_instance = kwargs.get('get_task_instance', GetTaskInstance())
-        Config.failures = kwargs.get('failures', {})
-        Config.propagate_node_args = kwargs.get('propagate_node_args', dict.fromkeys(flows, False))
-        Config.propagate_parent = kwargs.get('propagate_parent', dict.fromkeys(flows, False))
-        Config.propagate_finished = kwargs.get('propagate_finished', dict.fromkeys(flows, False))
-        Config.propagate_compound_finished = kwargs.get('propagate_compound_finished', dict.fromkeys(flows, False))
-        Config.retry_countdown = kwargs.get('retry_countdown', {})
-        Config.task_queues = kwargs.get('task_queues', QueueMock())
-        Config.dispatcher_queues = kwargs.get('dispatcher_queues', QueueMock())
-        Config.strategies = kwargs.get('strategies', dict.fromkeys(flows, strategy_function))
+        Config.flows = kwargs.pop('flows', flows)
+        Config.nowait_nodes = kwargs.pop('nowait_nodes', dict.fromkeys(flows, []))
+        Config.get_task_instance = kwargs.pop('get_task_instance', GetTaskInstance())
+        Config.failures = kwargs.pop('failures', {})
+        Config.propagate_node_args = kwargs.pop('propagate_node_args', dict.fromkeys(flows, False))
+        Config.propagate_parent = kwargs.pop('propagate_parent', dict.fromkeys(flows, False))
+        Config.propagate_finished = kwargs.pop('propagate_finished', dict.fromkeys(flows, False))
+        Config.propagate_compound_finished = kwargs.pop('propagate_compound_finished', dict.fromkeys(flows, False))
+        Config.retry_countdown = kwargs.pop('retry_countdown', {})
+        Config.task_queues = kwargs.pop('task_queues', QueueMock())
+        Config.dispatcher_queues = kwargs.pop('dispatcher_queues', QueueMock())
+        Config.strategies = kwargs.pop('strategies', dict.fromkeys(flows, strategy_function))
         # TODO: this is currently unused as we do not have tests for store()
-        Config.storage_readonly = kwargs.get('storage_readonly', {})
-        Config.task2storage_mapping = kwargs.get('task2storage_mapping', {})
-        Config.node_args_from_first = kwargs.get('node_args_from_first', dict.fromkeys(flows, False))
-        Config.throttle_flows = kwargs.get('throttle_flows', dict.fromkeys(flows, None))
-        Config.throttle_tasks = kwargs.get('throttle_tasks', _ThrottleTasks(Config.is_flow,
+        Config.storage_readonly = kwargs.pop('storage_readonly', {})
+        Config.task2storage_mapping = kwargs.pop('task2storage_mapping', {})
+        Config.node_args_from_first = kwargs.pop('node_args_from_first', dict.fromkeys(flows, False))
+        Config.throttle_flows = kwargs.pop('throttle_flows', dict.fromkeys(flows, None))
+        Config.throttle_tasks = kwargs.pop('throttle_tasks', _ThrottleTasks(Config.is_flow,
                                                                             kwargs.get('throttle_tasks_conf')))
-        Config.storage_mapping = kwargs.get('storage_mapping')
-        Config.output_schemas = kwargs.get('output_schemas')
+        Config.storage_mapping = kwargs.pop('storage_mapping', {})
+        Config.output_schemas = kwargs.pop('output_schemas', {})
+
+        if kwargs:
+            raise ValueError("Unknown config options provided: %s" % set(kwargs.keys()))
+
         self._update_edge_table()
 
         # Make sure we restore tracing function in tests

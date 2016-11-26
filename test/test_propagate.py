@@ -366,7 +366,7 @@ class TestPropagate(SelinonTestCase):
         assert set(task_x.parent['flow2']['Task3']) == set(task_x_parent['flow2']['Task3'])
         assert set(task_x.parent['flow2']['Task4']) == set(task_x_parent['flow2']['Task4'])
 
-    def test_propagate_compound_parent_mixed(self):
+    def test_propagate_compound_mixed(self):
         #
         # flow1:
         #
@@ -398,7 +398,7 @@ class TestPropagate(SelinonTestCase):
         }
         # Make sure propagate_finished is negated propagate_compound_finished
         # this is checked in selinonlib
-        self.init(edge_table, propagate_compound_parent=dict.fromkeys(edge_table.keys(), True),
+        self.init(edge_table,
                   propagate_finished={'flow1': ['flow2']},
                   propagate_compound_finished={'flow1': ['flow3']})
 
