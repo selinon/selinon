@@ -20,9 +20,11 @@
 
 import os
 import pytest
+from flexmock import flexmock
 from jsonschema import ValidationError
 from selinonTestCase import SelinonTestCase
 from selinon.selinonTaskEnvelope import SelinonTaskEnvelope
+from requestMock import RequestMock
 
 
 class TestSelinonTaskEnvelope(SelinonTestCase):
@@ -47,3 +49,23 @@ class TestSelinonTaskEnvelope(SelinonTestCase):
 
         with pytest.raises(ValidationError):
             SelinonTaskEnvelope.validate_result(task_name, result)
+
+    def test_selinon_retry(self):
+        task = SelinonTaskEnvelope()
+        task.request = RequestMock()
+        flexmock(task).should_receive('retry').and_return(ValueError)
+
+        params = {
+            'task_name': 'Task1',
+            'flow_name': 'flow1',
+            'parent': {},
+            'node_args': None,
+            'retry_countdown': 0,
+            'retried_count': 0,
+            'dispatcher_id': '<dispatcher-id>',
+            'user_retry': False
+        }
+
+        # we should check params here
+        with pytest.raises(ValueError):
+            task.selinon_retry(**params)

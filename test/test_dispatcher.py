@@ -24,12 +24,7 @@ from selinonTestCase import SelinonTestCase
 from selinon import Dispatcher
 from selinon.systemState import SystemState
 from selinon.flowError import FlowError
-
-
-class _RequestMock(object):
-    def __getattr__(self, item):
-        assert item == 'id'
-        return '<id>'
+from requestMock import RequestMock
 
 
 class TestDispatcher(SelinonTestCase):
@@ -45,7 +40,7 @@ class TestDispatcher(SelinonTestCase):
         flexmock(SystemState).should_receive('to_dict').and_return(state_dict)
 
         dispatcher = Dispatcher()
-        dispatcher.request = _RequestMock()
+        dispatcher.request = RequestMock()
 
         assert dispatcher.run(flow_name) == state_dict
 
@@ -61,7 +56,7 @@ class TestDispatcher(SelinonTestCase):
         flexmock(SystemState).should_receive('to_dict').and_return(state_dict)
 
         dispatcher = Dispatcher()
-        dispatcher.request = _RequestMock()
+        dispatcher.request = RequestMock()
         flexmock(dispatcher).should_receive('retry').and_return(FlowError)
 
         # We should improve this by actually checking exception value
@@ -79,7 +74,7 @@ class TestDispatcher(SelinonTestCase):
         flexmock(SystemState).should_receive('update').and_raise(exc)
 
         dispatcher = Dispatcher()
-        dispatcher.request = _RequestMock()
+        dispatcher.request = RequestMock()
         flexmock(dispatcher).should_receive('retry').and_return(exc)
 
         # We should improve this by actually checking exception value
@@ -98,10 +93,9 @@ class TestDispatcher(SelinonTestCase):
         flexmock(SystemState).should_receive('to_dict').and_return(state_dict)
 
         dispatcher = Dispatcher()
-        dispatcher.request = _RequestMock()
+        dispatcher.request = RequestMock()
         flexmock(dispatcher).should_receive('retry').and_return(FlowError)
 
         # We should improve this by actually checking exception value
         with pytest.raises(FlowError):
             dispatcher.run(flow_name)
-

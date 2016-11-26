@@ -153,4 +153,3 @@ class SelinonTaskEnvelope(Task):
                                    'queue': Config.task_queues[task_name],
                                    'dispatcher_id': dispatcher_id,
                                    'storage': StoragePool.get_storage_name_by_task_name(task_name, graceful=True)})
-
