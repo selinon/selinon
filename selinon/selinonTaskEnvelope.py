@@ -20,6 +20,7 @@
 
 import traceback
 import jsonschema
+import json
 from .storagePool import StoragePool
 from .fatalTaskError import FatalTaskError
 from celery import Task
@@ -50,7 +51,7 @@ class SelinonTaskEnvelope(Task):
         schema_path = Config.output_schemas.get(task_name)
         if schema_path:
             with open(schema_path, "r") as f:
-                schema = f.read()
+                schema = json.load(f)
 
             jsonschema.validate(result, schema)
 
