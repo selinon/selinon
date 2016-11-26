@@ -1,0 +1,10 @@
+{
+	"title": "Selinon test schema",
+	"type": "object",
+	"properties": {
+		"projectName": {
+			"type": "string"
+		}
+	},
+	"required": ["projectName"]
+}

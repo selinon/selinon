@@ -86,6 +86,7 @@ class SelinonTestCase(object):
         Config.throttle_tasks = kwargs.get('throttle_tasks', _ThrottleTasks(Config.is_flow,
                                                                             kwargs.get('throttle_tasks_conf')))
         Config.storage_mapping = kwargs.get('storage_mapping')
+        Config.output_schemas = kwargs.get('output_schemas')
         self._update_edge_table()
 
         # Make sure we restore tracing function in tests
