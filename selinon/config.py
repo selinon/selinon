@@ -39,6 +39,7 @@ class Config(object):
     retry_countdown = None
     storage2storage_cache = None
     storage_readonly = None
+    storage_task_name = None
     propagate_node_args = None
     propagate_parent = None
     propagate_finished = None
@@ -74,6 +75,7 @@ class Config(object):
         # task configuration
         cls.output_schemas = config_module['output_schemas']
         cls.storage_mapping = config_module['storage2instance_mapping']
+        cls.storage_task_name = config_module['storage_task_name']
         cls.task2storage_mapping = config_module['task2storage_mapping']
         cls.max_retry = config_module['max_retry']
         cls.retry_countdown = config_module['retry_countdown']
@@ -232,4 +234,3 @@ class Config(object):
         :return: True if given node is a flow
         """
         return node_name in cls.flows
-

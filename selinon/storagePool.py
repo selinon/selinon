@@ -95,7 +95,9 @@ class StoragePool(object):
         :return: task's result
         """
         storage = cls.get_storage_by_task_name(task_name)
+        storage_task_name = Config.storage_task_name[task_name]
         Trace.log(Trace.STORAGE_RETRIEVE, {'task_name': task_name,
+                                           'storage_task_name': storage_task_name,
                                            'storage_name': Config.task2storage_mapping[task_name]})
         return storage.retrieve(task_name, task_id)
 
@@ -112,11 +114,13 @@ class StoragePool(object):
         :return: result ID - a unique ID which can be used to reference task results
         """
         storage = cls.get_storage_by_task_name(task_name)
+        storage_task_name = Config.storage_task_name[task_name]
 
-        record_id = storage.store(node_args, flow_name, task_name, task_id, result)
+        record_id = storage.store(node_args, flow_name, storage_task_name, task_id, result)
         Trace.log(Trace.STORAGE_STORE, {'flow_name': flow_name,
                                         'node_args': node_args,
                                         'task_name': task_name,
+                                        'storage_task_name': storage_task_name,
                                         'task_id': task_id,
                                         'storage_name': Config.task2storage_mapping[task_name],
                                         'result': result,

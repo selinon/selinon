@@ -22,6 +22,7 @@ import os
 from getTaskInstance import GetTaskInstance
 from queueMock import QueueMock
 from strategyMock import strategy_function
+from storageTaskNameMock import StorageTaskNameMock
 
 from celery.result import AsyncResult
 from selinon.config import Config
@@ -80,6 +81,7 @@ class SelinonTestCase(object):
         Config.strategies = kwargs.pop('strategies', dict.fromkeys(flows, strategy_function))
         # TODO: this is currently unused as we do not have tests for store()
         Config.storage_readonly = kwargs.pop('storage_readonly', {})
+        Config.storage_task_name = kwargs.pop('storage_task_name', StorageTaskNameMock())
         Config.task2storage_mapping = kwargs.pop('task2storage_mapping', {})
         Config.node_args_from_first = kwargs.pop('node_args_from_first', dict.fromkeys(flows, False))
         Config.throttle_flows = kwargs.pop('throttle_flows', dict.fromkeys(flows, None))
