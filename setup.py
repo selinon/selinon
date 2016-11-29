@@ -37,14 +37,14 @@ setup(
     keywords='celery selinonlib yaml condition flow',
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Programming Language:: Python:: 3",
-        "Programming Language:: Python:: 3.4",
-        "Programming Language:: Python:: 3.5",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
         "Operating System :: OS Independent",
         "Topic :: System :: Distributed Computing",
-        "Programming Language:: Python:: Implementation:: CPython",
-        "Programming Language:: Python:: Implementation:: PyPy"
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy"
     ]
 )
