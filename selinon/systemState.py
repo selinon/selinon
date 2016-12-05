@@ -300,6 +300,7 @@ class SystemState(object):
                         traced_nodes_arr = []
 
                         for node in combination:
+                            # TODO: we should choose the same representation as in normal run
                             traced_nodes_arr.append((node[0], self._failed_nodes[node[0]][0],))
                             self._failed_nodes[node[0]].pop(0)
                             if len(self._failed_nodes[node[0]]) == 0:
@@ -311,6 +312,7 @@ class SystemState(object):
                                                          'fallback': failure_node['fallback']})
 
                         for node in failure_node['fallback']:
+                            # TODO: parent should be tasks from traced_nodes_arr, we need to compute sub-flow ids
                             record = self._start_node(node, parent=None, node_args=self._node_args)
                             ret.append(record)
 
