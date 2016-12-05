@@ -471,7 +471,6 @@ class SystemState(object):
                         records = self._fire_edge(edge, storage_pool, parent=parent, node_args=self._node_args)
                         ret.extend(records)
                     else:
-                        # TODO: we should consider to include condition
                         Trace.log(Trace.EDGE_COND_FALSE, {
                             'nodes_to': edge['to'],
                             'nodes_from': edge['from'],
