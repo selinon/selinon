@@ -300,8 +300,7 @@ class SystemState(object):
                         traced_nodes_arr = []
 
                         for node in combination:
-                            # TODO: we should choose the same representation as in normal run
-                            traced_nodes_arr.append((node[0], self._failed_nodes[node[0]][0],))
+                            traced_nodes_arr.append({'name': node[0], 'id': self._failed_nodes[node[0]][0]})
                             self._failed_nodes[node[0]].pop(0)
                             if len(self._failed_nodes[node[0]]) == 0:
                                 del self._failed_nodes[node[0]]
@@ -322,7 +321,7 @@ class SystemState(object):
                         change = True
                         traced_nodes_arr = []
                         for node in combination:
-                            traced_nodes_arr.append((node[0], self._failed_nodes[node[0]][0],))
+                            traced_nodes_arr.append({'name': node[0], 'id': self._failed_nodes[node[0]][0]})
                             self._failed_nodes[node[0]].pop(0)
                             if len(self._failed_nodes[node[0]]) == 0:
                                 del self._failed_nodes[node[0]]
