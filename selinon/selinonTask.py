@@ -19,6 +19,7 @@
 # ####################################################################
 
 import abc
+from celery.result import AsyncResult
 from .storagePool import StoragePool
 from .retry import Retry
 
@@ -39,35 +40,14 @@ class SelinonTask(metaclass=abc.ABCMeta):
         self.parent = parent
         self.dispatcher_id = dispatcher_id
 
-    @property
-    def storage(self):
+    def _selinon_dereference_task_id(self, flow_names, task_name, index):
         """
-        :return: tasks's configured storage as stated in YAML config
-        """
-        return StoragePool.get_storage_by_task_name(self.task_name)
-
-    def parent_task_result(self, parent_name):
-        """
-        :param parent_name: name of parent task to retrieve result from
-        :return: result of parent task
-        """
-        try:
-            parent_task_id = self.parent[parent_name]
-        except KeyError:
-            raise KeyError("No such parent '%s' in task '%s' in flow '%s', check your configuration"
-                           % (parent_name, self.task_name, self.flow_name))
-
-        return StoragePool.retrieve(parent_name, parent_task_id)
-
-    def parent_flow_result(self, flow_names, task_name, index):
-        """
-        Get parent subflow results; note that parent flows can return multiple results from task of same type
-        because of loops in flows
+        Compute task id based on mapping of ancestors (from parent sub-flows)
 
         :param flow_names: name of parent flow or list of flow names in case of nested flows
         :param task_name: name of task in parent flow
         :param index: index of result if more than one subflow was run
-        :return: result of task in parent subflow
+        :return: task id based from parent subflows
         """
         if not isinstance(flow_names, list):
             flow_names = [flow_names]
@@ -90,8 +70,77 @@ class SelinonTask(metaclass=abc.ABCMeta):
                              "%s tasks in task %s flow %s"
                              % (index, task_name, flow_names, len(parent_flow[task_name]), self.task_name,
                                 self.flow_name))
+        return task_id
 
+    @property
+    def storage(self):
+        """
+        :return: tasks's configured storage as stated in YAML config
+        """
+        return StoragePool.get_storage_by_task_name(self.task_name)
+
+    def parent_task_result(self, parent_name):
+        """
+        :param parent_name: name of parent task to retrieve result from
+        :return: result of parent task
+        """
+        try:
+            parent_task_id = self.parent[parent_name]
+        except KeyError:
+            raise KeyError("No such parent '%s' in task '%s' in flow '%s', check your configuration"
+                           % (parent_name, self.task_name, self.flow_name))
+
+        return StoragePool.retrieve(parent_name, parent_task_id)
+
+    def parent_flow_result(self, flow_names, task_name, index=None):
+        """
+        Get parent subflow results; note that parent flows can return multiple results from task of same type
+        because of loops in flows
+
+        :param flow_names: name of parent flow or list of flow names in case of nested flows
+        :param task_name: name of task in parent flow
+        :param index: index of result if more than one subflow was run
+        :return: result of task in parent subflow
+        """
+        index = -1 if index is None else index
+        task_id = self._selinon_dereference_task_id(flow_names, task_name, index)
         return StoragePool.retrieve(task_name, task_id)
+
+    def parent_task_exception(self, parent_name):
+        """Retrieve parent task exception. You have to call this from a fallback (direct or transitive)
+
+        :param task_name: name of task that failed (ancestor of calling task)
+        :return exception that was raised in the ancestor
+        """
+        try:
+            parent_task_id = self.parent[parent_name]
+        except KeyError:
+            raise KeyError("No such parent '%s' in task '%s' in flow '%s', check your configuration"
+                           % (parent_name, self.task_name, self.flow_name))
+
+        # Celery stores exceptions in
+        celery_result = AsyncResult(parent_task_id)
+        if not celery_result.failed():
+            raise ValueError("Parent task '%s' did not raised exception" % parent_name)
+
+        return celery_result.result
+
+    def parent_flow_exception(self, flow_names, task_name, index=None):
+        """Retrieve parent task exception. You have to call this from a fallback (direct or transitive)
+
+        :param task_name: name of task that failed (ancestor of calling task)
+        :return exception that was raised in the ancestor
+        """
+        index = -1 if index is None else index
+        task_id = self._selinon_dereference_task_id(flow_names, task_name, index)
+
+        # Celery stores exceptions in result field
+        celery_result = AsyncResult(task_id)
+        if not celery_result.failed():
+            raise ValueError("Parent task '%s' from subflows %s did not raised exception"
+                             % (task_name, str(flow_names)))
+
+        return celery_result.result
 
     @staticmethod
     def retry(countdown=0):
