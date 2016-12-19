@@ -21,9 +21,9 @@
 import traceback
 import jsonschema
 import json
+from celery import Task
 from .storagePool import StoragePool
 from .fatalTaskError import FatalTaskError
-from celery import Task
 from .trace import Trace
 from .config import Config
 from .retry import Retry
