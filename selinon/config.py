@@ -21,8 +21,11 @@
 import os
 import runpy
 import tempfile
+import logging
 from .trace import Trace
 from selinonlib import System
+
+_logger = logging.getLogger(__name__)
 
 
 class Config(object):
@@ -103,6 +106,7 @@ class Config(object):
 
         :param config_code: configuration source code
         """
+        _logger.debug("Using config.py file from '%s'", config_code)
         config_module = runpy.run_path(config_code)
         cls._set_config(config_module)
 
@@ -119,11 +123,13 @@ class Config(object):
 
         if not config_py:
             tmp_f = tempfile.NamedTemporaryFile(mode="w", delete=False)
+            _logger.debug("Generating config.py file to created temporary file '%s'", tmp_f.name)
             system.dump2stream(tmp_f)
             tmp_f.close()
             cls.set_config_py(tmp_f.name)
             os.unlink(tmp_f.name)
         else:
+            _logger.debug("Generating config.py file to proposed file '%s'", config_py)
             with open(config_py, "w") as f:
                 system.dump2stream(f)
             cls.set_config_py(config_py)
@@ -154,6 +160,8 @@ class Config(object):
         # Avoid circular imports
         from .dispatcher import Dispatcher
         from .selinonTaskEnvelope import SelinonTaskEnvelope
+
+        _logger.debug("Registering Selinon to Celery context")
 
         cls.celery_app = celery_app
         celery_app.tasks.register(Dispatcher())
