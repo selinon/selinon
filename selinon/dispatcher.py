@@ -96,6 +96,7 @@ class Dispatcher(Task):
                                                })
             raise self.retry(args=[], kwargs=kwargs, countdown=retry, queue=Config.dispatcher_queues[flow_name])
         else:
+            # TODO: make this more rich - same keys as FLOW_FAILURE
             Trace.log(Trace.FLOW_END, {'flow_name': flow_name,
                                        'dispatcher_id': self.request.id,
                                        'queue': Config.dispatcher_queues[flow_name],
