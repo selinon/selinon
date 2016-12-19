@@ -51,11 +51,16 @@ class SystemState(object):
         return self._node_args
 
     @staticmethod
-    def _instantiate_active_nodes(arr):
+    def _get_async_result(id):
+        return AsyncResult(id=id)
+
+    @classmethod
+    def _instantiate_active_nodes(cls, arr):
         """
         :return: convert node references from argument to AsyncResult
         """
-        return [{'name': node['name'], 'id': node['id'], 'result': AsyncResult(id=node['id'])} for node in arr]
+        return [{'name': node['name'], 'id': node['id'],
+                 'result': cls._get_async_result(node['id'])} for node in arr]
 
     @staticmethod
     def _deinstantiate_active_nodes(arr):
@@ -197,12 +202,15 @@ class SystemState(object):
                                                     countdown=countdown)
 
             # reuse kwargs for trace log entry
-            kwargs['flow_name'] = self._flow_name
-            kwargs['child_flow_name'] = node_name
-            kwargs['dispatcher_id'] = self._dispatcher_id
-            kwargs['child_dispatcher_id'] = async_result.task_id
-            kwargs['queue'] = Config.dispatcher_queues[node_name]
-            kwargs['countdown'] = countdown
+            kwargs['meta'] = {
+                'flow_name': self._flow_name,
+                'child_flow_name': node_name,
+                'dispatcher_id': self._dispatcher_id,
+                'child_dispatcher_id': async_result.task_id,
+                'queue': Config.dispatcher_queues[node_name],
+                'countdown': countdown
+            }
+
             Trace.log(Trace.SUBFLOW_SCHEDULE, kwargs)
         else:
             kwargs = {
@@ -219,9 +227,12 @@ class SystemState(object):
                                                              countdown=countdown)
 
             # reuse kwargs for trace log entry
-            kwargs['task_id'] = async_result.task_id
-            kwargs['queue'] = Config.task_queues[node_name]
-            kwargs['countdown'] = countdown
+            kwargs['meta'] = {
+                'task_id': async_result.task_id,
+                'queue': Config.task_queues[node_name],
+                'countdown': countdown
+            }
+
             Trace.log(Trace.TASK_SCHEDULE, kwargs)
 
         record = {'name': node_name, 'id': async_result.task_id, 'result': async_result}
@@ -348,8 +359,8 @@ class SystemState(object):
                 self._waiting_edges.append(edge)
                 self._waiting_edges_idx.append(idx)
 
-    @staticmethod
-    def _extend_parent_from_flow(dst_dict, flow_name, flow_id, key, compound=False):
+    @classmethod
+    def _extend_parent_from_flow(cls, dst_dict, flow_name, flow_id, key, compound=False):
         """
         Compute parent in a flow in case of propagate_parent flag
 
@@ -388,7 +399,7 @@ class SystemState(object):
 
         res = dst_dict
 
-        async_result = AsyncResult(flow_id)
+        async_result = cls._get_async_result(flow_id)
         stack = deque()
         push_flow(stack, flow_name, async_result.result, deque())
 
@@ -396,7 +407,7 @@ class SystemState(object):
             node_name, node_ids, keys = stack.pop()
             if Config.is_flow(node_name):
                 for node_id in node_ids:
-                    push_flow(stack, node_name, AsyncResult(node_id).result, keys)
+                    push_flow(stack, node_name, cls._get_async_result(node_id).result, keys)
             else:
                 dst = follow_keys(res, keys)
 
