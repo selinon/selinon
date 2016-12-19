@@ -111,13 +111,14 @@ class Config(object):
         cls._set_config(config_module)
 
     @classmethod
-    def set_config_yaml(cls, nodes_definition_file, flow_definition_files, config_py=None):
+    def set_config_yaml(cls, nodes_definition_file, flow_definition_files, config_py=None, keep_config_py=False):
         """
         Set dispatcher configuration by path to YAML configuration files
 
         :param nodes_definition_file: definition of system nodes - YAML configuration
         :param flow_definition_files: list of flow definition files
         :param config_py: a file that should be used for storing generated config.py
+        :param keep_config_py: do not remove config_py file after run
         """
         system = System.from_files(nodes_definition_file, flow_definition_files)
 
@@ -126,13 +127,17 @@ class Config(object):
             _logger.debug("Generating config.py file to created temporary file '%s'", tmp_f.name)
             system.dump2stream(tmp_f)
             tmp_f.close()
-            cls.set_config_py(tmp_f.name)
-            os.unlink(tmp_f.name)
+            config_py = tmp_f.name
         else:
             _logger.debug("Generating config.py file to proposed file '%s'", config_py)
             with open(config_py, "w") as f:
                 system.dump2stream(f)
-            cls.set_config_py(config_py)
+
+        cls.set_config_py(config_py)
+
+        if not keep_config_py:
+            _logger.debug("Removing generated config.py file '%s'", config_py)
+            os.unlink(config_py)
 
     @classmethod
     def trace_by_func(cls, trace_func):
