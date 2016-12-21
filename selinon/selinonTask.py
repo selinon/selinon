@@ -109,7 +109,7 @@ class SelinonTask(metaclass=abc.ABCMeta):
     def parent_task_exception(self, parent_name):
         """Retrieve parent task exception. You have to call this from a fallback (direct or transitive)
 
-        :param task_name: name of task that failed (ancestor of calling task)
+        :param parent_name: name of task that failed (ancestor of calling task)
         :return exception that was raised in the ancestor
         """
         try:
@@ -128,6 +128,7 @@ class SelinonTask(metaclass=abc.ABCMeta):
     def parent_flow_exception(self, flow_names, task_name, index=None):
         """Retrieve parent task exception. You have to call this from a fallback (direct or transitive)
 
+        :param flow_names: name of parent flow or list of flow names in case of nested flows
         :param task_name: name of task that failed (ancestor of calling task)
         :return exception that was raised in the ancestor
         """
