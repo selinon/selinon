@@ -160,4 +160,3 @@ class SelinonTask(metaclass=abc.ABCMeta):
         :return: tasks's result that will be stored in database as configured
         """
         pass
-

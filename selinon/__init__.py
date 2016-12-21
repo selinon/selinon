@@ -7,7 +7,5 @@ from .flowError import FlowError
 from .storagePool import StoragePool
 from .systemState import SystemState
 from .version import selinon_version
-from .fatalTaskError import FatalTaskError
 from .utils import run_flow
 from .errors import FatalTaskError, InternalError, ConfigError
-
