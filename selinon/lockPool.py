@@ -21,7 +21,7 @@
 from threading import Lock
 
 
-class LockPool(object):
+class LockPool(object):  # pylint: disable=too-few-public-methods
     """
     Global lock pool for shared locks
     """

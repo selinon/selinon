@@ -8,4 +8,3 @@ class Retry(Exception):
     def __init__(self, countdown):
         self.countdown = countdown
         Exception.__init__(self, countdown)
-

@@ -103,6 +103,7 @@ class StoragePool(object):
 
     @classmethod
     def set(cls, node_args, flow_name, task_name, task_id, result):
+        # pylint: disable=too-many-arguments
         """
         Store result for task
 

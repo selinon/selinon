@@ -38,6 +38,7 @@ class Dispatcher(Task):
     name = "selinon.Dispatcher"
 
     def run(self, flow_name, node_args=None, parent=None, retry=None, state=None):
+        # pylint: disable=too-many-arguments,arguments-differ
         """
         Dispatcher entry-point - run each time a dispatcher is scheduled
 
@@ -87,13 +88,14 @@ class Dispatcher(Task):
                 'retry': retry,
                 'state': state_dict
             }
-            Trace.log(Trace.DISPATCHER_RETRY, {'flow_name': flow_name,
-                                               'dispatcher_id': self.request.id,
-                                               'retry': retry,
-                                               'state_dict': state_dict,
-                                               'node_args': node_args,
-                                               'queue': Config.dispatcher_queues[flow_name]
-                                               })
+            Trace.log(Trace.DISPATCHER_RETRY, {
+                'flow_name': flow_name,
+                'dispatcher_id': self.request.id,
+                'retry': retry,
+                'state_dict': state_dict,
+                'node_args': node_args,
+                'queue': Config.dispatcher_queues[flow_name]
+            })
             raise self.retry(args=[], kwargs=kwargs, countdown=retry, queue=Config.dispatcher_queues[flow_name])
         else:
             # TODO: make this more rich - same keys as FLOW_FAILURE
