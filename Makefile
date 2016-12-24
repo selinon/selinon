@@ -14,7 +14,7 @@ uninstall:
 
 devenv:
 	@echo "Installing latest development requirements"
-	pip3 install -U -r dev_requirements.txt
+	pip3 install -U --force-reinstall -r dev_requirements.txt
 
 venv:
 	python3 -m venv venv && source venv/bin/activate && pip3 install -r requirements.txt
