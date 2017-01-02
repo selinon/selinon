@@ -3,7 +3,8 @@ python:
   - "3.4"
   - "3.5"
   - "3.5-dev" # 3.5 development branch
-  - "nightly" # currently points to 3.6-dev
+  # Disable for now as pylint is failing
+  #- "nightly" # currently points to 3.6-dev
 # we force update dev_requirements.txt so we get latest master of selinonlib to
 # be consistent with test
 install: 
