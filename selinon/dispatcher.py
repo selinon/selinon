@@ -21,6 +21,7 @@
 Selinon Dispatcher worker implementation
 """
 
+import json
 import traceback
 from celery import Task
 from .systemState import SystemState
@@ -65,7 +66,7 @@ class Dispatcher(Task):
         except FlowError as flow_error:
             Trace.log(Trace.FLOW_FAILURE, {'flow_name': flow_name,
                                            'dispatcher_id': self.request.id,
-                                           'state': str(flow_error),
+                                           'state': json.loads(str(flow_error)),
                                            'node_args': node_args,
                                            'parent': parent,
                                            'retry': retry,

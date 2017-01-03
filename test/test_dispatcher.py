@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
+import json
 import pytest
 from flexmock import flexmock
 from selinonTestCase import SelinonTestCase
@@ -52,7 +53,7 @@ class TestDispatcher(SelinonTestCase):
         self.init(edge_table)
         state_dict = {'failed_nodes': {'Task1': ['<task1-id>']}, 'finished_nodes': {}}
 
-        flexmock(SystemState).should_receive('update').and_raise(FlowError)
+        flexmock(SystemState).should_receive('update').and_raise(FlowError(json.dumps(state_dict)))
         flexmock(SystemState).should_receive('to_dict').and_return(state_dict)
 
         dispatcher = Dispatcher()
