@@ -252,7 +252,13 @@ class Trace(object):
                      json.dumps(msg_dict, sort_keys=True))
 
         logger = logger or cls._logger
-        if event in [Trace.NODE_FAILURE, Trace.DISPATCHER_FAILURE, Trace.TASK_DISCARD_RESULT, Trace.TASK_RETRY]:
+        if event == Trace.DISPATCHER_FAILURE:
+            return logger.error(message)
+        if event in (Trace.NODE_FAILURE,
+                     Trace.TASK_DISCARD_RESULT,
+                     Trace.TASK_RETRY,
+                     Trace.TASK_FAILURE,
+                     Trace.FLOW_FAILURE):
             return logger.warn(message)
         else:
             return logger.info(message)
