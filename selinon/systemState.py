@@ -162,7 +162,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                                                'dispatcher_id': self._dispatcher_id,
                                                'node_name': node['name'],
                                                'node_id': node['id'],
-                                               'what': node['result'].result})
+                                               'what': node['result'].traceback})
                 # We keep track of failed nodes to handle failures once all nodes finish
                 if node['name'] not in self._failed_nodes:
                     self._failed_nodes[node['name']] = []

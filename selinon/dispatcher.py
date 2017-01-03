@@ -65,12 +65,11 @@ class Dispatcher(Task):
         except FlowError as flow_error:
             Trace.log(Trace.FLOW_FAILURE, {'flow_name': flow_name,
                                            'dispatcher_id': self.request.id,
-                                           'state': state,
+                                           'state': str(flow_error),
                                            'node_args': node_args,
                                            'parent': parent,
                                            'retry': retry,
-                                           'queue': Config.dispatcher_queues[flow_name],
-                                           'what': str(flow_error)})
+                                           'queue': Config.dispatcher_queues[flow_name]})
             # force max_retries to 0 so we are not scheduled and marked as FAILED
             raise self.retry(max_retries=0, exc=flow_error)
         except Exception as exc:

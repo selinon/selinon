@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ####################################################################
 
+import traceback
 from .states import states
 
 
@@ -66,6 +67,17 @@ class AsyncResult(object):
     @property
     def result(self):
         return self._result_mapping[self._id]
+
+    @property
+    def traceback(self):
+        assert self.failed()
+
+        # there is no (documented) way on how to create Traceback object, so simulate it by rising exception
+        # instance that was set
+        try:
+            raise self._result_mapping[self._id]
+        except:
+            return traceback.format_exc()
 
     @property
     def state(self):
