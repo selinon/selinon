@@ -56,41 +56,27 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
     def _get_async_result(self, node_name, id):  # pylint: disable=invalid-name,redefined-builtin
         cache = Config.async_result_cache[self._flow_name]
+        trace_msg = {
+            'flow_name': self._flow_name,
+            'node_args': self._node_args,
+            'parent': self._parent,
+            'dispatcher_id': self._dispatcher_id,
+            'queue': Config.dispatcher_queues[self._flow_name],
+            'id': id,
+            'node_name': node_name
+        }
 
         try:
-            Trace.log(Trace.TASK_STATE_CACHE_GET, {
-                'flow_name': self._flow_name,
-                'node_args': self._node_args,
-                'parent': self._parent,
-                'dispatcher_id': self._dispatcher_id,
-                'queue': Config.dispatcher_queues[self._flow_name],
-                'id': id,
-                'node_name': node_name
-            })
+            Trace.log(Trace.TASK_STATE_CACHE_GET, trace_msg)
             res = cache.get(id)
+            Trace.log(Trace.TASK_STATE_CACHE_HIT, trace_msg)
         except CacheMissError:
-            Trace.log(Trace.TASK_STATE_CACHE_MISS, {
-                'flow_name': self._flow_name,
-                'node_args': self._node_args,
-                'parent': self._parent,
-                'dispatcher_id': self._dispatcher_id,
-                'queue': Config.dispatcher_queues[self._flow_name],
-                'id': id,
-                'node_name': node_name
-            })
+            Trace.log(Trace.TASK_STATE_CACHE_MISS, trace_msg)
             res = AsyncResult(id=id)
             # we can cache only results of tasks that have finished or failed, not the ones that are going to
             # be processed
             if res.successful() or res.failed():
-                Trace.log(Trace.TASK_STATE_CACHE_ADD, {
-                    'flow_name': self._flow_name,
-                    'node_args': self._node_args,
-                    'parent': self._parent,
-                    'dispatcher_id': self._dispatcher_id,
-                    'queue': Config.dispatcher_queues[self._flow_name],
-                    'id': id,
-                    'node_name': node_name
-                })
+                Trace.log(Trace.TASK_STATE_CACHE_ADD, trace_msg)
                 cache.add(id, res)
 
         return res
