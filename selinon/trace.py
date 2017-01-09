@@ -163,7 +163,9 @@ class Trace(object):
     STORAGE_STORE, \
     STORAGE_STORED, \
     EDGE_COND_FALSE, \
-    FOREACH_RESULT = range(24)
+    FOREACH_RESULT,\
+    TASK_STATE_CACHE_GET,\
+    TASK_STATE_CACHE_ADD = range(26)
 
     _event_strings = [
         'DISPATCHER_WAKEUP',
@@ -189,7 +191,9 @@ class Trace(object):
         'STORAGE_STORE',
         'STORAGE_STORED',
         'EDGE_COND_FALSE',
-        'FOREACH_RESULT'
+        'FOREACH_RESULT',
+        'TASK_STATE_CACHE_GET',
+        'TASK_STATE_CACHE_ADD'
     ]
 
     def __init__(self):

@@ -51,6 +51,7 @@ class Config(object):
     propagate_finished = None
     propagate_compound_finished = None
     output_schemas = None
+    async_result_cache = None
 
     storage_mapping = None
     task2storage_mapping = None
@@ -71,6 +72,7 @@ class Config(object):
 
         # misc
         cls.node_args_from_first = config_module['node_args_from_first']
+        cls.async_result_cache = config_module['async_result_cache']
 
         # propagate_* entries
         cls.propagate_finished = config_module['propagate_finished']

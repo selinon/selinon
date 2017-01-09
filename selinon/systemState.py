@@ -29,6 +29,7 @@ from threading import Lock
 from functools import reduce
 from collections import deque
 from celery.result import AsyncResult
+from selinonlib.caches import CacheMissError
 from .errors import FlowError
 from .storagePool import StoragePool
 from .trace import Trace
@@ -53,17 +54,44 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         """
         return self._node_args
 
-    @staticmethod
-    def _get_async_result(id):  # pylint: disable=invalid-name,redefined-builtin
-        return AsyncResult(id=id)
+    def _get_async_result(self, node_name, id):  # pylint: disable=invalid-name,redefined-builtin
+        cache = Config.async_result_cache[self._flow_name]
 
-    @classmethod
-    def _instantiate_active_nodes(cls, arr):
+        try:
+            Trace.log(Trace.TASK_STATE_CACHE_GET, {
+                'flow_name': self._flow_name,
+                'node_args': self._node_args,
+                'parent': self._parent,
+                'dispatcher_id': self._dispatcher_id,
+                'queue': Config.dispatcher_queues[self._flow_name],
+                'id': id,
+                'node_name': node_name
+            })
+            res = Config.async_result_cache[self._flow_name].get(id)
+        except CacheMissError:
+            res = AsyncResult(id=id)
+            # we can cache only results of tasks that have finished or failed, not the ones that are going to
+            # be processed
+            if res.successful() or res.failed():
+                Trace.log(Trace.TASK_STATE_CACHE_ADD, {
+                    'flow_name': self._flow_name,
+                    'node_args': self._node_args,
+                    'parent': self._parent,
+                    'dispatcher_id': self._dispatcher_id,
+                    'queue': Config.dispatcher_queues[self._flow_name],
+                    'id': id,
+                    'node_name': node_name
+                })
+                cache.add(id, res)
+
+        return res
+
+    def _instantiate_active_nodes(self, arr):
         """
         :return: convert node references from argument to AsyncResult
         """
         return [{'name': node['name'], 'id': node['id'],
-                 'result': cls._get_async_result(node['id'])} for node in arr]
+                 'result': self._get_async_result(node['name'], node['id'])} for node in arr]
 
     @staticmethod
     def _deinstantiate_active_nodes(arr):
@@ -387,8 +415,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 self._waiting_edges.append(edge)
                 self._waiting_edges_idx.append(idx)
 
-    @classmethod
-    def _extend_parent_from_flow(cls, dst_dict, flow_name, flow_id, key, compound=False):
+    def _extend_parent_from_flow(self, dst_dict, flow_name, flow_id, key, compound=False):
         # pylint: disable=too-many-arguments,too-many-locals
         """
         Compute parent in a flow in case of propagate_parent flag
@@ -430,7 +457,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
         res = dst_dict
 
-        async_result = cls._get_async_result(flow_id)
+        async_result = self._get_async_result(flow_name, flow_id)
         stack = deque()
         push_flow(stack, flow_name, async_result.result, deque())
 
@@ -438,7 +465,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             node_name, node_ids, keys = stack.pop()
             if Config.is_flow(node_name):
                 for node_id in node_ids:
-                    push_flow(stack, node_name, cls._get_async_result(node_id).result, keys)
+                    push_flow(stack, node_name, self._get_async_result(node_name, node_id).result, keys)
             else:
                 dst = follow_keys(res, keys)
 

@@ -25,6 +25,7 @@ from strategyMock import strategy_function
 from storageTaskNameMock import StorageTaskNameMock
 
 from celery.result import AsyncResult
+from selinonlib.caches import LRU
 from selinon.config import Config
 from selinon.systemState import SystemState
 from selinon.trace import Trace, _default_trace_func
@@ -39,6 +40,17 @@ class _ThrottleTasks(object):
         if self._is_flow(item):
             raise KeyError("Unable to find throttle flow configuration in task throttle configuration")
         return self._throttle_conf.get(item)
+
+
+class _AsyncResultCacheMock(object):
+    def __init__(self, is_flow):
+        self.is_flow = is_flow
+        self.cache = LRU(max_cache_size=0)
+
+    def __getitem__(self, item):
+        if not self.is_flow(item):
+            raise KeyError("Unable to subscribe for AsyncResult cache since '%s' is not a flow", item)
+        return self.cache
 
 
 class SelinonTestCase(object):
@@ -90,6 +102,7 @@ class SelinonTestCase(object):
                                                                             kwargs.get('throttle_tasks_conf')))
         Config.storage_mapping = kwargs.pop('storage_mapping', {})
         Config.output_schemas = kwargs.pop('output_schemas', {})
+        Config.async_result_cache = kwargs.pop('async_result_cache', _AsyncResultCacheMock(Config.is_flow))
 
         if kwargs:
             raise ValueError("Unknown config options provided: %s" % set(kwargs.keys()))
