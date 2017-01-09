@@ -41,7 +41,33 @@ class Dispatcher(Task):
     max_retries = None
     name = "selinon.Dispatcher"
 
-    def run(self, flow_name, node_args=None, parent=None, retry=None, state=None):
+    def selinon_retry(self, flow_name, node_args, parent, retried_count):
+        """"Retry whole flow on failure if configured so, forget any progress done so far
+
+        :param flow_name: name of the flow to be retried
+        :param node_args: flow arguments
+        :param parent: flow parents
+        :param retried_count: number of retries already done
+        :raises celery.Retry: always
+        """
+        kwargs = {
+            'flow_name': flow_name,
+            'node_args': node_args,
+            'parent': parent,
+            'retried_count': retried_count+1,
+            # Set these to None so Selinon will properly start the flow again
+            'retry': None,
+            'state': None
+        }
+        countdown = Config.retry_countdown.get(flow_name, 0)
+
+        # we will force max retries to 1 so we are always retried by Celery
+        raise self.retry(kwargs=kwargs,
+                         max_retries=1,
+                         countdown=countdown,
+                         queue=Config.dispatcher_queues[flow_name])
+
+    def run(self, flow_name, node_args=None, parent=None, retried_count=None, retry=None, state=None):
         # pylint: disable=too-many-arguments,arguments-differ
         """
         Dispatcher entry-point - run each time a dispatcher is scheduled
@@ -49,6 +75,7 @@ class Dispatcher(Task):
         :param flow_name: name of the flow
         :param parent: flow parent nodes
         :param node_args: arguments for workers
+        :param retried_count: number of Selinon retries done (not Celery retries)
         :param retry: last retry countdown
         :param state: the current system state
         :raises: FlowError
@@ -64,15 +91,23 @@ class Dispatcher(Task):
             system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent)
             retry = system_state.update()
         except FlowError as flow_error:
+            retried_count = retried_count or 0
+            max_retry = Config.max_retry.get(flow_name, 0)
+
             Trace.log(Trace.FLOW_FAILURE, {'flow_name': flow_name,
                                            'dispatcher_id': self.request.id,
                                            'state': json.loads(str(flow_error)),
                                            'node_args': node_args,
                                            'parent': parent,
                                            'retry': retry,
+                                           'will_retry': retried_count < max_retry,
                                            'queue': Config.dispatcher_queues[flow_name]})
-            # force max_retries to 0 so we are not scheduled and marked as FAILED
-            raise self.retry(max_retries=0, exc=flow_error)
+
+            if retried_count < max_retry:
+                raise self.selinon_retry(flow_name, node_args, parent, retried_count)
+            else:
+                # force max_retries to 0 so we are not scheduled and marked as FAILED
+                raise self.retry(max_retries=0, exc=flow_error)
         except Exception as exc:
             Trace.log(Trace.DISPATCHER_FAILURE, {'flow_name': flow_name,
                                                  'dispatcher_id': self.request.id,

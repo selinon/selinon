@@ -105,3 +105,31 @@ class TestDispatcher(SelinonTestCase):
 
         with pytest.raises(RuntimeError):
             dispatcher.run(flow_name)
+
+    def test_selinon_retry(self):
+        def my_retry(kwargs, max_retries, countdown, queue):
+            assert kwargs.get('flow_name') == flow_name
+            assert kwargs.get('node_args') == node_args
+            assert 'parent' in kwargs
+            assert kwargs.get('retried_count') == 1
+            assert max_retries == 1
+            assert countdown == 5
+            assert queue == 'queue_flow1'
+            raise RuntimeError()  # we re-raise as stated in Celery doc
+
+        flow_name = 'flow1'
+        node_args = {'foo': 'bar'}
+        edge_table = {
+            flow_name: [{'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
+        }
+        self.init(edge_table, retry_countdown={'flow1': 5}, max_retry={'flow1': 1})
+        state_dict = {'finished_nodes': {'Task1': ['<task1-id>']}, 'failed_nodes': {}}
+
+        flexmock(SystemState).should_receive('update').and_raise(FlowError(json.dumps(state_dict)))
+
+        dispatcher = Dispatcher()
+        dispatcher.request = RequestMock()
+        flexmock(dispatcher).should_receive('retry').replace_with(my_retry)
+
+        with pytest.raises(RuntimeError):
+            dispatcher.run(flow_name, node_args)

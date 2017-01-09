@@ -75,6 +75,7 @@ class SelinonTestCase(object):
         Config.propagate_parent = kwargs.pop('propagate_parent', dict.fromkeys(flows, False))
         Config.propagate_finished = kwargs.pop('propagate_finished', dict.fromkeys(flows, False))
         Config.propagate_compound_finished = kwargs.pop('propagate_compound_finished', dict.fromkeys(flows, False))
+        Config.max_retry = kwargs.pop('max_retry', {})
         Config.retry_countdown = kwargs.pop('retry_countdown', {})
         Config.task_queues = kwargs.pop('task_queues', QueueMock())
         Config.dispatcher_queues = kwargs.pop('dispatcher_queues', QueueMock())
