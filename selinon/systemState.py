@@ -175,7 +175,10 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
         return ret_successful, ret_failed
 
-    def _start_node(self, node_name, parent, node_args, force_propagate_node_args=False, condition_str=None):
+    def _start_node(self, node_name, parent, node_args,
+                    force_propagate_node_args=False,
+                    condition_str=None,
+                    foreach_str=None):
         """
         Start a node in the system
 
@@ -183,6 +186,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         :param parent: parent nodes of the starting node
         :param node_args: arguments for the starting node
         :param condition_str: condition that triggered starting this node
+        :param foreach_str: foreach string if node was started from foreach result
         """
         # pylint: disable=too-many-arguments
         from .dispatcher import Dispatcher
@@ -213,6 +217,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             kwargs['meta'] = {
                 'flow_name': self._flow_name,
                 'condition_str': condition_str,
+                'foreach_str': foreach_str,
                 'child_flow_name': node_name,
                 'dispatcher_id': self._dispatcher_id,
                 'child_dispatcher_id': async_result.task_id,
@@ -240,6 +245,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 'task_id': async_result.task_id,
                 'queue': Config.task_queues[node_name],
                 'condition_str': condition_str,
+                'foreach_str': foreach_str,
                 'countdown': countdown
             }
 
@@ -288,10 +294,12 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                     if edge.get('foreach_propagate_result'):
                         record = self._start_node(node_name, parent, res,
                                                   force_propagate_node_args=True,
-                                                  condition_str=edge['condition_str'])
+                                                  condition_str=edge['condition_str'],
+                                                  foreach_str=edge['foreach_str'])
                     else:
                         record = self._start_node(node_name, parent, node_args,
-                                                  condition_str=edge['condition_str'])
+                                                  condition_str=edge['condition_str'],
+                                                  foreach_str=edge['foreach_str'])
                     ret.append(record)
         else:
             for node_name in edge['to']:
