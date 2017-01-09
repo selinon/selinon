@@ -83,6 +83,11 @@ class TestDispatcher(SelinonTestCase):
             dispatcher.run(flow_name)
 
     def test_retry(self):
+        def my_retry(max_retries, exc):
+            assert max_retries == 0
+            assert exc == raised_exc
+            raise RuntimeError()  # we re-raise as stated in Celery doc
+
         flow_name = 'flow1'
         edge_table = {
             flow_name: [{'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
@@ -90,13 +95,13 @@ class TestDispatcher(SelinonTestCase):
         self.init(edge_table)
         state_dict = {'finished_nodes': {'Task1': ['<task1-id>']}, 'failed_nodes': {}}
 
-        flexmock(SystemState).should_receive('update').and_raise(2)  # we will retry
+        raised_exc = FlowError(json.dumps(state_dict))
+        flexmock(SystemState).should_receive('update').and_raise(raised_exc)  # we will retry
         flexmock(SystemState).should_receive('to_dict').and_return(state_dict)
 
         dispatcher = Dispatcher()
         dispatcher.request = RequestMock()
-        flexmock(dispatcher).should_receive('retry').and_return(FlowError)
+        flexmock(dispatcher).should_receive('retry').replace_with(my_retry)
 
-        # We should improve this by actually checking exception value
-        with pytest.raises(FlowError):
+        with pytest.raises(RuntimeError):
             dispatcher.run(flow_name)
