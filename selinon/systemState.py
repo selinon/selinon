@@ -175,15 +175,18 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
         return ret_successful, ret_failed
 
-    def _start_node(self, node_name, parent, node_args, force_propagate_node_args=False):
+    def _start_node(self, node_name, parent, node_args, force_propagate_node_args=False, condition_str=None):
         """
         Start a node in the system
 
         :param node_name: name of a node to be started
         :param parent: parent nodes of the starting node
         :param node_args: arguments for the starting node
+        :param condition_str: condition that triggered starting this node
         """
+        # pylint: disable=too-many-arguments
         from .dispatcher import Dispatcher
+
         if Config.is_flow(node_name):
             if force_propagate_node_args or Config.should_propagate_node_args(self._flow_name, node_name):
                 node_args = node_args
@@ -209,6 +212,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             # reuse kwargs for trace log entry
             kwargs['meta'] = {
                 'flow_name': self._flow_name,
+                'condition_str': condition_str,
                 'child_flow_name': node_name,
                 'dispatcher_id': self._dispatcher_id,
                 'child_dispatcher_id': async_result.task_id,
@@ -235,12 +239,17 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             kwargs['meta'] = {
                 'task_id': async_result.task_id,
                 'queue': Config.task_queues[node_name],
+                'condition_str': condition_str,
                 'countdown': countdown
             }
 
             Trace.log(Trace.TASK_SCHEDULE, kwargs)
 
-        record = {'name': node_name, 'id': async_result.task_id, 'result': async_result}
+        record = {
+            'name': node_name,
+            'id': async_result.task_id,
+            'result': async_result
+        }
 
         if node_name not in Config.nowait_nodes.get(self._flow_name, []):
             self._active_nodes.append(record)
@@ -266,6 +275,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 'nodes_from': edge['from'],
                 'flow_name': self._flow_name,
                 'foreach_str': edge['foreach_str'],
+                'condition_str': edge['condition_str'],
                 'parent': parent,
                 'node_args': self._node_args,
                 'dispatcher_id': self._dispatcher_id
@@ -276,13 +286,17 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             for res in iterable:
                 for node_name in edge['to']:
                     if edge.get('foreach_propagate_result'):
-                        record = self._start_node(node_name, parent, res, force_propagate_node_args=True)
+                        record = self._start_node(node_name, parent, res,
+                                                  force_propagate_node_args=True,
+                                                  condition_str=edge['condition_str'])
                     else:
-                        record = self._start_node(node_name, parent, node_args)
+                        record = self._start_node(node_name, parent, node_args,
+                                                  condition_str=edge['condition_str'])
                     ret.append(record)
         else:
             for node_name in edge['to']:
-                record = self._start_node(node_name, parent, node_args)
+                record = self._start_node(node_name, parent, node_args,
+                                          condition_str=edge['condition_str'])
                 ret.append(record)
 
         return ret
