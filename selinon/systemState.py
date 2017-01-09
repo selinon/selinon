@@ -67,8 +67,17 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 'id': id,
                 'node_name': node_name
             })
-            res = Config.async_result_cache[self._flow_name].get(id)
+            res = cache.get(id)
         except CacheMissError:
+            Trace.log(Trace.TASK_STATE_CACHE_MISS, {
+                'flow_name': self._flow_name,
+                'node_args': self._node_args,
+                'parent': self._parent,
+                'dispatcher_id': self._dispatcher_id,
+                'queue': Config.dispatcher_queues[self._flow_name],
+                'id': id,
+                'node_name': node_name
+            })
             res = AsyncResult(id=id)
             # we can cache only results of tasks that have finished or failed, not the ones that are going to
             # be processed

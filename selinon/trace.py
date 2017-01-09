@@ -165,7 +165,8 @@ class Trace(object):
     EDGE_COND_FALSE, \
     FOREACH_RESULT,\
     TASK_STATE_CACHE_GET,\
-    TASK_STATE_CACHE_ADD = range(26)
+    TASK_STATE_CACHE_ADD,\
+    TASK_STATE_CACHE_MISS = range(27)
 
     _event_strings = [
         'DISPATCHER_WAKEUP',
@@ -193,7 +194,8 @@ class Trace(object):
         'EDGE_COND_FALSE',
         'FOREACH_RESULT',
         'TASK_STATE_CACHE_GET',
-        'TASK_STATE_CACHE_ADD'
+        'TASK_STATE_CACHE_ADD',
+        'TASK_STATE_CACHE_MISS'
     ]
 
     def __init__(self):
