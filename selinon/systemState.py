@@ -25,6 +25,7 @@ import itertools
 import json
 import datetime
 import copy
+from multiprocessing import Lock
 from threading import Lock
 from functools import reduce
 from collections import deque
@@ -46,6 +47,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
     _throttle_lock = Lock()
     _throttled_tasks = {}
     _throttled_flows = {}
+    _task_state_cache_lock = Lock()
 
     @property
     def node_args(self):
@@ -54,7 +56,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         """
         return self._node_args
 
-    def _get_async_result(self, node_name, id):  # pylint: disable=invalid-name,redefined-builtin
+    def _get_async_result(self, node_name, node_id):  # pylint: disable=invalid-name,redefined-builtin
         cache = Config.async_result_cache[self._flow_name]
         trace_msg = {
             'flow_name': self._flow_name,
@@ -62,22 +64,23 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             'parent': self._parent,
             'dispatcher_id': self._dispatcher_id,
             'queue': Config.dispatcher_queues[self._flow_name],
-            'id': id,
+            'node_id': node_id,
             'node_name': node_name
         }
 
-        try:
-            Trace.log(Trace.TASK_STATE_CACHE_GET, trace_msg)
-            res = cache.get(id)
-            Trace.log(Trace.TASK_STATE_CACHE_HIT, trace_msg)
-        except CacheMissError:
-            Trace.log(Trace.TASK_STATE_CACHE_MISS, trace_msg)
-            res = AsyncResult(id=id)
-            # we can cache only results of tasks that have finished or failed, not the ones that are going to
-            # be processed
-            if res.successful() or res.failed():
-                Trace.log(Trace.TASK_STATE_CACHE_ADD, trace_msg)
-                cache.add(id, res)
+        with self._task_state_cache_lock:
+            try:
+                Trace.log(Trace.TASK_STATE_CACHE_GET, trace_msg)
+                res = cache.get(node_id)
+                Trace.log(Trace.TASK_STATE_CACHE_HIT, trace_msg)
+            except CacheMissError:
+                Trace.log(Trace.TASK_STATE_CACHE_MISS, trace_msg)
+                res = AsyncResult(id=node_id)
+                # we can cache only results of tasks that have finished or failed, not the ones that are going to
+                # be processed
+                if res.successful() or res.failed():
+                    Trace.log(Trace.TASK_STATE_CACHE_ADD, trace_msg)
+                    cache.add(node_id, res)
 
         return res
 

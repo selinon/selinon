@@ -118,7 +118,7 @@ class Dispatcher(Task):
         state_dict = system_state.to_dict()
         node_args = system_state.node_args
 
-        if retry is not None and retry >=0:
+        if retry is not None and retry >= 0:
             kwargs = {
                 'flow_name': flow_name,
                 'node_args': node_args,
