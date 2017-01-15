@@ -53,6 +53,14 @@ class _AsyncResultCacheMock(object):
         return self.cache
 
 
+class _TaskResultCacheMock(object):
+    def __init__(self):
+        self.cache = LRU(max_cache_size=0)
+
+    def __getitem__(self, item):
+        return self.cache
+
+
 class SelinonTestCase(object):
     """
     Main class for Selinon testing
@@ -96,6 +104,7 @@ class SelinonTestCase(object):
         Config.storage_readonly = kwargs.pop('storage_readonly', {})
         Config.storage_task_name = kwargs.pop('storage_task_name', StorageTaskNameMock())
         Config.task2storage_mapping = kwargs.pop('task2storage_mapping', {})
+        Config.storage2storage_cache = kwargs.pop('storage2storage_cache', _TaskResultCacheMock())
         Config.node_args_from_first = kwargs.pop('node_args_from_first', dict.fromkeys(flows, False))
         Config.throttle_flows = kwargs.pop('throttle_flows', dict.fromkeys(flows, None))
         Config.throttle_tasks = kwargs.pop('throttle_tasks', _ThrottleTasks(Config.is_flow,

@@ -21,6 +21,7 @@
 A pool that carries all database connections for workers
 """
 
+from selinonlib.caches import CacheMissError
 from .config import Config
 from .lockPool import LockPool
 from .trace import Trace
@@ -32,8 +33,9 @@ class StoragePool(object):
     """
     _storage_pool_locks = LockPool()
 
-    def __init__(self, id_mapping=None):
+    def __init__(self, id_mapping, flow_name):
         self._id_mapping = id_mapping or {}
+        self._flow_name = flow_name
 
     @classmethod
     def get_storage_name_by_task_name(cls, task_name, graceful=False):
@@ -88,23 +90,42 @@ class StoragePool(object):
         :param task_name: task's name that we are retrieving data for
         :return: task's result for the current context
         """
-        return self.retrieve(task_name, self._id_mapping[task_name])
+        return self.retrieve(task_name, self._id_mapping[task_name], self._flow_name)
 
     @classmethod
-    def retrieve(cls, task_name, task_id):
+    def retrieve(cls, task_name, task_id, flow_name):
         """
         Retrieve task's result from database which was configured to be used for desired task
 
         :param task_name: name of task for which result should be retrieved
         :param task_id: task ID to uniquely identify task results
+        :param flow_name: flow in which the retrieval is taking place
         :return: task's result
         """
         storage = cls.get_storage_by_task_name(task_name)
         storage_task_name = Config.storage_task_name[task_name]
-        Trace.log(Trace.STORAGE_RETRIEVE, {'task_name': task_name,
-                                           'storage_task_name': storage_task_name,
-                                           'storage_name': Config.task2storage_mapping[task_name]})
-        return storage.retrieve(task_name, task_id)
+        storage_name = cls.get_storage_name_by_task_name(task_name)
+        trace_msg = {
+            'task_name': task_name,
+            'storage_task_name': storage_task_name,
+            'storage_name': storage_name,
+            'flow_name': flow_name
+        }
+
+        with cls._storage_pool_locks.get_lock(storage):
+            cache = Config.storage2storage_cache[storage_name]
+            try:
+                Trace.log(Trace.TASK_RESULT_CACHE_GET, trace_msg)
+                result = cache.get(task_id, task_name=storage_task_name, flow_name=flow_name)
+                Trace.log(Trace.TASK_RESULT_CACHE_HIT, trace_msg)
+            except CacheMissError:
+                Trace.log(Trace.TASK_RESULT_CACHE_MISS, trace_msg)
+                Trace.log(Trace.STORAGE_RETRIEVE, trace_msg)
+                result = storage.retrieve(flow_name, task_name, task_id)
+                Trace.log(Trace.TASK_RESULT_CACHE_ADD, trace_msg)
+                cache.add(task_id, result)
+
+        return result
 
     @classmethod
     def set(cls, node_args, flow_name, task_name, task_id, result):
@@ -123,12 +144,14 @@ class StoragePool(object):
         storage_task_name = Config.storage_task_name[task_name]
 
         record_id = storage.store(node_args, flow_name, storage_task_name, task_id, result)
-        Trace.log(Trace.STORAGE_STORE, {'flow_name': flow_name,
-                                        'node_args': node_args,
-                                        'task_name': task_name,
-                                        'storage_task_name': storage_task_name,
-                                        'task_id': task_id,
-                                        'storage_name': Config.task2storage_mapping[task_name],
-                                        'result': result,
-                                        'record_id': record_id})
+        Trace.log(Trace.STORAGE_STORE, {
+            'flow_name': flow_name,
+            'node_args': node_args,
+            'task_name': task_name,
+            'storage_task_name': storage_task_name,
+            'task_id': task_id,
+            'storage_name': Config.task2storage_mapping[task_name],
+            'result': result,
+            'record_id': record_id
+        })
         return record_id

@@ -93,7 +93,7 @@ class SelinonTask(metaclass=abc.ABCMeta):
             raise KeyError("No such parent '%s' in task '%s' in flow '%s', check your configuration"
                            % (parent_name, self.task_name, self.flow_name))
 
-        return StoragePool.retrieve(parent_name, parent_task_id)
+        return StoragePool.retrieve(self.flow_name, parent_name, parent_task_id)
 
     def parent_flow_result(self, flow_names, task_name, index=None):
         """
@@ -106,8 +106,9 @@ class SelinonTask(metaclass=abc.ABCMeta):
         :return: result of task in parent subflow
         """
         index = -1 if index is None else index
+        parent_flow_name = flow_names if not isinstance(flow_names, list) else flow_names[-1]
         task_id = self._selinon_dereference_task_id(flow_names, task_name, index)
-        return StoragePool.retrieve(task_name, task_id)
+        return StoragePool.retrieve(parent_flow_name, task_name, task_id)
 
     def parent_task_exception(self, parent_name):
         """Retrieve parent task exception. You have to call this from a fallback (direct or transitive)

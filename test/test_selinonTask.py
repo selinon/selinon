@@ -64,7 +64,7 @@ class TestSelinonTask(SelinonTestCase):
 
         flexmock(StoragePool)\
             .should_receive('retrieve')\
-            .with_args(parent_task_name, parent_task_id)\
+            .with_args(params['flow_name'], parent_task_name, parent_task_id)\
             .and_return(result)
 
         assert task.parent_task_result(parent_task_name) == result
@@ -82,7 +82,7 @@ class TestSelinonTask(SelinonTestCase):
 
         flexmock(StoragePool)\
             .should_receive('retrieve')\
-            .with_args(parent_task_name, parent_task_id)\
+            .with_args(parent_flow_name, parent_task_name, parent_task_id)\
             .and_return(result)
 
         assert task.parent_flow_result(parent_flow_name, parent_task_name, index=0) == result

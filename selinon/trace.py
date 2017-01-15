@@ -167,7 +167,11 @@ class Trace(object):
     TASK_STATE_CACHE_GET,\
     TASK_STATE_CACHE_ADD,\
     TASK_STATE_CACHE_MISS,\
-    TASK_STATE_CACHE_HIT = range(28)
+    TASK_STATE_CACHE_HIT,\
+    TASK_RESULT_CACHE_GET,\
+    TASK_RESULT_CACHE_ADD,\
+    TASK_RESULT_CACHE_MISS,\
+    TASK_RESULT_CACHE_HIT = range(32)
 
     _event_strings = [
         'DISPATCHER_WAKEUP',
@@ -197,7 +201,11 @@ class Trace(object):
         'TASK_STATE_CACHE_GET',
         'TASK_STATE_CACHE_ADD',
         'TASK_STATE_CACHE_MISS',
-        'TASK_STATE_CACHE_HIT'
+        'TASK_STATE_CACHE_HIT',
+        'TASK_RESULT_CACHE_GET',
+        'TASK_RESULT_CACHE_ADD',
+        'TASK_RESULT_CACHE_MISS',
+        'TASK_RESULT_CACHE_HIT'
     ]
 
     def __init__(self):

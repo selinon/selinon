@@ -42,7 +42,7 @@ class _MyStorage(DataStorage):
     def store(self, node_args, flow_name, task_name, task_id, result):
         pass
 
-    def retrieve(self, task_name, task_id):
+    def retrieve(self, flow_name, task_name, task_id):
         return self.result
 
 

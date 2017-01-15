@@ -487,7 +487,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         if len(new_finished) == 1 and len(self._active_nodes) == 0 and len(self._finished_nodes) == 0:
             # propagate arguments from newly finished node if configured to do so
             if Config.node_args_from_first.get(self._flow_name, False):
-                self._node_args = StoragePool.retrieve(new_finished[0]['name'], new_finished[0]['id'])
+                self._node_args = StoragePool.retrieve(new_finished[0]['name'], new_finished[0]['id'], self._flow_name)
 
         for node in new_finished:
             # We could optimize this by pre-computing affected edges in pre-generated config file for each
@@ -533,7 +533,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
                     # We could also examine results of subflow, there could be passed a list of subflows with
                     # finished_nodes to 'condition' in order to do inspection
-                    storage_pool = StoragePool(storage_id_mapping)
+                    storage_pool = StoragePool(storage_id_mapping, self._flow_name)
                     if edge['condition'](storage_pool, self._node_args):
                         records = self._fire_edge(edge, storage_pool, parent=parent, node_args=self._node_args)
                         ret.extend(records)
@@ -573,7 +573,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             raise ValueError("No starting node found for flow '%s'!" % self._flow_name)
 
         for start_edge in start_edges:
-            storage_pool = StoragePool(self._parent)
+            storage_pool = StoragePool(self._parent, self._flow_name)
             if start_edge['condition'](storage_pool, self._node_args):
                 records = self._fire_edge(start_edge, storage_pool, node_args=self._node_args, parent=self._parent)
 
