@@ -21,7 +21,7 @@
 A pool that carries all database connections for workers
 """
 
-from selinonlib.caches import CacheMissError
+from .errors import CacheMissError
 from .config import Config
 from .lockPool import LockPool
 from .trace import Trace

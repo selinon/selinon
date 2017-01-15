@@ -42,8 +42,16 @@ class ConfigError(Exception):
     """
     pass
 
+
 class FlowError(Exception):
     """
     An exception that is raised once there is an error in the flow
+    """
+    pass
+
+
+class CacheMissError(Exception):
+    """
+    An error raised when there is requested an item from cache that is not stored in cache
     """
     pass

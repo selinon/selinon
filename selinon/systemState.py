@@ -28,8 +28,7 @@ import copy
 from functools import reduce
 from collections import deque
 from celery.result import AsyncResult
-from selinonlib.caches import CacheMissError
-from .errors import FlowError
+from .errors import FlowError, CacheMissError
 from .storagePool import StoragePool
 from .lockPool import LockPool
 from .trace import Trace
