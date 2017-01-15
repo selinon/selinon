@@ -119,6 +119,7 @@ List of events that can be traced:
 
 import json
 import platform
+import datetime
 from celery.utils.log import get_task_logger
 
 
@@ -262,19 +263,21 @@ class Trace(object):
         :param msg_dict: a dict holding additional trace information for event
         :param logger: a logger to be used, if None, logger from trace_by_logging will be used
         """
-        message = "SELINON %10s - %s: %s"\
-                  % (platform.node(),
-                     cls.event2str(event),
-                     json.dumps(msg_dict, sort_keys=True))
+        report_dict = {
+            'event': cls.event2str(event),
+            'time': str(datetime.datetime.utcnow()),
+            'details': msg_dict
+        }
+        message = "SELINON %10s - : %s" % (platform.node(), json.dumps(report_dict, sort_keys=True))
 
         logger = logger or cls._logger
         if event == Trace.DISPATCHER_FAILURE:
             return logger.error(message)
-        if event in (Trace.NODE_FAILURE,
-                     Trace.TASK_DISCARD_RESULT,
-                     Trace.TASK_RETRY,
-                     Trace.TASK_FAILURE,
-                     Trace.FLOW_FAILURE):
+        elif event in (Trace.NODE_FAILURE,
+                       Trace.TASK_DISCARD_RESULT,
+                       Trace.TASK_RETRY,
+                       Trace.TASK_FAILURE,
+                       Trace.FLOW_FAILURE):
             return logger.warn(message)
         else:
             return logger.info(message)
