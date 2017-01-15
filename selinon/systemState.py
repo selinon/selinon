@@ -25,7 +25,6 @@ import itertools
 import json
 import datetime
 import copy
-from multiprocessing import Lock
 from threading import Lock
 from functools import reduce
 from collections import deque
@@ -583,12 +582,14 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                         self._update_waiting_edges(node['name'])
                         new_started_nodes.append(node)
 
-        self._retry = Config.strategies[self._flow_name](previous_retry=None,
-                                                         active_nodes=self._active_nodes,
-                                                         failed_nodes=self._failed_nodes,
-                                                         new_started_nodes=new_started_nodes,
-                                                         new_fallback_nodes=[],
-                                                         finished_nodes=self._finished_nodes)
+        self._retry = Config.strategies[self._flow_name]({
+            'previous_retry': None,
+            'active_nodes': self._active_nodes,
+            'failed_nodes': self._failed_nodes,
+            'new_started_nodes': new_started_nodes,
+            'new_fallback_nodes': [],
+            'finished_nodes': self._finished_nodes
+        })
 
     def update(self):
         """
@@ -628,17 +629,21 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                         }
                         raise FlowError(json.dumps(state_info))
 
-                self._retry = Config.strategies[self._flow_name](previous_retry=self._retry,
-                                                                 active_nodes=self._active_nodes,
-                                                                 failed_nodes=self._failed_nodes,
-                                                                 new_started_nodes=started,
-                                                                 new_fallback_nodes=fallback_started,
-                                                                 finished_nodes=self._finished_nodes)
+                self._retry = Config.strategies[self._flow_name]({
+                    'previous_retry': self._retry,
+                    'active_nodes': self._active_nodes,
+                    'failed_nodes': self._failed_nodes,
+                    'new_started_nodes': started,
+                    'new_fallback_nodes': fallback_started,
+                    'finished_nodes': self._finished_nodes
+                })
             else:
-                self._retry = Config.strategies[self._flow_name](previous_retry=self._retry,
-                                                                 active_nodes=self._active_nodes,
-                                                                 failed_nodes=self._failed_nodes,
-                                                                 new_started_nodes=[],
-                                                                 new_fallback_nodes=[],
-                                                                 finished_nodes=self._finished_nodes)
+                self._retry = Config.strategies[self._flow_name]({
+                    'previous_retry': self._retry,
+                    'active_nodes': self._active_nodes,
+                    'failed_nodes': self._failed_nodes,
+                    'new_started_nodes': [],
+                    'new_fallback_nodes': [],
+                    'finished_nodes': self._finished_nodes
+                })
         return self._retry

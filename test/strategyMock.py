@@ -19,12 +19,11 @@
 # ####################################################################
 
 
-def strategy_function(previous_retry, active_nodes, failed_nodes,
-                      new_started_nodes, new_fallback_nodes, finished_nodes):
+def strategy_function(status):
     """
-    Strategy function for system state sempling - simplified version, more robust solutions tested in selinonlib
+    Strategy function for system state sampling - simplified version, more robust solutions tested in selinonlib
     """
-    if len(active_nodes) > 0 or len(new_started_nodes) > 0:
+    if len(status['active_nodes']) > 0 or len(status['new_started_nodes']) > 0:
         return 2
     else:
         return None
