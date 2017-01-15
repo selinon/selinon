@@ -8,7 +8,7 @@
       retry_countdown: 120
       storage: MyStorage
       queue: Task1_v0
-      throttle:
+      throttling:
          seconds: 5
       output_schema: schema.json
 
