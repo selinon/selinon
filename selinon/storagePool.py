@@ -30,6 +30,8 @@ class StoragePool(object):
     """
     A pool that carries all database connections for workers
     """
+    _storage_pool_locks = LockPool()
+
     def __init__(self, id_mapping=None):
         self._id_mapping = id_mapping or {}
 
@@ -72,7 +74,7 @@ class StoragePool(object):
         storage = Config.storage_mapping[storage_name]
 
         if not storage.is_connected():
-            with LockPool.get_lock(storage):
+            with cls._storage_pool_locks.get_lock(storage):
                 if not storage.is_connected():
                     Trace.log(Trace.STORAGE_CONNECT, {'storage_name': storage_name})
                     storage.connect()

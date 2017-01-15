@@ -21,18 +21,19 @@
 Global lock pool for shared locks
 """
 
-from threading import Lock
+from multiprocessing import Lock
 
 
 class LockPool(object):  # pylint: disable=too-few-public-methods
     """
-    Global lock pool for shared locks
+    Lock pool for shared locks
     """
-    _locks = {}
-    _global_lock = Lock()
+    def __init__(self):
+        self._locks = {}
+        # Instance global lock to defend operations on stored locks
+        self._global_lock = Lock()
 
-    @classmethod
-    def get_lock(cls, lock_id):
+    def get_lock(self, lock_id):
         """
         Get lock for resource, exclusively
 
@@ -40,11 +41,11 @@ class LockPool(object):  # pylint: disable=too-few-public-methods
         :return: lock, can be acquired if already taken, if new, always released
         """
         # TODO: we could make it more optimal by storing only locks that are used and release them once unused
-        with cls._global_lock:
-            if not cls._locks.get(lock_id):
+        with self._global_lock:
+            if not self._locks.get(lock_id):
                 ret = Lock()
-                cls._locks[lock_id] = ret
+                self._locks[lock_id] = ret
             else:
-                ret = cls._locks[lock_id]
+                ret = self._locks[lock_id]
 
         return ret

@@ -25,13 +25,13 @@ import itertools
 import json
 import datetime
 import copy
-from threading import Lock
 from functools import reduce
 from collections import deque
 from celery.result import AsyncResult
 from selinonlib.caches import CacheMissError
 from .errors import FlowError
 from .storagePool import StoragePool
+from .lockPool import LockPool
 from .trace import Trace
 from .config import Config
 from .selinonTaskEnvelope import SelinonTaskEnvelope
@@ -43,10 +43,10 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
     """
     # Throttled nodes in the current worker: node name -> next schedule time
     # Throttle should be safe with concurrency
-    _throttle_lock = Lock()
+    _throttle_lock_pool = LockPool()
     _throttled_tasks = {}
     _throttled_flows = {}
-    _task_state_cache_lock = Lock()
+    _task_state_cache_lock = LockPool()
 
     @property
     def node_args(self):
@@ -67,7 +67,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             'node_name': node_name
         }
 
-        with self._task_state_cache_lock:
+        with self._task_state_cache_lock.get_lock(self._flow_name):
             try:
                 Trace.log(Trace.TASK_STATE_CACHE_GET, trace_msg)
                 res = cache.get(node_id)
@@ -151,7 +151,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             throttle_conf = Config.throttle_tasks
             throttled_nodes = self._throttled_tasks
 
-        with self._throttle_lock:
+        with self._throttle_lock_pool.get_lock(node_name):
             if throttle_conf[node_name]:
                 current_datetime = datetime.datetime.now()
                 if node_name not in throttled_nodes:
