@@ -268,7 +268,8 @@ class Trace(object):
             'time': str(datetime.datetime.utcnow()),
             'details': msg_dict
         }
-        message = "SELINON %10s - : %s" % (platform.node(), json.dumps(report_dict, sort_keys=True))
+        message = "SELINON %10s - %s : %s" \
+                  % (platform.node(), cls.event2str(event), json.dumps(report_dict, sort_keys=True))
 
         logger = logger or cls._logger
         if event == Trace.DISPATCHER_FAILURE:
