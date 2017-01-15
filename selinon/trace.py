@@ -174,7 +174,7 @@ class Trace(object):
     TASK_RESULT_CACHE_MISS,\
     TASK_RESULT_CACHE_HIT = range(32)
 
-    _event_strings = [
+    _event_strings = (
         'DISPATCHER_WAKEUP',
         'FLOW_START',
         'TASK_SCHEDULE',
@@ -207,7 +207,7 @@ class Trace(object):
         'TASK_RESULT_CACHE_ADD',
         'TASK_RESULT_CACHE_MISS',
         'TASK_RESULT_CACHE_HIT'
-    ]
+    )
 
     def __init__(self):
         raise NotImplementedError()
