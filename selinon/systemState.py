@@ -486,7 +486,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         if len(new_finished) == 1 and len(self._active_nodes) == 0 and len(self._finished_nodes) == 0:
             # propagate arguments from newly finished node if configured to do so
             if Config.node_args_from_first.get(self._flow_name, False):
-                self._node_args = StoragePool.retrieve(new_finished[0]['name'], new_finished[0]['id'], self._flow_name)
+                self._node_args = StoragePool.retrieve(self._flow_name, new_finished[0]['name'], new_finished[0]['id'])
 
         for node in new_finished:
             # We could optimize this by pre-computing affected edges in pre-generated config file for each

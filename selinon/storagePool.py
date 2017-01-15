@@ -90,16 +90,16 @@ class StoragePool(object):
         :param task_name: task's name that we are retrieving data for
         :return: task's result for the current context
         """
-        return self.retrieve(task_name, self._id_mapping[task_name], self._flow_name)
+        return self.retrieve(self._flow_name, task_name, self._id_mapping[task_name])
 
     @classmethod
-    def retrieve(cls, task_name, task_id, flow_name):
+    def retrieve(cls, flow_name, task_name, task_id):
         """
         Retrieve task's result from database which was configured to be used for desired task
 
+        :param flow_name: flow in which the retrieval is taking place
         :param task_name: name of task for which result should be retrieved
         :param task_id: task ID to uniquely identify task results
-        :param flow_name: flow in which the retrieval is taking place
         :return: task's result
         """
         storage = cls.get_storage_by_task_name(task_name)
