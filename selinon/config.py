@@ -252,3 +252,40 @@ class Config(object):
         :return: True if given node is a flow
         """
         return node_name in cls.flows
+
+    @classmethod
+    def is_task(cls, node_name):
+        """
+        Check if given node is a task by its name
+
+        :param node_name: name of the node to be checked
+        :return: True if given node is a task
+        """
+        return node_name in cls.task_classes
+
+    @classmethod
+    def has_storage(cls, task_name):
+        """
+        :param task_name: name of a task
+        :return: True if given task has assigned storage (either rw or readonly)
+        """
+        assert cls.is_task(task_name)
+        return task_name in cls.task2storage_mapping
+
+    @classmethod
+    def has_readonly_storage(cls, task_name):
+        """
+        :param task_name: name of a task
+        :return: True if the given task has assigned readonly storage
+        """
+        assert cls.is_task(task_name)
+        return task_name in cls.storage_readonly
+
+    @classmethod
+    def has_readwrite_storage(cls, task_name):
+        """
+        :param task_name: name of a task
+        :return: True if the given task has assigned rw storage
+        """
+        assert cls.is_task(task_name)
+        return cls.has_storage(task_name) and not cls.has_readonly_storage(task_name)
