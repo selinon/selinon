@@ -134,6 +134,7 @@ class SelinonTask(metaclass=abc.ABCMeta):
 
         :param flow_names: name of parent flow or list of flow names in case of nested flows
         :param task_name: name of task that failed (ancestor of calling task)
+        :param index: index of result if more than one subflow was run
         :return exception that was raised in the ancestor
         """
         index = -1 if index is None else index
