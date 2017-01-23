@@ -16,10 +16,10 @@ I'm getting Python related errors
 
 Check your Python version. Selinon and Selinonlib currently support only Pyhon3+ as Celery project is about to `drop Python2 support <http://docs.celeryproject.org/en/master/whatsnew-4.0.html#last-major-version-to-support-python-2>`_.
 
-I'm getting warning: "Multiple starting nodes found in a flow". Why?
-********************************************************************
+Should I replace Celery with Selinon?
+*************************************
 
-In order to propagate arguments to a flow, you should start flow with one single task (e.g. init task) which result is then propagated as an argument to each direct child tasks or transitive child tasks. This avoids various inconsistency errors and race conditions. If you define multiple starting nodes, arguments are not propagated from the first task. If you don't want to propagate arguments from an init task, you can ignore this warning for a certain flow or specify arguments explicitly in Selinon dispatcher.
+Well, hard to say. Celery is a great project and offers some features that are hard to model in Selinon. Selinon should be suitable for you when you have time and data dependencies between tasks and you can group these tasks into flows that are more sophisticated then Celery's primitives such as chain or chord. If this is true for you just give Selinon a try.
 
 How should I name tasks and flows?
 **********************************
@@ -71,7 +71,7 @@ Since YAML config files cover some logic (such as conditions), this needs to be 
 
 You can easily check how YAML file is transformed to Python code simply by running:
 ```
-selinonlib-cli --nodes-definition NODES.yml -flow-definition FLOWS.yml -dump outputfile.py
+selinonlib-cli inspect --nodes-definition NODES.yml --flow-definitions FLOWS.yml --dump outputfile.py
 ```
 
 How to write conditions for sub-flows?
@@ -84,5 +84,8 @@ Is my YAML config file correct? How to improve or correct it?
 
 See Best practices section for tips.
 
+Can I rely on checks of YAML file?
+**********************************
 
+You can a bit, but think before you write configuration. There are captured some errors, but it checks are not bullet-proof. If you make logical mistakes or your flow is simply wrong, Selinon is not AI to check your configuration. There are not done checks on transitive dependencies, if given conditions could evaluate or so.
 

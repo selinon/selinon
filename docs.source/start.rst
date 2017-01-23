@@ -52,7 +52,3 @@ Results of Tasks/Nodes
 
 Results of tasks are stored in database as you define in your configuration file.
 
-More info
-=========
-
-More information can be found in other sections of this doc.

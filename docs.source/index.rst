@@ -42,6 +42,7 @@ Documentation
    tasks
    storage
    trace
+   migration
    patterns
    development
    api/selinon
