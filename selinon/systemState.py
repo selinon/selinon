@@ -45,7 +45,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
     _throttle_lock_pool = LockPool()
     _throttled_tasks = {}
     _throttled_flows = {}
-    _task_state_cache_lock = LockPool()
+    _node_state_cache_lock = LockPool()
 
     @property
     def node_args(self):
@@ -66,18 +66,18 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             'node_name': node_name
         }
 
-        with self._task_state_cache_lock.get_lock(self._flow_name):
+        with self._node_state_cache_lock.get_lock(self._flow_name):
             try:
-                Trace.log(Trace.TASK_STATE_CACHE_GET, trace_msg)
+                Trace.log(Trace.NODE_STATE_CACHE_GET, trace_msg)
                 res = cache.get(node_id)
-                Trace.log(Trace.TASK_STATE_CACHE_HIT, trace_msg)
+                Trace.log(Trace.NODE_STATE_CACHE_HIT, trace_msg)
             except CacheMissError:
-                Trace.log(Trace.TASK_STATE_CACHE_MISS, trace_msg)
+                Trace.log(Trace.NODE_STATE_CACHE_MISS, trace_msg)
                 res = AsyncResult(id=node_id)
                 # we can cache only results of tasks that have finished or failed, not the ones that are going to
                 # be processed
                 if res.successful() or res.failed():
-                    Trace.log(Trace.TASK_STATE_CACHE_ADD, trace_msg)
+                    Trace.log(Trace.NODE_STATE_CACHE_ADD, trace_msg)
                     cache.add(node_id, res)
 
         return res
