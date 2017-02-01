@@ -33,7 +33,7 @@ setup(
     maintainer_email='fpokorny@redhat.com',
     description='task flow management for Celery',
     url='https://github.com/selinon/selinon',
-    license='GPLv2+',
+    license='BSD',
     keywords='celery selinonlib yaml condition flow',
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -41,7 +41,7 @@ setup(
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+        "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
         "Topic :: System :: Distributed Computing",
         "Programming Language :: Python :: Implementation :: CPython",

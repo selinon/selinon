@@ -8,7 +8,7 @@ An advanced task flow management on top of [Celery](https://www.celeryproject.or
 ![PyPI Wheel](https://img.shields.io/pypi/wheel/selinon.svg)
 ![Travis CI](https://travis-ci.org/selinon/selinon.svg?branch=master)
 ![GitHub stars](https://img.shields.io/github/stars/selinon/selinon.svg)
-![GitHub license](https://img.shields.io/badge/license-GPLv2-blue.svg)
+![GitHub license](https://img.shields.io/badge/license-BSD-blue.svg)
 ![Twitter](https://img.shields.io/twitter/url/http/github.com/selinon/selinon.svg?style=social)
 
 ## TLDR;
