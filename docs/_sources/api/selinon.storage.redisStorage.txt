@@ -1,7 +1,0 @@
-selinon.storage.redisStorage module
-===================================
-
-.. automodule:: selinon.storage.redisStorage
-    :members:
-    :undoc-members:
-    :show-inheritance:

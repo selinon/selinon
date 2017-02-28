@@ -1,7 +1,0 @@
-selinon.fatalTaskError module
-=============================
-
-.. automodule:: selinon.fatalTaskError
-    :members:
-    :undoc-members:
-    :show-inheritance:

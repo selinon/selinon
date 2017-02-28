@@ -38,7 +38,6 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -68,7 +67,6 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -168,7 +166,7 @@ html_theme = 'alabaster'
 # documentation.
 #
 html_theme_options = {
-    'github_user': 'fridex',
+    'github_user': 'selinon',
     'github_repo': 'selinon',
     'github_button': True,
     'github_banner': True
