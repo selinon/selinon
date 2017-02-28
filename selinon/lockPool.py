@@ -15,6 +15,7 @@ class LockPool(object):  # pylint: disable=too-few-public-methods
     """
     Lock pool for shared locks
     """
+
     def __init__(self):
         self._locks = {}
         # Instance global lock to defend operations on stored locks

@@ -104,9 +104,10 @@ List of events that can be traced:
 
 """
 
+import datetime
 import json
 import platform
-import datetime
+
 from celery.utils.log import get_task_logger
 
 
@@ -129,37 +130,37 @@ class Trace(object):
     _logger = None
 
     DISPATCHER_WAKEUP, \
-    FLOW_START, \
-    TASK_SCHEDULE, \
-    TASK_START, \
-    SUBFLOW_SCHEDULE, \
-    TASK_END, \
-    NODE_SUCCESSFUL, \
-    TASK_DISCARD_RESULT, \
-    TASK_FAILURE, \
-    TASK_RETRY, \
-    FLOW_FAILURE, \
-    DISPATCHER_FAILURE, \
-    NODE_FAILURE, \
-    FALLBACK_START, \
-    DISPATCHER_RETRY, \
-    FLOW_END, \
-    STORAGE_CONNECT, \
-    STORAGE_DISCONNECT, \
-    STORAGE_RETRIEVE, \
-    STORAGE_RETRIEVED, \
-    STORAGE_STORE, \
-    STORAGE_STORED, \
-    EDGE_COND_FALSE, \
-    FOREACH_RESULT,\
-    NODE_STATE_CACHE_GET,\
-    NODE_STATE_CACHE_ADD,\
-    NODE_STATE_CACHE_MISS,\
-    NODE_STATE_CACHE_HIT,\
-    TASK_RESULT_CACHE_GET,\
-    TASK_RESULT_CACHE_ADD,\
-    TASK_RESULT_CACHE_MISS,\
-    TASK_RESULT_CACHE_HIT = range(32)
+        FLOW_START, \
+        TASK_SCHEDULE, \
+        TASK_START, \
+        SUBFLOW_SCHEDULE, \
+        TASK_END, \
+        NODE_SUCCESSFUL, \
+        TASK_DISCARD_RESULT, \
+        TASK_FAILURE, \
+        TASK_RETRY, \
+        FLOW_FAILURE, \
+        DISPATCHER_FAILURE, \
+        NODE_FAILURE, \
+        FALLBACK_START, \
+        DISPATCHER_RETRY, \
+        FLOW_END, \
+        STORAGE_CONNECT, \
+        STORAGE_DISCONNECT, \
+        STORAGE_RETRIEVE, \
+        STORAGE_RETRIEVED, \
+        STORAGE_STORE, \
+        STORAGE_STORED, \
+        EDGE_COND_FALSE, \
+        FOREACH_RESULT,\
+        NODE_STATE_CACHE_GET,\
+        NODE_STATE_CACHE_ADD,\
+        NODE_STATE_CACHE_MISS,\
+        NODE_STATE_CACHE_HIT,\
+        TASK_RESULT_CACHE_GET,\
+        TASK_RESULT_CACHE_ADD,\
+        TASK_RESULT_CACHE_MISS,\
+        TASK_RESULT_CACHE_HIT = range(32)
 
     _event_strings = (
         'DISPATCHER_WAKEUP',

@@ -1,6 +1,7 @@
 pytest>=3
 pytest-timeout
 pytest-cov
+coala-bears
 flexmock
 pylint
 # Use latest selinonlib so we know we are in sync

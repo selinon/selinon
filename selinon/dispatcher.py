@@ -10,11 +10,13 @@ Selinon Dispatcher worker implementation
 
 import json
 import traceback
+
 from celery import Task
-from .systemState import SystemState
-from .errors import FlowError
-from .trace import Trace
+
 from .config import Config
+from .errors import FlowError
+from .systemState import SystemState
+from .trace import Trace
 
 
 class Dispatcher(Task):

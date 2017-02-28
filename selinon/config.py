@@ -8,11 +8,13 @@
 All user configurations generated from YAML file
 """
 
+import logging
 import os
 import runpy
 import tempfile
-import logging
+
 from selinonlib import System
+
 from .trace import Trace
 
 
@@ -256,7 +258,6 @@ class Config(object):
         :param task_name: name of a task
         :return: True if given task has assigned storage (either rw or readonly)
         """
-        assert cls.is_task(task_name)
         return task_name in cls.task2storage_mapping
 
     @classmethod
@@ -265,7 +266,6 @@ class Config(object):
         :param task_name: name of a task
         :return: True if the given task has assigned readonly storage
         """
-        assert cls.is_task(task_name)
         return task_name in cls.storage_readonly
 
     @classmethod
@@ -274,5 +274,4 @@ class Config(object):
         :param task_name: name of a task
         :return: True if the given task has assigned rw storage
         """
-        assert cls.is_task(task_name)
         return cls.has_storage(task_name) and not cls.has_readonly_storage(task_name)

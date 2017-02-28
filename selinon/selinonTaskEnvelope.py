@@ -8,15 +8,17 @@
 A raw Celery task that is responsible for running SelinonTask
 """
 
-import traceback
 import json
-import jsonschema
+import traceback
+
 from celery import Task
-from .storagePool import StoragePool
-from .errors import FatalTaskError
-from .trace import Trace
+import jsonschema
+
 from .config import Config
+from .errors import FatalTaskError
 from .retry import Retry
+from .storagePool import StoragePool
+from .trace import Trace
 
 
 class SelinonTaskEnvelope(Task):

@@ -8,19 +8,22 @@
 Main system actions done by Selinon
 """
 
+from collections import deque
+import copy
+import datetime
+from functools import reduce
 import itertools
 import json
-import datetime
-import copy
-from functools import reduce
-from collections import deque
+
 from celery.result import AsyncResult
-from .errors import FlowError, CacheMissError
-from .storagePool import StoragePool
-from .lockPool import LockPool
-from .trace import Trace
+
 from .config import Config
+from .errors import CacheMissError
+from .errors import FlowError
+from .lockPool import LockPool
 from .selinonTaskEnvelope import SelinonTaskEnvelope
+from .storagePool import StoragePool
+from .trace import Trace
 
 
 class SystemState(object):  # pylint: disable=too-many-instance-attributes

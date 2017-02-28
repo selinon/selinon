@@ -8,8 +8,8 @@
 A pool that carries all database connections for workers
 """
 
-from .errors import CacheMissError
 from .config import Config
+from .errors import CacheMissError
 from .lockPool import LockPool
 from .trace import Trace
 

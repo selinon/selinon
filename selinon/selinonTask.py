@@ -9,15 +9,18 @@ Base class for user-defined tasks
 """
 
 import abc
+
 from celery.result import AsyncResult
-from .storagePool import StoragePool
+
 from .retry import Retry
+from .storagePool import StoragePool
 
 
 class SelinonTask(metaclass=abc.ABCMeta):
     """
     Base class for user-defined tasks
     """
+
     def __init__(self, flow_name, task_name, parent, dispatcher_id):
         """
         :param flow_name: name of flow under which this tasks runs on
