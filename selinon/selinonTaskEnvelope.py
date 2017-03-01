@@ -113,9 +113,9 @@ class SelinonTaskEnvelope(Task):
             result = task.run(node_args)
             self.validate_result(task_name, result)
 
-            storage = StoragePool.get_storage_by_task_name(task_name)
+            storage = StoragePool.get_storage_name_by_task_name(task_name, graceful=True)
             if storage and not Config.storage_readonly[task_name]:
-                storage.store(node_args, flow_name, task_name, self.request.id, result)
+                StoragePool.set(node_args, flow_name, task_name, self.request.id, result)
             elif result is not None:
                 Trace.log(Trace.TASK_DISCARD_RESULT, {'flow_name': flow_name,
                                                       'task_name': task_name,
