@@ -556,12 +556,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                                      'dispatcher_id': self._dispatcher_id,
                                      'queue': Config.dispatcher_queues[self._flow_name],
                                      'args': self._node_args})
-        start_edges = [edge for edge in Config.edge_table[self._flow_name] if len(edge['from']) == 0]
-        if len(start_edges) == 0:
-            # This should not occur since selinonlib raises exception if such occurs, but just to be sure...
-            raise ValueError("No starting node found for flow '%s'!" % self._flow_name)
 
-        for start_edge in start_edges:
+        for start_edge in Config.get_starting_edges(self._flow_name):
             storage_pool = StoragePool(self._parent, self._flow_name)
             if start_edge['condition'](storage_pool, self._node_args):
                 records = self._fire_edge(start_edge, storage_pool, node_args=self._node_args, parent=self._parent)

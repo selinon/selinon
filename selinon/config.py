@@ -275,3 +275,20 @@ class Config(object):
         :return: True if the given task has assigned rw storage
         """
         return cls.has_storage(task_name) and not cls.has_readonly_storage(task_name)
+
+    @classmethod
+    def get_starting_edges(cls, flow_name):
+        """ Get starting edges for a flow
+
+        :param flow_name: a flow name to get starting edges
+        :return: starting edges for a flow
+        """
+        if flow_name not in Config.edge_table:
+            raise ValueError("No such flow in configuration: %s" % flow_name)
+
+        start_edges = [edge for edge in Config.edge_table[flow_name] if len(edge['from']) == 0]
+        if len(start_edges) == 0:
+            # This should not occur since selinonlib raises exception if such occurs, but just to be sure...
+            raise ValueError("No starting node found for flow '%s'!" % flow_name)
+
+        return start_edges
