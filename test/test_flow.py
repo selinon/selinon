@@ -8,7 +8,7 @@
 import time
 import datetime
 from selinonTestCase import SelinonTestCase
-from selinon import SystemState, Dispatcher
+from selinon import SystemState
 
 
 class TestFlow(SelinonTestCase):

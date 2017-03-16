@@ -160,7 +160,11 @@ class Trace(object):
         TASK_RESULT_CACHE_GET,\
         TASK_RESULT_CACHE_ADD,\
         TASK_RESULT_CACHE_MISS,\
-        TASK_RESULT_CACHE_HIT = range(32)
+        TASK_RESULT_CACHE_HIT,\
+        SELECTIVE_OMIT_EDGE,\
+        SELECTIVE_OMIT_NODE,\
+        SELECTIVE_RUN_FUNC,\
+        SELECTIVE_TASK_REUSE = range(36)
 
     _event_strings = (
         'DISPATCHER_WAKEUP',
@@ -194,7 +198,11 @@ class Trace(object):
         'TASK_RESULT_CACHE_GET',
         'TASK_RESULT_CACHE_ADD',
         'TASK_RESULT_CACHE_MISS',
-        'TASK_RESULT_CACHE_HIT'
+        'TASK_RESULT_CACHE_HIT',
+        'SELECTIVE_OMIT_EDGE',
+        'SELECTIVE_OMIT_NODE',
+        'SELECTIVE_RUN_FUNC',
+        'SELECTIVE_TASK_REUSE'
     )
 
     def __init__(self):
@@ -223,14 +231,17 @@ class Trace(object):
         cls._trace_func = func
 
     @classmethod
-    def log(cls, event, msg_dict):
+    def log(cls, event, *msg_dict):
         """
         Trace work
 
         :param event: tracing event
         :param msg_dict: message to be printed
         """
-        cls._trace_func(event, msg_dict)
+        to_report = {}
+        for msg in msg_dict:
+            to_report.update(msg)
+        cls._trace_func(event, to_report)
 
     @classmethod
     def event2str(cls, event):

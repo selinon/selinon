@@ -65,6 +65,16 @@ class GetTaskInstance(object):
         AsyncResult.set_unfinished(node.task_id)
 
     @classmethod
+    def remove_all_flows_by_name(cls, flow_name):
+        """ Remove all flows with the given name """
+        cls._flow_instances = [f for f in cls._flow_instances if f.flow_name != flow_name]
+
+    @classmethod
+    def remove_all_tasks_by_name(cls, task_name):
+        """ Remove all flows with the given name """
+        cls._task_instances = [t for t in cls._task_instances if t.task_name != task_name]
+
+    @classmethod
     def clear(cls):
         """
         Since we are using class attributes and methos, we need to clear each time there will be a test

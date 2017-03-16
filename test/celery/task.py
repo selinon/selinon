@@ -17,6 +17,7 @@ class Task(object):
         self.queue = None
         self.countdown = None
         self.dispatcher_id = None
+        self.selective = None
 
     @property
     def task_id(self):
@@ -35,6 +36,7 @@ class Task(object):
         self.task_name = kwargs.get('task_name')
         self.retried_count = kwargs.get('retried_count')
         self.countdown = countdown
+        self.selective = kwargs.get('selective')
 
         self.queue = queue
         Config.get_task_instance.register_node(self)
@@ -46,4 +48,10 @@ class Task(object):
         # ensure that we are raising with max_retry equal to 0 so we will not get into an infinite loop
         assert max_retry == 0
         raise exc
+
+    def get_initial_system_state(self):
+        """ Get initial SystemState as would Dispatcher run it inside run() method """
+        from selinon.systemState import SystemState
+        return SystemState(id(self), self.flow_name, node_args=self.node_args, retry=None, state=None,
+                           parent=self.parent, selective=self.selective)
 

@@ -48,6 +48,14 @@ class _TaskResultCacheMock(object):
         return self.cache
 
 
+class _SelectiveRunFunctionMock(object):
+    def __getitem__(self, item):
+        def func(flow_name, node_name, node_args, task_names, storage_pool):
+            # Always return None so we always execute task before the desired one
+            return None
+        return func
+
+
 class SelinonTestCase(object):
     """
     Main class for Selinon testing
@@ -63,14 +71,15 @@ class SelinonTestCase(object):
         GetTaskInstance.clear()
         SystemState._throttled_tasks = {}
         SystemState._throttled_flows = {}
-        # If you would like to have a really verbose debug messages, just comment this out
-        #Config.trace_by_logging()
 
     def init(self, edge_table, **kwargs):
         """
         :param edge_table: table dict as defined in YAML file containing edges
         :param kwargs: additional parameters for test configuration
         """
+        # If you would like to have a really verbose debug messages, just comment this out
+        #Config.trace_by_logging()
+
         Config.edge_table = edge_table
         flows = list(edge_table.keys())
 
@@ -99,6 +108,7 @@ class SelinonTestCase(object):
         Config.storage_mapping = kwargs.pop('storage_mapping', {})
         Config.output_schemas = kwargs.pop('output_schemas', {})
         Config.async_result_cache = kwargs.pop('async_result_cache', _AsyncResultCacheMock(Config.is_flow))
+        Config.selective_run_task = kwargs.pop('selective_run_task', _SelectiveRunFunctionMock())
 
         if kwargs:
             raise ValueError("Unknown config options provided: %s" % set(kwargs.keys()))
@@ -108,7 +118,8 @@ class SelinonTestCase(object):
         # Make sure we restore tracing function in tests
         Trace._trace_func = _default_trace_func
 
-    def _update_edge_table(self):
+    @staticmethod
+    def _update_edge_table():
         """
         As edge table stores some metadata for debugging, let's fake them during testing
         """
@@ -222,3 +233,14 @@ class SelinonTestCase(object):
         :return: GetTaskInstance in the current context
         """
         return Config.get_task_instance
+
+    @staticmethod
+    def remove_all_flows_by_name(flow_name):
+        """ Remove all flows with the given name """
+        Config.get_task_instance.remove_all_flows_by_name(flow_name)
+
+    @staticmethod
+    def remove_all_tasks_by_name(task_name):
+        """ Remove all flows with the given name """
+        Config.get_task_instance.remove_all_tasks_by_name(task_name)
+

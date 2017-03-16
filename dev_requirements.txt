@@ -4,5 +4,6 @@ pytest-cov
 coala-bears
 flexmock
 pylint
+pytest-capturelog
 # Use latest selinonlib so we know we are in sync
 git+https://github.com/selinon/selinonlib@master

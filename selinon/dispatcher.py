@@ -56,7 +56,7 @@ class Dispatcher(Task):
                          countdown=countdown,
                          queue=Config.dispatcher_queues[flow_name])
 
-    def run(self, flow_name, node_args=None, parent=None, retried_count=None, retry=None, state=None):
+    def run(self, flow_name, node_args=None, parent=None, retried_count=None, retry=None, state=None, selective=False):
         # pylint: disable=too-many-arguments,arguments-differ
         """
         Dispatcher entry-point - run each time a dispatcher is scheduled
@@ -64,9 +64,10 @@ class Dispatcher(Task):
         :param flow_name: name of the flow
         :param parent: flow parent nodes
         :param node_args: arguments for workers
-        :param retried_count: number of Selinon retries done (not Celery retries)
+        :param retried_count: number of @Selinon retries done (not Celery retries)
         :param retry: last retry countdown
         :param state: the current system state
+        :param selective: selective flow information if run in selective flow
         :raises: FlowError
         """
 
@@ -76,10 +77,11 @@ class Dispatcher(Task):
             'node_args': node_args,
             'retry': retry,
             'queue': Config.dispatcher_queues[flow_name],
-            'state': state
+            'state': state,
+            'selective': selective
         })
         try:
-            system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent)
+            system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent, selective)
             retry = system_state.update()
         except FlowError as flow_error:
             retried_count = retried_count or 0
@@ -92,7 +94,8 @@ class Dispatcher(Task):
                 'parent': parent,
                 'retry': retry,
                 'will_retry': retried_count < max_retry,
-                'queue': Config.dispatcher_queues[flow_name]
+                'queue': Config.dispatcher_queues[flow_name],
+                'selective': selective
             })
 
             if retried_count < max_retry:
@@ -107,7 +110,8 @@ class Dispatcher(Task):
                 'node_args': node_args,
                 'parent': parent,
                 'queue': Config.dispatcher_queues[flow_name],
-                'what': traceback.format_exc()
+                'what': traceback.format_exc(),
+                'selective': selective
             })
             raise self.retry(max_retries=0, exc=exc)
 
@@ -120,15 +124,13 @@ class Dispatcher(Task):
                 'node_args': node_args,
                 'parent': parent,
                 'retry': retry,
-                'state': state_dict
+                'state': state_dict,
+                'selective': system_state.selective
             }
-            Trace.log(Trace.DISPATCHER_RETRY, {
-                'flow_name': flow_name,
+            Trace.log(Trace.DISPATCHER_RETRY, kwargs, {
                 'dispatcher_id': self.request.id,
-                'retry': retry,
                 'state_dict': state_dict,
-                'node_args': node_args,
-                'queue': Config.dispatcher_queues[flow_name]
+                'queue': Config.dispatcher_queues[flow_name],
             })
             raise self.retry(args=[], kwargs=kwargs, countdown=retry, queue=Config.dispatcher_queues[flow_name])
         else:
@@ -139,7 +141,8 @@ class Dispatcher(Task):
                 'parent': parent,
                 'dispatcher_id': self.request.id,
                 'queue': Config.dispatcher_queues[flow_name],
-                'finished_nodes': state_dict['finished_nodes']
+                'finished_nodes': state_dict['finished_nodes'],
+                'selective': selective
             })
             return {
                 'finished_nodes': state_dict['finished_nodes'],

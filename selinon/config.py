@@ -90,6 +90,9 @@ class Config(object):
         # Dispatcher scheduling strategy
         cls.strategies = config_module['strategies']
 
+        # Selective task configuration
+        cls.selective_run_task = config_module['selective_run_task']
+
         # call config init with Config class to set up other configuration specific values
         config_module['init'](cls)
 
@@ -286,7 +289,7 @@ class Config(object):
         if flow_name not in Config.edge_table:
             raise ValueError("No such flow in configuration: %s" % flow_name)
 
-        start_edges = [edge for edge in Config.edge_table[flow_name] if len(edge['from']) == 0]
+        start_edges = [(i, edge) for i, edge in enumerate(Config.edge_table[flow_name]) if len(edge['from']) == 0]
         if len(start_edges) == 0:
             # This should not occur since selinonlib raises exception if such occurs, but just to be sure...
             raise ValueError("No starting node found for flow '%s'!" % flow_name)

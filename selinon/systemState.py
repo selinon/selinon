@@ -53,7 +53,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             'dispatcher_id': self._dispatcher_id,
             'queue': Config.dispatcher_queues[self._flow_name],
             'node_id': node_id,
-            'node_name': node_name
+            'node_name': node_name,
+            'selective': self._selective
         }
 
         with self._node_state_cache_lock.get_lock(self._flow_name):
@@ -98,7 +99,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         # Make tests more readable
         return str(self.to_dict())
 
-    def __init__(self, dispatcher_id, flow_name, node_args=None, retry=None, state=None, parent=None):
+    def __init__(self, dispatcher_id, flow_name, node_args=None, retry=None, state=None, parent=None, selective=None):
         # pylint: disable=too-many-arguments
         state_dict = state or {}
 
@@ -106,6 +107,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         self._flow_name = flow_name
         self._node_args = node_args
         self._parent = parent or {}
+        self._selective = selective or False
         self._active_nodes = self._instantiate_active_nodes(state_dict.get('active_nodes', []))
         self._finished_nodes = state_dict.get('finished_nodes', {})
         self._failed_nodes = state_dict.get('failed_nodes', {})
@@ -113,6 +115,12 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         # Instantiate lazily later if we will know that there is something to process
         self._waiting_edges = []
         self._retry = retry
+
+        # TODO: fix this - for some reasons serializer uses strings in values
+        if self._selective:
+            for flow in self._selective['waiting_edges_subset']:
+                self._selective['waiting_edges_subset'][flow] = \
+                    {int(k): v for k, v in self._selective['waiting_edges_subset'][flow].items()}
 
     def to_dict(self):
         """
@@ -124,6 +132,11 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             'failed_nodes': self._failed_nodes,
             'waiting_edges': self._waiting_edges_idx
         }
+
+    @property
+    def selective(self):
+        """ Edges that should be started selectively as computed by compute_selective """
+        return self._selective
 
     def _get_countdown(self, node_name, is_flow):
         """
@@ -156,11 +169,11 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             else:
                 return None
 
-    def _get_successful_and_failed(self):
+    def _get_successful_and_failed(self, reused):
         """
         :return: all successful and failed nodes in system from active nodes
         """
-        ret_successful = []
+        ret_successful = reused
         ret_failed = []
 
         new_active_nodes = []
@@ -169,14 +182,16 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 Trace.log(Trace.NODE_SUCCESSFUL, {'flow_name': self._flow_name,
                                                   'dispatcher_id': self._dispatcher_id,
                                                   'node_name': node['name'],
-                                                  'node_id': node['id']})
+                                                  'node_id': node['id'],
+                                                  'selective': self._selective})
                 ret_successful.append(node)
             elif node['result'].failed():
                 Trace.log(Trace.NODE_FAILURE, {'flow_name': self._flow_name,
                                                'dispatcher_id': self._dispatcher_id,
                                                'node_name': node['name'],
                                                'node_id': node['id'],
-                                               'what': node['result'].traceback})
+                                               'what': node['result'].traceback,
+                                               'selective': self._selective})
                 # We keep track of failed nodes to handle failures once all nodes finish
                 if node['name'] not in self._failed_nodes:
                     self._failed_nodes[node['name']] = []
@@ -186,8 +201,25 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 new_active_nodes.append(node)
 
         self._active_nodes = new_active_nodes
-
         return ret_successful, ret_failed
+
+    def _execute_selective_run_func(self, node_name, node_args, parent):
+        trace_msg = {
+            'flow_name': self._flow_name,
+            'dispatcher_id': self._dispatcher_id,
+            'selective': self._selective,
+            'node_name': node_name,
+            'node_args': node_args,
+            'parent': parent,
+        }
+
+        storage_pool = StoragePool(parent, self._flow_name)
+        selective_func = Config.selective_run_task[node_name]
+
+        result = selective_func(self._flow_name, node_name, node_args, self._selective['task_names'], storage_pool)
+        Trace.log(Trace.SELECTIVE_RUN_FUNC, trace_msg, {'result': result})
+
+        return result
 
     def _start_node(self, node_name, parent, node_args,
                     force_propagate_node_args=False,
@@ -206,20 +238,19 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         from .dispatcher import Dispatcher
 
         if Config.is_flow(node_name):
+            start_node_args = None
             if force_propagate_node_args or Config.should_propagate_node_args(self._flow_name, node_name):
-                node_args = node_args
-            else:
-                node_args = None
+                start_node_args = node_args
 
+            start_parent = None
             if Config.should_propagate_parent(self._flow_name, node_name):
-                parent = parent
-            else:
-                parent = None
+                start_parent = parent
 
             kwargs = {
                 'flow_name': node_name,
-                'node_args': node_args,
-                'parent': parent,
+                'node_args': start_node_args,
+                'parent': start_parent,
+                'selective': self._selective
             }
 
             countdown = self._get_countdown(node_name, is_flow=True)
@@ -227,8 +258,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                                                     queue=Config.dispatcher_queues[node_name],
                                                     countdown=countdown)
 
-            # reuse kwargs for trace log entry
-            kwargs['meta'] = {
+            Trace.log(Trace.SUBFLOW_SCHEDULE, {
                 'flow_name': self._flow_name,
                 'condition_str': condition_str,
                 'foreach_str': foreach_str,
@@ -236,10 +266,11 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 'dispatcher_id': self._dispatcher_id,
                 'child_dispatcher_id': async_result.task_id,
                 'queue': Config.dispatcher_queues[node_name],
-                'countdown': countdown
-            }
+                'countdown': countdown,
+                'selective': self._selective,
+                'node_args': start_node_args
+            })
 
-            Trace.log(Trace.SUBFLOW_SCHEDULE, kwargs)
         else:
             kwargs = {
                 'task_name': node_name,
@@ -254,16 +285,14 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                                                              queue=Config.task_queues[node_name],
                                                              countdown=countdown)
 
-            # reuse kwargs for trace log entry
-            kwargs['meta'] = {
+            Trace.log(Trace.TASK_SCHEDULE, kwargs, {
                 'task_id': async_result.task_id,
                 'queue': Config.task_queues[node_name],
                 'condition_str': condition_str,
                 'foreach_str': foreach_str,
-                'countdown': countdown
-            }
-
-            Trace.log(Trace.TASK_SCHEDULE, kwargs)
+                'countdown': countdown,
+                'selective': self._selective
+            })
 
         record = {
             'name': node_name,
@@ -276,9 +305,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
         return record
 
-    def _fire_edge(self, edge, storage_pool, parent, node_args):
-        """
-        Fire edge - start new nodes as described in edge table
+    def _fire_edge(self, edge_idx, edge, storage_pool, parent, node_args):
+        """ Fire edge - start new nodes as described in edge table
 
         :param edge: edge that should be fired
         :param storage_pool: storage pool which makes results of previous tasks available
@@ -286,25 +314,56 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         :param node_args: node arguments
         :return: list of nodes that were scheduled
         """
-        ret = []
+        # pylint: disable=too-many-arguments,too-many-branches
+        started = []
+        selective_reuse = []
+        trace_msg = {
+            'nodes_to': edge['to'],
+            'nodes_from': edge['from'],
+            'flow_name': self._flow_name,
+            'foreach_str': edge.get('foreach_str'),
+            'condition_str': edge['condition_str'],
+            'parent': parent,
+            'node_args': self._node_args,
+            'dispatcher_id': self._dispatcher_id,
+            'selective': self._selective
+        }
+
+        nodes2start = None
+        if self._selective:
+            if edge_idx not in self._selective['waiting_edges_subset'][self._flow_name].keys():
+                Trace.log(Trace.SELECTIVE_OMIT_EDGE, trace_msg)
+                return [], []
+            else:
+                nodes2start = self._selective['waiting_edges_subset'][self._flow_name][edge_idx]
 
         if 'foreach' in edge:
             iterable = edge['foreach'](storage_pool, node_args)
-            Trace.log(Trace.FOREACH_RESULT, {
-                'nodes_to': edge['to'],
-                'nodes_from': edge['from'],
-                'flow_name': self._flow_name,
-                'foreach_str': edge['foreach_str'],
-                'condition_str': edge['condition_str'],
-                'parent': parent,
-                'node_args': self._node_args,
-                'dispatcher_id': self._dispatcher_id
-            })
+            Trace.log(Trace.FOREACH_RESULT, trace_msg)
             # handle None as well
             if not iterable:
-                return ret
+                return started, []
             for res in iterable:
                 for node_name in edge['to']:
+                    if nodes2start and node_name not in nodes2start:
+                        Trace.log(Trace.SELECTIVE_OMIT_NODE, trace_msg, {'omitted_node': node_name})
+                        continue
+
+                    if self._selective and node_name not in self._selective['task_names'] \
+                            and not Config.is_flow(node_name):
+                        selective_run_func_result = self._execute_selective_run_func(node_name, res, parent)
+                        if selective_run_func_result:
+                            Trace.log(Trace.SELECTIVE_TASK_REUSE, trace_msg, {
+                                'task_name': node_name,
+                                'task_id': selective_run_func_result
+                            })
+                            selective_reuse.append({
+                                'name': node_name,
+                                'id': selective_run_func_result,
+                                'result': self._get_async_result(node_name, selective_run_func_result)
+                            })
+                            continue
+
                     if edge.get('foreach_propagate_result'):
                         record = self._start_node(node_name, parent, res,
                                                   force_propagate_node_args=True,
@@ -314,18 +373,35 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                         record = self._start_node(node_name, parent, node_args,
                                                   condition_str=edge['condition_str'],
                                                   foreach_str=edge['foreach_str'])
-                    ret.append(record)
+                    started.append(record)
         else:
             for node_name in edge['to']:
+                if nodes2start and node_name not in nodes2start:
+                    Trace.log(Trace.SELECTIVE_OMIT_NODE, trace_msg, {'omitted_node': node_name})
+                    continue
+
+                if self._selective and node_name not in self._selective['task_names'] and not Config.is_flow(node_name):
+                    selective_run_func_result = self._execute_selective_run_func(node_name, node_args, parent)
+                    if selective_run_func_result:
+                        Trace.log(Trace.SELECTIVE_TASK_REUSE, trace_msg, {
+                            'task_name': node_name,
+                            'task_id': selective_run_func_result
+                        })
+                        selective_reuse.append({
+                            'name': node_name,
+                            'id': selective_run_func_result,
+                            'result': self._get_async_result(node_name, selective_run_func_result)
+                        })
+                        continue
+
                 record = self._start_node(node_name, parent, node_args,
                                           condition_str=edge['condition_str'])
-                ret.append(record)
+                started.append(record)
 
-        return ret
+        return started, selective_reuse
 
     def _run_fallback(self):
-        """
-        Run fallback in the system
+        """ Run fallback in the system
 
         :return: fallbacks that were run
         """
@@ -361,6 +437,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                         Trace.log(Trace.FALLBACK_START, {'flow_name': self._flow_name,
                                                          'dispatcher_id': self._dispatcher_id,
                                                          'nodes': traced_nodes_arr,
+                                                         'selective': self._selective,
                                                          'fallback': failure_node['fallback']})
 
                         for node in failure_node['fallback']:
@@ -385,26 +462,43 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                         Trace.log(Trace.FALLBACK_START, {'flow_name': self._flow_name,
                                                          'dispatcher_id': self._dispatcher_id,
                                                          'nodes': traced_nodes_arr,
+                                                         'selective': self._selective,
                                                          'fallback': True})
                         # continue with fallback in other combinations, nothing started
 
         return ret
 
-    def _update_waiting_edges(self, node_name):
+    def _update_waiting_edges(self, nodes):
         """
         Update waiting edges (edges that wait for a node finish) based on node name
 
         :param node_name: node that will trigger an edge
         """
-        for idx, edge in enumerate(Config.edge_table[self._flow_name]):
-            if node_name in edge['from'] and idx not in self._waiting_edges_idx:
+        res = []
+
+        for node in nodes:
+            for idx, edge in enumerate(Config.edge_table[self._flow_name]):
+                if node['name'] not in edge['from']:
+                    continue
+
+                if idx in self._waiting_edges_idx:
+                    continue
+
+                if node['name'] in Config.nowait_nodes.get(self._flow_name, []):
+                    continue
+
+                if self._selective and idx not in self._selective['waiting_edges_subset'][self._flow_name]:
+                    continue
+
+                res.append(node)
                 self._waiting_edges.append(edge)
                 self._waiting_edges_idx.append(idx)
 
+        return res
+
     def _extend_parent_from_flow(self, dst_dict, flow_name, flow_id, key, compound=False):
         # pylint: disable=too-many-arguments,too-many-locals
-        """
-        Compute parent in a flow in case of propagate_parent flag
+        """ Compute parent in a flow in case of propagate_parent flag
 
         :param dst_dict: a dictionary that should be extended with calculated parents
         :param flow_name: a flow name for which propagate_parent is calculated
@@ -464,14 +558,14 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         return res
 
     def _start_new_from_finished(self, new_finished):  # pylint: disable=too-many-locals
-        """
-        Start new based on finished nodes
+        """ Start new based on finished nodes
 
         :param new_finished: finished nodes based on which we should start new nodes
         :return: newly started nodes
         """
         # pylint: disable=too-many-nested-blocks,too-many-branches
-        ret = []
+        new_started_nodes = []
+        selective_reuse = []
 
         if len(new_finished) == 1 and len(self._active_nodes) == 0 and len(self._finished_nodes) == 0:
             # propagate arguments from newly finished node if configured to do so
@@ -481,9 +575,13 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         for node in new_finished:
             # We could optimize this by pre-computing affected edges in pre-generated config file for each
             # node and computing intersection with waiting edges, but let's stick with this solution for now
-            edges = [edge for edge in self._waiting_edges if node['name'] in edge['from']]
+            edges = []
+            for waiting_edges_idx, edge_table_idx in enumerate(self._waiting_edges_idx):
+                # we have to store index to edge table, but inspect possible edge fires only in waiting edges
+                if node['name'] in self._waiting_edges[waiting_edges_idx]['from']:
+                    edges.append((edge_table_idx, self._waiting_edges[waiting_edges_idx]))
 
-            for edge in edges:
+            for i, edge in edges:
                 from_nodes = dict.fromkeys(edge['from'], [])
 
                 for from_name in from_nodes:
@@ -524,8 +622,10 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                     # finished_nodes to 'condition' in order to do inspection
                     storage_pool = StoragePool(storage_id_mapping, self._flow_name)
                     if edge['condition'](storage_pool, self._node_args):
-                        records = self._fire_edge(edge, storage_pool, parent=parent, node_args=self._node_args)
-                        ret.extend(records)
+                        records, reused = self._fire_edge(i, edge, storage_pool,
+                                                          parent=parent, node_args=self._node_args)
+                        new_started_nodes.extend(records)
+                        selective_reuse.extend(reused)
                     else:
                         Trace.log(Trace.EDGE_COND_FALSE, {
                             'nodes_to': edge['to'],
@@ -534,7 +634,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                             'flow_name': self._flow_name,
                             'parent': parent,
                             'node_args': self._node_args,
-                            'dispatcher_id': self._dispatcher_id
+                            'dispatcher_id': self._dispatcher_id,
+                            'selective': self._selective
                         })
 
             node_name = node['name']
@@ -542,93 +643,105 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 self._finished_nodes[node_name] = []
             self._finished_nodes[node_name].append(node['id'])
 
-        return ret
+        return new_started_nodes, selective_reuse
 
     def _start_and_update_retry(self):
-        """
-        Start the flow and update retry
+        """ Start the flow and update retry
 
         :return: new/next retry
         """
         new_started_nodes = []
+        selective_reuse = []
 
         Trace.log(Trace.FLOW_START, {'flow_name': self._flow_name,
                                      'dispatcher_id': self._dispatcher_id,
                                      'queue': Config.dispatcher_queues[self._flow_name],
+                                     'selective': self._selective,
                                      'args': self._node_args})
 
-        for start_edge in Config.get_starting_edges(self._flow_name):
+        for i, start_edge in Config.get_starting_edges(self._flow_name):
             storage_pool = StoragePool(self._parent, self._flow_name)
             if start_edge['condition'](storage_pool, self._node_args):
-                records = self._fire_edge(start_edge, storage_pool, node_args=self._node_args, parent=self._parent)
+                records, reused = self._fire_edge(i, start_edge, storage_pool,
+                                                  node_args=self._node_args, parent=self._parent)
 
-                for node in records:
-                    if node['name'] not in Config.nowait_nodes.get(self._flow_name, []):
-                        self._update_waiting_edges(node['name'])
-                        new_started_nodes.append(node)
+                new_started_nodes.extend(records)
+                selective_reuse.extend(reused)
+            else:
+                Trace.log(Trace.EDGE_COND_FALSE, {
+                    'nodes_to': start_edge['to'],
+                    'nodes_from': start_edge['from'],
+                    'condition': start_edge['condition_str'],
+                    'flow_name': self._flow_name,
+                    'parent': self._parent,
+                    'node_args': self._node_args,
+                    'dispatcher_id': self._dispatcher_id,
+                    'selective': self._selective
+                })
 
-        self._retry = Config.strategies[self._flow_name]({
-            'previous_retry': None,
-            'active_nodes': self._active_nodes,
-            'failed_nodes': self._failed_nodes,
-            'new_started_nodes': new_started_nodes,
-            'new_fallback_nodes': [],
-            'finished_nodes': self._finished_nodes
-        })
+        # Update here so the strategy has correct new_started_nodes without nowait
+        new_started_nodes = self._update_waiting_edges(new_started_nodes)
+        return new_started_nodes, selective_reuse
+
+    def _continue_and_update_retry(self, previously_reused):
+        """ Continue with the flow based on previous runs
+
+        :return: tuple describing newly started and reused nodes by selective run
+        """
+        new_started_nodes = []
+        selective_reuse = []
+        fallback_started = []
+
+        new_finished, new_failed = self._get_successful_and_failed(previously_reused)
+
+        if new_finished or new_failed:
+            # Instantiate results lazily
+            self._waiting_edges = self._idxs2items(Config.edge_table[self._flow_name], self._waiting_edges_idx)
+            self._update_waiting_edges(new_finished)
+
+            new_started_nodes, selective_reuse = self._start_new_from_finished(new_finished)
+
+            # We wait until all active nodes finish if there are some failed nodes try to recover from failure,
+            # otherwise mark flow as failed
+            if len(self._active_nodes) == 0 and self._failed_nodes:
+                fallback_started = self._run_fallback()
+                if len(fallback_started) == 0 and len(self._failed_nodes) > 0:
+                    # We will propagate state information so we can correctly propagate parent and failed nodes in
+                    # parent flow if there is any
+                    # We use JSON in order to use result backend with JSON configured so objects are not pickled
+                    state_dict = self.to_dict()
+                    state_info = {
+                        'finished_nodes': state_dict['finished_nodes'],
+                        'failed_nodes': state_dict['failed_nodes']
+                    }
+                    raise FlowError(json.dumps(state_info))
+
+        return new_started_nodes, selective_reuse, fallback_started
 
     def update(self):
-        """
-        Check the current state in the system and start new nodes if possible
+        """ Check the current state in the system and start new nodes if possible
 
         :return: retry count - can be None (do not retry dispatcher) or time in seconds to retry
         """
+        fallback_started = []
 
         if not self._active_nodes and not self._finished_nodes and not self._waiting_edges and not self._failed_nodes:
             # we are starting up
-            self._start_and_update_retry()
+            started, reused = self._start_and_update_retry()
         else:
-            new_finished, new_failed = self._get_successful_and_failed()
+            started, reused, fallback_started = self._continue_and_update_retry([])
 
-            if new_finished or new_failed:
-                # Instantiate results lazily
-                self._waiting_edges = self._idxs2items(Config.edge_table[self._flow_name], self._waiting_edges_idx)
+        while reused:
+            # We do not need to retry if there are some tasks that we can continue with
+            started, reused, fallback_started = self._continue_and_update_retry(reused)
 
-                for node in new_finished:
-                    self._update_waiting_edges(node['name'])
+        self._retry = Config.strategies[self._flow_name]({
+            'previous_retry': self._retry,
+            'active_nodes': self._active_nodes,
+            'failed_nodes': self._failed_nodes,
+            'new_started_nodes': started,
+            'new_fallback_nodes': fallback_started,
+            'finished_nodes': self._finished_nodes
+        })
 
-                started = self._start_new_from_finished(new_finished)
-
-                fallback_started = []
-                # We wait until all active nodes finish if there are some failed nodes try to recover from failure,
-                # otherwise mark flow as failed
-                if len(self._active_nodes) == 0 and self._failed_nodes:
-                    fallback_started = self._run_fallback()
-                    if len(fallback_started) == 0 and len(self._failed_nodes) > 0:
-                        # We will propagate state information so we can correctly propagate parent and failed nodes in
-                        # parent flow if there is any
-                        # We use JSON in order to use result backend with JSON configured so objects are not pickled
-                        state_dict = self.to_dict()
-                        state_info = {
-                            'finished_nodes': state_dict['finished_nodes'],
-                            'failed_nodes': state_dict['failed_nodes']
-                        }
-                        raise FlowError(json.dumps(state_info))
-
-                self._retry = Config.strategies[self._flow_name]({
-                    'previous_retry': self._retry,
-                    'active_nodes': self._active_nodes,
-                    'failed_nodes': self._failed_nodes,
-                    'new_started_nodes': started,
-                    'new_fallback_nodes': fallback_started,
-                    'finished_nodes': self._finished_nodes
-                })
-            else:
-                self._retry = Config.strategies[self._flow_name]({
-                    'previous_retry': self._retry,
-                    'active_nodes': self._active_nodes,
-                    'failed_nodes': self._failed_nodes,
-                    'new_started_nodes': [],
-                    'new_fallback_nodes': [],
-                    'finished_nodes': self._finished_nodes
-                })
         return self._retry
