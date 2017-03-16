@@ -5,11 +5,16 @@
 # This file is part of Selinon project.
 # ######################################################################
 """
-Library utilities for a user
+Selinon utilities for a user
 """
+
+import logging
 
 from .config import Config
 from .dispatcher import Dispatcher
+from .selective import compute_selective_run
+
+_logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def run_flow(flow_name, node_args=None):
@@ -23,6 +28,31 @@ def run_flow(flow_name, node_args=None):
     if Config.dispatcher_queues is None or flow_name not in Config.dispatcher_queues:
         raise KeyError("No flow with name '%s' defined" % flow_name)
 
+    queue = Config.dispatcher_queues[flow_name]
+    _logger.debug("Scheduling flow '%s' with node_args '%s' on queue '%s'", flow_name, node_args, queue)
     return Dispatcher().apply_async(kwargs={'flow_name': flow_name,
                                             'node_args': node_args},
-                                    queue=Config.dispatcher_queues[flow_name])
+                                    queue=queue)
+
+
+def run_flow_selective(flow_name, task_names, node_args, follow_subflows=False, run_subsequent=False):
+    """ Run only desired tasks in a flow
+
+    :param flow_name: name of the flow that should be run
+    :param task_names: name of the tasks that should be run
+    :param node_args: arguments that should be supplied to flow
+    :param follow_subflows: if True, subflows will be followed and checked for nodes to be run
+    :param run_subsequent: trigger run of all tasks that depend on the desired task
+    :return: a list of dispatchers that are scheduled in order to run desired task
+    :raises NoWay: there was no way found to the desired task in the flow
+    """
+
+    selective = compute_selective_run(flow_name, task_names, follow_subflows, run_subsequent)
+    queue = Config.dispatcher_queues[flow_name]
+
+    _logger.debug("Scheduling selective flow '%s' with node_args '%s' on queue '%s', computed selective run state: %s",
+                  flow_name, node_args, queue, selective)
+    return Dispatcher().apply_async(kwargs={'flow_name': flow_name,
+                                            'node_args': node_args,
+                                            'selective': selective},
+                                    queue=queue)

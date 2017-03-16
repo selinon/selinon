@@ -53,7 +53,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             'dispatcher_id': self._dispatcher_id,
             'queue': Config.dispatcher_queues[self._flow_name],
             'node_id': node_id,
-            'node_name': node_name
+            'node_name': node_name,
+            'selective': self._selective
         }
 
         with self._node_state_cache_lock.get_lock(self._flow_name):
@@ -98,7 +99,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         # Make tests more readable
         return str(self.to_dict())
 
-    def __init__(self, dispatcher_id, flow_name, node_args=None, retry=None, state=None, parent=None):
+    def __init__(self, dispatcher_id, flow_name, node_args=None, retry=None, state=None, parent=None, selective=None):
         # pylint: disable=too-many-arguments
         state_dict = state or {}
 
@@ -106,6 +107,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         self._flow_name = flow_name
         self._node_args = node_args
         self._parent = parent or {}
+        self._selective = selective
         self._active_nodes = self._instantiate_active_nodes(state_dict.get('active_nodes', []))
         self._finished_nodes = state_dict.get('finished_nodes', {})
         self._failed_nodes = state_dict.get('failed_nodes', {})
@@ -169,14 +171,16 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 Trace.log(Trace.NODE_SUCCESSFUL, {'flow_name': self._flow_name,
                                                   'dispatcher_id': self._dispatcher_id,
                                                   'node_name': node['name'],
-                                                  'node_id': node['id']})
+                                                  'node_id': node['id'],
+                                                  'selective': self._selective})
                 ret_successful.append(node)
             elif node['result'].failed():
                 Trace.log(Trace.NODE_FAILURE, {'flow_name': self._flow_name,
                                                'dispatcher_id': self._dispatcher_id,
                                                'node_name': node['name'],
                                                'node_id': node['id'],
-                                               'what': node['result'].traceback})
+                                               'what': node['result'].traceback,
+                                               'selective': self._selective})
                 # We keep track of failed nodes to handle failures once all nodes finish
                 if node['name'] not in self._failed_nodes:
                     self._failed_nodes[node['name']] = []
@@ -236,7 +240,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 'dispatcher_id': self._dispatcher_id,
                 'child_dispatcher_id': async_result.task_id,
                 'queue': Config.dispatcher_queues[node_name],
-                'countdown': countdown
+                'countdown': countdown,
+                'selective': self._selective
             }
 
             Trace.log(Trace.SUBFLOW_SCHEDULE, kwargs)
@@ -260,7 +265,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 'queue': Config.task_queues[node_name],
                 'condition_str': condition_str,
                 'foreach_str': foreach_str,
-                'countdown': countdown
+                'countdown': countdown,
+                'selective': self._selective
             }
 
             Trace.log(Trace.TASK_SCHEDULE, kwargs)
@@ -298,7 +304,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 'condition_str': edge['condition_str'],
                 'parent': parent,
                 'node_args': self._node_args,
-                'dispatcher_id': self._dispatcher_id
+                'dispatcher_id': self._dispatcher_id,
+                'selective': self._selective
             })
             # handle None as well
             if not iterable:
@@ -361,6 +368,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                         Trace.log(Trace.FALLBACK_START, {'flow_name': self._flow_name,
                                                          'dispatcher_id': self._dispatcher_id,
                                                          'nodes': traced_nodes_arr,
+                                                         'selective': self._selective,
                                                          'fallback': failure_node['fallback']})
 
                         for node in failure_node['fallback']:
@@ -385,6 +393,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                         Trace.log(Trace.FALLBACK_START, {'flow_name': self._flow_name,
                                                          'dispatcher_id': self._dispatcher_id,
                                                          'nodes': traced_nodes_arr,
+                                                         'selective': self._selective,
                                                          'fallback': True})
                         # continue with fallback in other combinations, nothing started
 
@@ -534,7 +543,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                             'flow_name': self._flow_name,
                             'parent': parent,
                             'node_args': self._node_args,
-                            'dispatcher_id': self._dispatcher_id
+                            'dispatcher_id': self._dispatcher_id,
+                            'selective': self._selective
                         })
 
             node_name = node['name']
@@ -555,6 +565,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         Trace.log(Trace.FLOW_START, {'flow_name': self._flow_name,
                                      'dispatcher_id': self._dispatcher_id,
                                      'queue': Config.dispatcher_queues[self._flow_name],
+                                     'selective': self._selective,
                                      'args': self._node_args})
 
         for start_edge in Config.get_starting_edges(self._flow_name):
@@ -566,6 +577,17 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                     if node['name'] not in Config.nowait_nodes.get(self._flow_name, []):
                         self._update_waiting_edges(node['name'])
                         new_started_nodes.append(node)
+            else:
+                Trace.log(Trace.EDGE_COND_FALSE, {
+                    'nodes_to': start_edge['to'],
+                    'nodes_from': start_edge['from'],
+                    'condition': start_edge['condition_str'],
+                    'flow_name': self._flow_name,
+                    'parent': self._parent,
+                    'node_args': self._node_args,
+                    'dispatcher_id': self._dispatcher_id,
+                    'selective': self._selective
+                })
 
         self._retry = Config.strategies[self._flow_name]({
             'previous_retry': None,
