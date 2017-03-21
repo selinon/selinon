@@ -339,7 +339,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
         if 'foreach' in edge:
             iterable = edge['foreach'](storage_pool, node_args)
-            Trace.log(Trace.FOREACH_RESULT, trace_msg)
+            Trace.log(Trace.FOREACH_RESULT, trace_msg, {'result': iterable})
             # handle None as well
             if not iterable:
                 return started, []
