@@ -195,7 +195,7 @@ def _compute_traversals(flow_name, task_names, follow_subflows=True):
             for parent_flow in subflows_dict[flow]:
                 if (parent_flow, flow) not in traversed_subflows:
                     traversed_subflows |= {(parent_flow, flow)}
-                stack.append((parent_flow, flow))
+                    stack.append((parent_flow, flow))
 
         if flow in result:
             result[flow] = _normalize_path((result[flow], paths))
