@@ -21,6 +21,7 @@ from .config import Config
 from .errors import CacheMissError
 from .errors import FlowError
 from .lockPool import LockPool
+from .selective import compute_selective_run
 from .selinonTaskEnvelope import SelinonTaskEnvelope
 from .storagePool import StoragePool
 from .trace import Trace
@@ -221,18 +222,14 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
         return result
 
-    def _start_node(self, node_name, parent, node_args,
-                    force_propagate_node_args=False,
-                    condition_str=None,
-                    foreach_str=None):
+    def _start_node(self, node_name, parent, node_args, edge=None, force_propagate_node_args=False):
         """
         Start a node in the system
 
         :param node_name: name of a node to be started
         :param parent: parent nodes of the starting node
         :param node_args: arguments for the starting node
-        :param condition_str: condition that triggered starting this node
-        :param foreach_str: foreach string if node was started from foreach result
+        :param edge: edge that triggered node start, can be None for fallbacks
         """
         # pylint: disable=too-many-arguments
         from .dispatcher import Dispatcher
@@ -246,11 +243,15 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             if Config.should_propagate_parent(self._flow_name, node_name):
                 start_parent = parent
 
+            selective = None
+            if edge and edge.get('selective'):
+                selective = compute_selective_run(node_name, **edge['selective'])
+
             kwargs = {
                 'flow_name': node_name,
                 'node_args': start_node_args,
                 'parent': start_parent,
-                'selective': self._selective
+                'selective': selective or self.selective
             }
 
             countdown = self._get_countdown(node_name, is_flow=True)
@@ -260,13 +261,15 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
             Trace.log(Trace.SUBFLOW_SCHEDULE, {
                 'flow_name': self._flow_name,
-                'condition_str': condition_str,
-                'foreach_str': foreach_str,
+                'condition_str': None if not edge else edge['condition_str'],
+                'foreach_str': None if not edge else edge.get('foreach_str'),
+                'selective_edge_conf': None if not edge else edge.get('selective', False),
                 'child_flow_name': node_name,
                 'dispatcher_id': self._dispatcher_id,
                 'child_dispatcher_id': async_result.task_id,
                 'queue': Config.dispatcher_queues[node_name],
                 'countdown': countdown,
+                'child_selective': selective,
                 'selective': self._selective,
                 'node_args': start_node_args
             })
@@ -288,8 +291,9 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             Trace.log(Trace.TASK_SCHEDULE, kwargs, {
                 'task_id': async_result.task_id,
                 'queue': Config.task_queues[node_name],
-                'condition_str': condition_str,
-                'foreach_str': foreach_str,
+                'condition_str': None if not edge else edge['condition_str'],
+                'foreach_str': None if not edge else edge.get('foreach_str'),
+                'selective_edge': False,  # always False as we are starting a task
                 'countdown': countdown,
                 'selective': self._selective
             })
@@ -365,14 +369,9 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                             continue
 
                     if edge.get('foreach_propagate_result'):
-                        record = self._start_node(node_name, parent, res,
-                                                  force_propagate_node_args=True,
-                                                  condition_str=edge['condition_str'],
-                                                  foreach_str=edge['foreach_str'])
+                        record = self._start_node(node_name, parent, res, edge, force_propagate_node_args=True)
                     else:
-                        record = self._start_node(node_name, parent, node_args,
-                                                  condition_str=edge['condition_str'],
-                                                  foreach_str=edge['foreach_str'])
+                        record = self._start_node(node_name, parent, node_args, edge)
                     started.append(record)
         else:
             for node_name in edge['to']:
@@ -394,8 +393,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                         })
                         continue
 
-                record = self._start_node(node_name, parent, node_args,
-                                          condition_str=edge['condition_str'])
+                record = self._start_node(node_name, parent, node_args, edge)
                 started.append(record)
 
         return started, selective_reuse

@@ -30,21 +30,24 @@ class Dispatcher(Task):
     max_retries = None
     name = "selinon.Dispatcher"
 
-    def selinon_retry(self, flow_name, node_args, parent, retried_count):
+    def selinon_retry(self, flow_name, node_args, parent, selective, retried_count):
         """"Retry whole flow on failure if configured so, forget any progress done so far
 
         :param flow_name: name of the flow to be retried
         :param node_args: flow arguments
         :param parent: flow parents
+        :param selective: selective dictionary
         :param retried_count: number of retries already done
         :raises celery.Retry: always
         """
+        # pylint: disable=too-many-arguments
         kwargs = {
             'flow_name': flow_name,
             'node_args': node_args,
             'parent': parent,
             'retried_count': retried_count+1,
             # Set these to None so Selinon will properly start the flow again
+            'selective': selective,
             'retry': None,
             'state': None
         }
@@ -99,7 +102,7 @@ class Dispatcher(Task):
             })
 
             if retried_count < max_retry:
-                raise self.selinon_retry(flow_name, node_args, parent, retried_count)
+                raise self.selinon_retry(flow_name, node_args, parent, selective, retried_count)
             else:
                 # force max_retries to 0 so we are not scheduled and marked as FAILED
                 raise self.retry(max_retries=0, exc=flow_error)
