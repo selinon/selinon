@@ -66,6 +66,19 @@ class DataStorage(object, metaclass=abc.ABCMeta):
         """
         raise NotImplementedError()
 
+    def store_error(self, node_args, flow_name, task_name, task_id, exc_info):  # pylint: disable=too-many-arguments
+        """ Store information about task error
+
+        :param node_args: arguments that were passed to node
+        :param flow_name: flow name in which task was executed
+        :param task_name: task name that result is going to be stored
+        :param task_id: id of the task that result is going to be stored
+        :param exc_info: information about exception - tuple (type, value, traceback) as returned by sys.exc_info()
+        :return: unique ID of stored record
+        """
+        # no not mark this method with @abc.abstractmethod as we do not force a user to implement this
+        raise NotImplementedError()
+
     def __del__(self):
         if self.is_connected():
             self.disconnect()

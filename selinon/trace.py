@@ -164,7 +164,9 @@ class Trace(object):
         SELECTIVE_OMIT_EDGE,\
         SELECTIVE_OMIT_NODE,\
         SELECTIVE_RUN_FUNC,\
-        SELECTIVE_TASK_REUSE = range(36)
+        SELECTIVE_TASK_REUSE,\
+        STORAGE_STORE_ERROR,\
+        STORAGE_OMIT_STORE_ERROR = range(38)
 
     _event_strings = (
         'DISPATCHER_WAKEUP',
@@ -202,7 +204,9 @@ class Trace(object):
         'SELECTIVE_OMIT_EDGE',
         'SELECTIVE_OMIT_NODE',
         'SELECTIVE_RUN_FUNC',
-        'SELECTIVE_TASK_REUSE'
+        'SELECTIVE_TASK_REUSE',
+        'STORAGE_STORE_ERROR',
+        'STORAGE_OMIT_STORE_ERROR'
     )
 
     def __init__(self):
@@ -277,7 +281,8 @@ class Trace(object):
                        Trace.TASK_DISCARD_RESULT,
                        Trace.TASK_RETRY,
                        Trace.TASK_FAILURE,
-                       Trace.FLOW_FAILURE):
+                       Trace.FLOW_FAILURE,
+                       Trace.STORAGE_OMIT_STORE_ERROR):
             return logger.warn(message)
         else:
             return logger.info(message)

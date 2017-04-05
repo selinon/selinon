@@ -8,6 +8,8 @@
 A pool that carries all database connections for workers
 """
 
+import traceback
+
 from .config import Config
 from .errors import CacheMissError
 from .lockPool import LockPool
@@ -142,3 +144,40 @@ class StoragePool(object):
             'record_id': record_id
         })
         return record_id
+
+    @classmethod
+    def set_error(cls, node_args, flow_name, task_name, task_id, exc_info):
+        # pylint: disable=too-many-arguments
+        """
+        Store error information for task failure
+
+        :param node_args: arguments that were passed to the node
+        :param flow_name: flow in which task was run
+        :param task_name: task that computed result
+        :param task_id: task id that computed result
+        :param exc_info: information about exception - tuple (type, value, traceback) as returned by sys.exc_info()
+        :return: true if error was stored in database - DataStorage.store_error() was called
+        """
+        storage = cls.get_storage_by_task_name(task_name)
+        storage_task_name = Config.storage_task_name[task_name]
+
+        try:
+            record_id = storage.store_error(node_args, flow_name, storage_task_name, task_id, exc_info)
+        except NotImplementedError:
+            return False
+
+        # TODO: move conversion to string to enhanced JSON handler and rather pass objects in Trace.log()
+        Trace.log(Trace.STORAGE_STORE_ERROR, {
+            'flow_name': flow_name,
+            'node_args': node_args,
+            'task_name': task_name,
+            'storage_task_name': storage_task_name,
+            'task_id': task_id,
+            'storage_name': Config.task2storage_mapping[task_name],
+            'error_type': str(exc_info[0]),
+            'error_value': str(exc_info[1]),
+            'error_traceback': "".join(traceback.format_tb(exc_info[2])),
+            'record_id': record_id
+        })
+
+        return True

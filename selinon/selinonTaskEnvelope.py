@@ -9,6 +9,7 @@ A raw Celery task that is responsible for running SelinonTask
 """
 
 import json
+import sys
 import traceback
 
 from celery import Task
@@ -86,7 +87,7 @@ class SelinonTaskEnvelope(Task):
         raise self.retry(kwargs=kwargs, countdown=retry_countdown, queue=Config.task_queues[task_name])
 
     def run(self, task_name, flow_name, parent, node_args, dispatcher_id, retried_count=None):
-        # pylint: disable=arguments-differ,too-many-arguments
+        # pylint: disable=arguments-differ,too-many-arguments,too-many-locals
         """
         Task entry-point called by Celery
 
@@ -130,6 +131,7 @@ class SelinonTaskEnvelope(Task):
             self.selinon_retry(task_name, flow_name, parent, node_args, retry.countdown, retried_count,
                                dispatcher_id, user_retry=True)
         except Exception as exc:  # pylint: disable=broad-except
+            exc_info = sys.exc_info()
             max_retry = Config.max_retry.get(task_name, 0)
             retried_count = retried_count or 0
 
@@ -148,6 +150,22 @@ class SelinonTaskEnvelope(Task):
                                                'queue': Config.task_queues[task_name],
                                                'dispatcher_id': dispatcher_id,
                                                'retried_count': retried_count})
+
+                storage = StoragePool.get_storage_name_by_task_name(task_name, graceful=True)
+
+                if storage and not Config.storage_readonly[task_name] \
+                        and not StoragePool.set_error(node_args, flow_name, task_name, self.request.id, exc_info):
+                    # TODO: move conversion to string to enhanced JSON handler and rather pass objects in Trace.log()
+                    Trace.log(Trace.STORAGE_OMIT_STORE_ERROR, {
+                        'flow_name': flow_name,
+                        'node_args': node_args,
+                        'task_name': task_name,
+                        'task_id': self.request.id,
+                        'error_type': str(exc_info[0]),
+                        'error_value': str(exc_info[1]),
+                        'error_traceback': "".join(traceback.format_tb(exc_info[2])),
+                    })
+
                 raise self.retry(max_retries=0, exc=exc)
 
         Trace.log(Trace.TASK_END, {'flow_name': flow_name,
