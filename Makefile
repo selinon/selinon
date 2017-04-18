@@ -31,6 +31,7 @@ check:
 	PYTHONPATH="test/:${PYTHONPATH}" python3 -m pytest -s --cov=./selinon -vvl --nocapturelog --timeout=2 -p no:celery test/*.py
 	@[ -n "${NOPYLINT}" ] || { echo ">>> Running PyLint"; pylint selinon; }
 	@[ -n "${NOCOALA}" ] || { echo ">>> Running Coala bears"; coala --non-interactive; }
+	@[ -n "${NOPYDOCSTYLE}" ] || { echo ">>> Running pydocstyle"; pydocstyle selinon || true; }
 
 doc:
 	@sphinx-apidoc -e -o docs.source/api selinon -f
