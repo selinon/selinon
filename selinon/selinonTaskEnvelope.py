@@ -109,8 +109,13 @@ class SelinonTaskEnvelope(Task):
                                      'dispatcher_id': dispatcher_id,
                                      'args': node_args})
         try:
-            task = Config.get_task_instance(task_name=task_name, flow_name=flow_name, parent=parent,
-                                            dispatcher_id=dispatcher_id)
+            task = Config.get_task_instance(
+                task_name=task_name,
+                flow_name=flow_name,
+                parent=parent,
+                task_id=self.request.id,
+                dispatcher_id=dispatcher_id
+            )
             result = task.run(node_args)
             self.validate_result(task_name, result)
 

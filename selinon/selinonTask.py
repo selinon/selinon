@@ -9,6 +9,7 @@ Base class for user-defined tasks
 """
 
 import abc
+import logging
 
 from celery.result import AsyncResult
 
@@ -21,17 +22,21 @@ class SelinonTask(metaclass=abc.ABCMeta):
     Base class for user-defined tasks
     """
 
-    def __init__(self, flow_name, task_name, parent, dispatcher_id):
+    def __init__(self, flow_name, task_name, parent, task_id, dispatcher_id):
         """
         :param flow_name: name of flow under which this tasks runs on
         :param task_name: name of task, note it can be aliased since we can have different task name and class name
         :param parent: direct task's predecessors stated in flow dependency
+        :param task_id: id of this task
         :parent dispatcher_id: id of dispatcher handling the current flow
         """
+        # pylint: disable=too-many-arguments
         self.flow_name = flow_name
         self.task_name = task_name
         self.parent = parent
+        self.task_id = task_id
         self.dispatcher_id = dispatcher_id
+        self.log = logging.getLogger(__name__)
 
     def _selinon_dereference_task_id(self, flow_names, task_name, index):
         """

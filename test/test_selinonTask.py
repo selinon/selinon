@@ -27,6 +27,7 @@ _MYTASK_PARAMS = {
             'task3': ['<flow2-task2-id>']
         }
     },
+    'task_id': '<task-id>',
     'dispatcher_id': '<dispatcher-id>'
 }
 
