@@ -2,9 +2,8 @@ language: python
 python:
   - "3.4"
   - "3.5"
-  # Disable for now as pylint is failing
-  #- "3.6"
-  #- "nightly" # currently points to 3.6-dev
+  - "3.6"
+  #- "nightly"
 # we force update dev_requirements.txt so we get latest master of selinonlib to
 # be consistent with test
 install: 
