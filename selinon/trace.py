@@ -104,11 +104,10 @@ List of events that can be traced:
 
 """
 
+import logging
 import datetime
 import json
 import platform
-
-from celery.utils.log import get_task_logger
 
 
 def _default_trace_func(event, msg_dict):
@@ -168,6 +167,15 @@ class Trace(object):
         STORAGE_STORE_ERROR,\
         STORAGE_OMIT_STORE_ERROR = range(38)
 
+    WARN_EVENTS = (
+        NODE_FAILURE,
+        TASK_DISCARD_RESULT,
+        TASK_RETRY,
+        TASK_FAILURE,
+        FLOW_FAILURE,
+        STORAGE_OMIT_STORE_ERROR
+    )
+
     _event_strings = (
         'DISPATCHER_WAKEUP',
         'FLOW_START',
@@ -220,7 +228,7 @@ class Trace(object):
         :param logger: optional logger that should be used
         """
         if not logger:
-            logger = get_task_logger('selinon')
+            logger = logging.getLogger(__name__)
 
         cls._logger = logger
         cls._trace_func = cls.logging_trace_func
@@ -277,12 +285,7 @@ class Trace(object):
         logger = logger or cls._logger
         if event == Trace.DISPATCHER_FAILURE:
             return logger.error(message)
-        elif event in (Trace.NODE_FAILURE,
-                       Trace.TASK_DISCARD_RESULT,
-                       Trace.TASK_RETRY,
-                       Trace.TASK_FAILURE,
-                       Trace.FLOW_FAILURE,
-                       Trace.STORAGE_OMIT_STORE_ERROR):
+        elif event in cls.WARN_EVENTS:
             return logger.warn(message)
         else:
             return logger.info(message)
