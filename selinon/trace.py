@@ -104,9 +104,9 @@ List of events that can be traced:
 
 """
 
-import logging
 import datetime
 import json
+import logging
 import platform
 
 
@@ -284,8 +284,8 @@ class Trace(object):
 
         logger = logger or cls._logger
         if event == Trace.DISPATCHER_FAILURE:
-            return logger.error(message)
+            logger.error(message)
         elif event in cls.WARN_EVENTS:
-            return logger.warn(message)
+            logger.warning(message)
         else:
-            return logger.info(message)
+            logger.info(message)

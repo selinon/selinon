@@ -47,10 +47,11 @@ class StoragePool(object):
         :rtype: DataStorage
         """
         storage_name = cls.get_storage_name_by_task_name(task_name, graceful=True)
+
         if storage_name:
             return cls.get_connected_storage(storage_name)
-        else:
-            return None
+
+        return None
 
     @classmethod
     def get_connected_storage(cls, storage_name):

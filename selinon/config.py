@@ -290,7 +290,7 @@ class Config(object):
             raise ValueError("No such flow in configuration: %s" % flow_name)
 
         start_edges = [(i, edge) for i, edge in enumerate(Config.edge_table[flow_name]) if len(edge['from']) == 0]
-        if len(start_edges) == 0:
+        if not start_edges:
             # This should not occur since selinonlib raises exception if such occurs, but just to be sure...
             raise ValueError("No starting node found for flow '%s'!" % flow_name)
 

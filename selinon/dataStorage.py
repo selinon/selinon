@@ -76,6 +76,7 @@ class DataStorage(object, metaclass=abc.ABCMeta):
         :param exc_info: information about exception - tuple (type, value, traceback) as returned by sys.exc_info()
         :return: unique ID of stored record
         """
+        # pylint: disable=abstract-method
         # no not mark this method with @abc.abstractmethod as we do not force a user to implement this
         raise NotImplementedError()
 

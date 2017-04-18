@@ -175,7 +175,7 @@ def _compute_traversals(flow_name, task_names, follow_subflows=True):
     subflows_dict = {}
     traversed_subflows = set()
 
-    if not isinstance(task_names, list) and not isinstance(task_names, tuple):
+    if not isinstance(task_names, (list, tuple)):
         task_names = [task_names]
 
     for task_name in task_names:
@@ -222,7 +222,7 @@ def compute_selective_run(flow_name, task_names, follow_subflows=False, run_subs
     }
 
     if run_subsequent:
-        if isinstance(run_subsequent, list) or isinstance(run_subsequent, tuple):
+        if isinstance(run_subsequent, (list, tuple)):
             subsequent_flows = run_subsequent
         else:
             subsequent_flows = traversals.keys()

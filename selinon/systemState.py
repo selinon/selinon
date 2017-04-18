@@ -404,7 +404,6 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         :return: fallbacks that were run
         """
         # we sort it first to make evaluation dependent on alphabetical order
-        # TODO: use binary search when inserting to optimize from O(N*log(N)) to O(log(N))
         ret = []
         failed_nodes = sorted(self._failed_nodes.items())
 
@@ -423,13 +422,13 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                         # flow will always fail, but run defined fallbacks for defined failures first
                         continue
 
-                    if isinstance(failure_node['fallback'], list) and len(failure_node['fallback']) > 0:
+                    if isinstance(failure_node['fallback'], list) and failure_node['fallback']:
                         traced_nodes_arr = []
 
                         for node in combination:
                             traced_nodes_arr.append({'name': node[0], 'id': self._failed_nodes[node[0]][0]})
                             self._failed_nodes[node[0]].pop(0)
-                            if len(self._failed_nodes[node[0]]) == 0:
+                            if not self._failed_nodes[node[0]]:
                                 del self._failed_nodes[node[0]]
 
                         Trace.log(Trace.FALLBACK_START, {'flow_name': self._flow_name,
@@ -451,7 +450,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                         for node in combination:
                             traced_nodes_arr.append({'name': node[0], 'id': self._failed_nodes[node[0]][0]})
                             self._failed_nodes[node[0]].pop(0)
-                            if len(self._failed_nodes[node[0]]) == 0:
+                            if not self._failed_nodes[node[0]]:
                                 del self._failed_nodes[node[0]]
                                 # we have reached zero in failed nodes, we cannot continue with failure
                                 # combination otherwise we get KeyError
@@ -565,7 +564,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         new_started_nodes = []
         selective_reuse = []
 
-        if len(new_finished) == 1 and len(self._active_nodes) == 0 and len(self._finished_nodes) == 0:
+        if len(new_finished) == 1 and not self._active_nodes and not self._finished_nodes:
             # propagate arguments from newly finished node if configured to do so
             if Config.node_args_from_first.get(self._flow_name, False):
                 self._node_args = StoragePool.retrieve(self._flow_name, new_finished[0]['name'], new_finished[0]['id'])
@@ -701,9 +700,9 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
             # We wait until all active nodes finish if there are some failed nodes try to recover from failure,
             # otherwise mark flow as failed
-            if len(self._active_nodes) == 0 and self._failed_nodes:
+            if not self._active_nodes and self._failed_nodes:
                 fallback_started = self._run_fallback()
-                if len(fallback_started) == 0 and len(self._failed_nodes) > 0:
+                if not fallback_started and self._failed_nodes:
                     # We will propagate state information so we can correctly propagate parent and failed nodes in
                     # parent flow if there is any
                     # We use JSON in order to use result backend with JSON configured so objects are not pickled
