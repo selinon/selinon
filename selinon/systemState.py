@@ -654,7 +654,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                                      'dispatcher_id': self._dispatcher_id,
                                      'queue': Config.dispatcher_queues[self._flow_name],
                                      'selective': self._selective,
-                                     'args': self._node_args})
+                                     'node_args': self._node_args})
 
         for i, start_edge in Config.get_starting_edges(self._flow_name):
             storage_pool = StoragePool(self._parent, self._flow_name)

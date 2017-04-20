@@ -76,7 +76,7 @@ class SelinonTaskEnvelope(Task):
                                      'task_name': task_name,
                                      'task_id': self.request.id,
                                      'parent': parent,
-                                     'args': node_args,
+                                     'node_args': node_args,
                                      'what': traceback.format_exc(),
                                      'retry_countdown': retry_countdown,
                                      'retried_count': retried_count,
@@ -107,7 +107,7 @@ class SelinonTaskEnvelope(Task):
                                      'parent': parent,
                                      'queue': Config.task_queues[task_name],
                                      'dispatcher_id': dispatcher_id,
-                                     'args': node_args})
+                                     'node_args': node_args})
         try:
             task = Config.get_task_instance(
                 task_name=task_name,
@@ -127,7 +127,7 @@ class SelinonTaskEnvelope(Task):
                                                       'task_name': task_name,
                                                       'task_id': self.request.id,
                                                       'parent': parent,
-                                                      'args': node_args,
+                                                      'node_args': node_args,
                                                       'queue': Config.task_queues[task_name],
                                                       'dispatcher_id': dispatcher_id,
                                                       'result': result})
@@ -150,7 +150,7 @@ class SelinonTaskEnvelope(Task):
                                                'task_name': task_name,
                                                'task_id': self.request.id,
                                                'parent': parent,
-                                               'args': node_args,
+                                               'node_args': node_args,
                                                'what': traceback.format_exc(),
                                                'queue': Config.task_queues[task_name],
                                                'dispatcher_id': dispatcher_id,
@@ -177,7 +177,7 @@ class SelinonTaskEnvelope(Task):
                                    'task_name': task_name,
                                    'task_id': self.request.id,
                                    'parent': parent,
-                                   'args': node_args,
+                                   'node_args': node_args,
                                    'queue': Config.task_queues[task_name],
                                    'dispatcher_id': dispatcher_id,
                                    'storage': StoragePool.get_storage_name_by_task_name(task_name, graceful=True)})
