@@ -99,7 +99,8 @@ class StoragePool(object):
             'task_name': task_name,
             'storage_task_name': storage_task_name,
             'storage_name': storage_name,
-            'flow_name': flow_name
+            'flow_name': flow_name,
+            'task_id': task_id
         }
 
         with cls._storage_pool_locks.get_lock(storage):
