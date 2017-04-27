@@ -1,4 +1,4 @@
-Selinon - A Dynamic Task Flow Management on top of Celery
+A Dynamic Task Flow Management on top of Celery
 =========================================================
 
 What is Selinon and why should I use it?
@@ -11,7 +11,7 @@ If you are looking for a workflow solution, take a look at existing solutions, s
 Is there available a demo?
 ##########################
 
-You can take a look at `selinon-demo <https://github.com/fridex/selinon-demo>`_ so you can see how Selinon works without deep diving into configuration. Just run `docker-compose up`.
+You can take a look at `selinon-demo <https://github.com/selinon/demo>`_ so you can see how Selinon works without deep diving into configuration. Just run `docker-compose up`.
 
 What do I need?
 ###############
@@ -28,7 +28,7 @@ How does it work? - a high level overview
 
 The key idea lies in Dispatcher - there is created Dispatcher Celery task for each flow. Dispatcher takes care of starting new tasks and subflows, checking their results and scheduling new tasks based on your configuration.
 
-The only thing that needs to be provided by you is a YAML configuration file that specifies dependencies of your tasks and where results of tasks should be stored. This configuration file is parsed by `Selinonlib <https://fridex.github.io/selinonlib>`_ and automatically transformed to a Python3 code which is then used by Selinon.
+The only thing that needs to be provided by you is a YAML configuration file that specifies dependencies of your tasks and where results of tasks should be stored. This configuration file is parsed by `Selinonlib <https://selinon.github.io/selinonlib>`_ and automatically transformed to a Python3 code which is then used by Selinon.
 
 Documentation
 #############
@@ -50,7 +50,7 @@ Documentation
 See also
 ********
 
-   * `Selinonlib <https://fridex.github.io/selinonlib>`_
+   * `Selinonlib <https://selinon.github.io/selinonlib>`_
    * `Celery configuration <http://docs.celeryproject.org/en/latest/configuration.html>`_
 
 
