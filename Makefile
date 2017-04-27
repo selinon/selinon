@@ -1,6 +1,6 @@
 TEMPFILE := $(shell mktemp -u)
 
-.PHONY: install clean uninstall venv check doc docs html
+.PHONY: install clean uninstall venv check doc docs html api
 
 install:
 	sh ./bump-version.sh
@@ -33,8 +33,10 @@ check:
 	@[ -n "${NOCOALA}" ] || { echo ">>> Running Coala bears"; coala --non-interactive; }
 	@[ -n "${NOPYDOCSTYLE}" ] || { echo ">>> Running pydocstyle"; pydocstyle --match='(?!test_|version).*\.py' selinon; }
 
-doc:
-	@sphinx-apidoc -e -o docs.source/api selinon -f
+api:
+	@sphinx-apidoc -e -o docs.source/selinon/doc/selinon selinon -f
+
+doc: api
 	@make -f Makefile.docs html
 	@echo "Documentation available at 'docs/index.html'"
 

@@ -17,11 +17,11 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+
 import os
 import sys
 path = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..'))
 sys.path.insert(0, path)
-
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
