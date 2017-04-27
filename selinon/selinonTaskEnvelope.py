@@ -4,9 +4,7 @@
 # Copyright (C) 2016-2017  Fridolin Pokorny, fridolin.pokorny@gmail.com
 # This file is part of Selinon project.
 # ######################################################################
-"""
-A raw Celery task that is responsible for running SelinonTask
-"""
+"""A raw Celery task that is responsible for running SelinonTask."""
 
 import json
 import sys
@@ -23,9 +21,8 @@ from .trace import Trace
 
 
 class SelinonTaskEnvelope(Task):
-    """
-    A Celery task that is responsible for running user defined tasks from flow
-    """
+    """A Celery task that is responsible for running user defined tasks from flow."""
+
     # Celery configuration
     ignore_result = False
     acks_late = True
@@ -35,8 +32,7 @@ class SelinonTaskEnvelope(Task):
 
     @classmethod
     def validate_result(cls, task_name, result):
-        """
-        Validate result of the task for the given schema, if fails an Exception is raised
+        """Validate result of the task for the given schema, if fails an Exception is raised.
 
         :param task_name: name of task
         :param result: result of task
@@ -51,7 +47,7 @@ class SelinonTaskEnvelope(Task):
     def selinon_retry(self, task_name, flow_name, parent, node_args, retry_countdown, retried_count,
                       dispatcher_id, user_retry=False):
         # pylint: disable=too-many-arguments
-        """Retry on Celery level
+        """Retry on Celery level.
 
         :param task_name: name of the task to be retried
         :param flow_name: name of in which the task was run
@@ -88,8 +84,7 @@ class SelinonTaskEnvelope(Task):
 
     def run(self, task_name, flow_name, parent, node_args, dispatcher_id, retried_count=None):
         # pylint: disable=arguments-differ,too-many-arguments,too-many-locals
-        """
-        Task entry-point called by Celery
+        """Task entry-point called by Celery.
 
         :param task_name: task to be run
         :param flow_name: flow in which this task run

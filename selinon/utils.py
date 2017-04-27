@@ -4,9 +4,7 @@
 # Copyright (C) 2016-2017  Fridolin Pokorny, fridolin.pokorny@gmail.com
 # This file is part of Selinon project.
 # ######################################################################
-"""
-Selinon utilities for a user
-"""
+"""Selinon utilities for a user."""
 
 import logging
 
@@ -18,8 +16,7 @@ _logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def run_flow(flow_name, node_args=None):
-    """
-    Run flow by it's name
+    """Run flow by it's name.
 
     :param flow_name: name of the flow to be run
     :param node_args: arguments that will be supplied to flow
@@ -36,7 +33,7 @@ def run_flow(flow_name, node_args=None):
 
 
 def run_flow_selective(flow_name, task_names, node_args, follow_subflows=False, run_subsequent=False):
-    """ Run only desired tasks in a flow
+    """Run only desired tasks in a flow.
 
     :param flow_name: name of the flow that should be run
     :param task_names: name of the tasks that should be run
@@ -46,7 +43,6 @@ def run_flow_selective(flow_name, task_names, node_args, follow_subflows=False, 
     :return: a list of dispatchers that are scheduled in order to run desired task
     :raises NoWay: there was no way found to the desired task in the flow
     """
-
     selective = compute_selective_run(flow_name, task_names, follow_subflows, run_subsequent)
     queue = Config.dispatcher_queues[flow_name]
 

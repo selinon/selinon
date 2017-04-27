@@ -4,7 +4,7 @@
 # Copyright (C) 2016-2017  Fridolin Pokorny, fridolin.pokorny@gmail.com
 # This file is part of Selinon project.
 # ######################################################################
-"""
+"""Built-in tracing mechanism.
 
 List of events that can be traced:
 
@@ -112,8 +112,7 @@ import platform
 
 def _default_trace_func(event, msg_dict):
     # pylint: disable=unused-argument
-    """
-    Default tracing function that is used for storing results - do nothing
+    """Default tracing function that is used for storing results - do nothing.
 
     :param event: event that triggered trace point
     :param msg_dict: a dict holding additional trace information for event
@@ -122,9 +121,8 @@ def _default_trace_func(event, msg_dict):
 
 
 class Trace(object):
-    """
-    Trace system flow actions
-    """
+    """Trace system flow actions."""
+
     _trace_func = _default_trace_func
     _logger = None
 
@@ -218,12 +216,12 @@ class Trace(object):
     )
 
     def __init__(self):
+        """Unused."""
         raise NotImplementedError()
 
     @classmethod
     def trace_by_logging(cls, logger=None):
-        """
-        Trace by using Python's logging
+        """Trace by using Python's logging.
 
         :param logger: optional logger that should be used
         """
@@ -235,8 +233,7 @@ class Trace(object):
 
     @classmethod
     def trace_by_func(cls, func):
-        """
-        Trace by a custom function
+        """Trace by a custom function.
 
         :param func: function with a one single argument
         """
@@ -244,8 +241,7 @@ class Trace(object):
 
     @classmethod
     def log(cls, event, *msg_dict):
-        """
-        Trace work
+        """Main tracing function called on events.
 
         :param event: tracing event
         :param msg_dict: message to be printed
@@ -257,8 +253,7 @@ class Trace(object):
 
     @classmethod
     def event2str(cls, event):
-        """
-        Translate event to it's string representation
+        """Translate event to it's string representation.
 
         :param event: event
         :return: string representation of event
@@ -267,8 +262,7 @@ class Trace(object):
 
     @classmethod
     def logging_trace_func(cls, event, msg_dict, logger=None):
-        """
-        Trace to Python's logging facilities
+        """Trace to Python's logging facilities.
 
         :param event: event that triggered trace point
         :param msg_dict: a dict holding additional trace information for event

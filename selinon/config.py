@@ -4,9 +4,7 @@
 # Copyright (C) 2016-2017  Fridolin Pokorny, fridolin.pokorny@gmail.com
 # This file is part of Selinon project.
 # ######################################################################
-"""
-All user configurations generated from YAML file
-"""
+"""All user configurations generated from YAML file."""
 
 import logging
 import os
@@ -19,9 +17,8 @@ from .trace import Trace
 
 
 class Config(object):
-    """
-    All user configurations generated from YAML file
-    """
+    """All user configurations generated from YAML file."""
+
     _logger = logging.getLogger(__name__)
 
     celery_app = None
@@ -50,8 +47,9 @@ class Config(object):
 
     @classmethod
     def _set_config(cls, config_module):
-        """
-        Set configuration from Python's module
+        """Set configuration from Python's module.
+
+        :param config_module: config module to be used for attributes assignment
         """
         cls.task_classes = config_module['task_classes']
         cls.edge_table = config_module['edge_table']
@@ -98,8 +96,7 @@ class Config(object):
 
     @classmethod
     def set_config_py(cls, config_code):
-        """
-        Set dispatcher configuration by Python config file
+        """Set dispatcher configuration by Python config file.
 
         :param config_code: configuration source code
         """
@@ -109,8 +106,7 @@ class Config(object):
 
     @classmethod
     def set_config_yaml(cls, nodes_definition_file, flow_definition_files, config_py=None, keep_config_py=False):
-        """
-        Set dispatcher configuration by path to YAML configuration files
+        """Set dispatcher configuration by path to YAML configuration files.
 
         :param nodes_definition_file: definition of system nodes - YAML configuration
         :param flow_definition_files: list of flow definition files
@@ -138,8 +134,7 @@ class Config(object):
 
     @classmethod
     def trace_by_func(cls, trace_func):
-        """
-        Set tracing function for Dispatcher
+        """Set tracing function for Dispatcher.
 
         :param trace_func: a function that should be used to trace dispatcher actions
         """
@@ -147,15 +142,12 @@ class Config(object):
 
     @classmethod
     def trace_by_logging(cls):
-        """
-        Use Python's logging for tracing
-        """
+        """Use Python's logging for tracing."""
         Trace.trace_by_logging()
 
     @classmethod
     def set_celery_app(cls, celery_app):
-        """
-        Set celery application that should be used
+        """Set celery application that should be used.
 
         :param celery_app: celery app instance
         """
@@ -171,7 +163,8 @@ class Config(object):
 
     @staticmethod
     def _should_config(node_name, dst_node_name, configuration):
-        """
+        """Syntax sugar for configuration entries that accept lists/booleans.
+
         :param node_name: node name
         :param dst_node_name: destination node to which configuration should be propagated
         :param configuration: configuration that should be checked
@@ -187,7 +180,8 @@ class Config(object):
 
     @classmethod
     def should_propagate_finished(cls, node_name, dst_node_name):
-        """
+        """Check whether finished nodes should be propagated.
+
         :param node_name: node name that should be checked for propagate_finished
         :param dst_node_name: destination node to which configuration should be propagated
         :return: True if should propagate_finish
@@ -196,7 +190,8 @@ class Config(object):
 
     @classmethod
     def should_propagate_node_args(cls, node_name, dst_node_name):
-        """
+        """Check whether node arguments should be propagated.
+
         :param node_name: node name that should be checked for propagate_node_args
         :param dst_node_name: destination node to which configuration should be propagated
         :return: True if should propagate_node_args
@@ -205,7 +200,8 @@ class Config(object):
 
     @classmethod
     def should_propagate_parent(cls, node_name, dst_node_name):
-        """
+        """Check whether parents be propagated.
+
         :param node_name: node name that should be checked for propagate_parent
         :param dst_node_name: destination node to which configuration should be propagated
         :return: True if should propagate_parent
@@ -214,7 +210,8 @@ class Config(object):
 
     @classmethod
     def should_propagate_compound_finished(cls, node_name, dst_node_name):  # pylint: disable=invalid-name
-        """
+        """Check whether finished should be propagated (compound/flattered mode).
+
         :param node_name: node name that should be checked for propagate_compound_finished
         :param dst_node_name: destination node to which configuration should be propagated
         :return: True if should propagate_compound_finished
@@ -223,8 +220,7 @@ class Config(object):
 
     @classmethod
     def get_task_instance(cls, task_name, flow_name, parent, task_id, dispatcher_id):
-        """
-        Get instance of SelinonTask
+        """Get instance of SelinonTask.
 
         :param task_name: task name that should be instantiated (it is not necessarily SelinonTask)
         :param flow_name: flow name
@@ -245,8 +241,7 @@ class Config(object):
 
     @classmethod
     def is_flow(cls, node_name):
-        """
-        Check if given node is a flow by its name
+        """Check if given node is a flow by its name.
 
         :param node_name: name of the node to be checked
         :return: True if given node is a flow
@@ -255,8 +250,7 @@ class Config(object):
 
     @classmethod
     def is_task(cls, node_name):
-        """
-        Check if given node is a task by its name
+        """Check if given node is a task by its name.
 
         :param node_name: name of the node to be checked
         :return: True if given node is a task
@@ -265,7 +259,8 @@ class Config(object):
 
     @classmethod
     def has_storage(cls, task_name):
-        """
+        """Check whether the given task has assigned storage.
+
         :param task_name: name of a task
         :return: True if given task has assigned storage (either rw or readonly)
         """
@@ -273,7 +268,8 @@ class Config(object):
 
     @classmethod
     def has_readonly_storage(cls, task_name):
-        """
+        """Check whether the given task has storage in read-only mode (results are not saved).
+
         :param task_name: name of a task
         :return: True if the given task has assigned readonly storage
         """
@@ -281,7 +277,8 @@ class Config(object):
 
     @classmethod
     def has_readwrite_storage(cls, task_name):
-        """
+        """Check whether the given task has storage assigned and results are stored.
+
         :param task_name: name of a task
         :return: True if the given task has assigned rw storage
         """
@@ -289,7 +286,7 @@ class Config(object):
 
     @classmethod
     def get_starting_edges(cls, flow_name):
-        """ Get starting edges for a flow
+        """Get starting edges for a flow.
 
         :param flow_name: a flow name to get starting edges
         :return: starting edges for a flow

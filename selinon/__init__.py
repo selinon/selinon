@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""" Selinon - an advanced task flow management on top of Celery """
+"""Selinon - an advanced task flow management on top of Celery."""
 
 from .cache import Cache
 from .config import Config

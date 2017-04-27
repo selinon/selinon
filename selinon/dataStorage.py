@@ -4,46 +4,44 @@
 # Copyright (C) 2016-2017  Fridolin Pokorny, fridolin.pokorny@gmail.com
 # This file is part of Selinon project.
 # ######################################################################
-"""
-Data storage interface
-"""
+"""Data storage interface."""
 
 import abc
 
 
 class DataStorage(object, metaclass=abc.ABCMeta):
-    """
-    Abstract Selinon storage adapter that is implemented by a user
-    """
+    """Abstract Selinon storage adapter that is implemented by a user."""
+
     @abc.abstractmethod
     def __init__(self, *args, **kwargs):
+        """Initialize storage.
+
+        :param args: storage arguments as stated in YAML configuration file
+        :param kwargs: storage key-value arguments as stated in YAML configuration (preferred over args)
+        """
         pass
 
     @abc.abstractmethod
     def connect(self):
-        """
-        Connect to a resource, if not needed, should be empty
-        """
+        """Connect to a resource, if not needed, should be empty."""
         raise NotImplementedError()
 
     @abc.abstractmethod
     def is_connected(self):
-        """
+        """Check storage connection status.
+
         :return: True if connected to a resource
         """
         raise NotImplementedError()
 
     @abc.abstractmethod
     def disconnect(self):
-        """
-        Disconnect from a resource
-        """
+        """Disconnect from a resource."""
         raise NotImplementedError()
 
     @abc.abstractmethod
     def retrieve(self, flow_name, task_name, task_id):
-        """
-        Retrieve result stored in storage
+        """Retrieve result stored in storage.
 
         :param flow_name: flow name in which task was executed
         :param task_name: task name that result is going to be retrieved
@@ -54,8 +52,7 @@ class DataStorage(object, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def store(self, node_args, flow_name, task_name, task_id, result):  # pylint: disable=too-many-arguments
-        """
-        Store result stored in storage
+        """Store result stored in storage.
 
         :param node_args: arguments that were passed to node
         :param flow_name: flow name in which task was executed
@@ -67,7 +64,7 @@ class DataStorage(object, metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
     def store_error(self, node_args, flow_name, task_name, task_id, exc_info):  # pylint: disable=too-many-arguments
-        """ Store information about task error
+        """Store information about task error.
 
         :param node_args: arguments that were passed to node
         :param flow_name: flow name in which task was executed
@@ -81,5 +78,6 @@ class DataStorage(object, metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
     def __del__(self):
+        """Clean up."""
         if self.is_connected():
             self.disconnect()

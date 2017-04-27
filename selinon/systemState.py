@@ -4,9 +4,7 @@
 # Copyright (C) 2016-2017  Fridolin Pokorny, fridolin.pokorny@gmail.com
 # This file is part of Selinon project.
 # ######################################################################
-"""
-Main system actions done by Selinon
-"""
+"""Main system actions done by Selinon."""
 
 from collections import deque
 import copy
@@ -28,9 +26,8 @@ from .trace import Trace
 
 
 class SystemState(object):  # pylint: disable=too-many-instance-attributes
-    """
-    Main system actions done by Selinon
-    """
+    """Main system actions done by Selinon."""
+
     # Throttled nodes in the current worker: node name -> next schedule time
     # Throttle should be safe with concurrency
     _throttle_lock_pool = LockPool()
@@ -40,12 +37,19 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
     @property
     def node_args(self):
-        """
+        """Node arguments.
+
         :return: arguments for a node
         """
         return self._node_args
 
     def _get_async_result(self, node_name, node_id):  # pylint: disable=invalid-name,redefined-builtin
+        """Retrieve async result, check cache first.
+
+        :param node_name: a name of node for which async result should be checked
+        :param node_id: id if node for which async result should be checked
+        :return: Celery AsyncResult
+        """
         cache = Config.async_result_cache[self._flow_name]
         trace_msg = {
             'flow_name': self._flow_name,
@@ -75,7 +79,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         return res
 
     def _instantiate_active_nodes(self, arr):
-        """
+        """Retrieve all async results for active nodes.
+
         :return: convert node references from argument to AsyncResult
         """
         return [{'name': node['name'], 'id': node['id'],
@@ -83,25 +88,45 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def _deinstantiate_active_nodes(arr):
-        """
+        """Store only id's of AsyncResults.
+
+        Used before serialization so we get JSON.
+
+        :param arr: array of nodes that are active in a flow
         :return: node references for Dispatcher arguments
         """
         return [{'name': x['name'], 'id': x['id']} for x in arr]
 
     @staticmethod
     def _idxs2items(edge_node_table, arr):
+        """For the given array, get all edges based on edge node table.
+
+        :param edge_node_table: edge table to be used
+        :param arr: a list of indexes to edge table
+        :return: edges that correspond to the given index array
+        """
         # we keep only the index to edges_table in order to avoid serialization and optimize number representation
         ret = []
         for i in arr:
             ret.append(edge_node_table[i])
         return ret
 
-    def __repr__(self):
+    def __repr__(self):  # noqa
         # Make tests more readable
         return str(self.to_dict())
 
     def __init__(self, dispatcher_id, flow_name, node_args=None, retry=None, state=None, parent=None, selective=None):
         # pylint: disable=too-many-arguments
+        """Instantiate system state computation (called from Dispatcher).
+
+        :param dispatcher_id: id of dispatcher for the current flow
+        :param flow_name: name of the flow
+        :param node_args: flow arguments
+        :param retry: retry information
+        :param state: current state (serialized, if any)
+        :param parent: information about parent nodes
+        :param selective: precomputed information about selective flow, if any
+        """
         state_dict = state or {}
 
         self._dispatcher_id = dispatcher_id
@@ -124,7 +149,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                     {int(k): v for k, v in self._selective['waiting_edges_subset'][flow].items()}
 
     def to_dict(self):
-        """
+        """Serialize current system state.
+
         :return: converted system state to dict
         """
         return {
@@ -136,12 +162,11 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
     @property
     def selective(self):
-        """ Edges that should be started selectively as computed by compute_selective """
+        """All edges that should be started selectively as computed by compute_selective."""
         return self._selective
 
     def _get_countdown(self, node_name, is_flow):
-        """
-        Get countdown for throttling
+        """Get countdown for throttling.
 
         :param node_name: node name
         :param is_flow: true if node_name is a flow
@@ -171,7 +196,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 return None
 
     def _get_successful_and_failed(self, reused):
-        """
+        """Retrieve info about successful and failed nodes.
+
         :return: all successful and failed nodes in system from active nodes
         """
         ret_successful = reused
@@ -205,6 +231,13 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         return ret_successful, ret_failed
 
     def _execute_selective_run_func(self, node_name, node_args, parent):
+        """Execute selective run function so we know whether we need to re-run the given node.
+
+        :param node_name: name of the node for which the selective function should be executed
+        :param node_args: arguments that would be passed to desired node
+        :param parent: information about parent nodes
+        :return: None if node should be run, id of task that result's should be reused
+        """
         trace_msg = {
             'flow_name': self._flow_name,
             'dispatcher_id': self._dispatcher_id,
@@ -223,8 +256,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         return result
 
     def _start_node(self, node_name, parent, node_args, edge=None, force_propagate_node_args=False):
-        """
-        Start a node in the system
+        """Start a node in the system.
 
         :param node_name: name of a node to be started
         :param parent: parent nodes of the starting node
@@ -310,7 +342,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         return record
 
     def _fire_edge(self, edge_idx, edge, storage_pool, parent, node_args):
-        """ Fire edge - start new nodes as described in edge table
+        """Fire edge - start new nodes as described in edge table.
 
         :param edge: edge that should be fired
         :param storage_pool: storage pool which makes results of previous tasks available
@@ -399,7 +431,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         return started, selective_reuse
 
     def _run_fallback(self):
-        """ Run fallback in the system
+        """Run fallback in the system.
 
         :return: fallbacks that were run
         """
@@ -466,10 +498,9 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         return ret
 
     def _update_waiting_edges(self, nodes):
-        """
-        Update waiting edges (edges that wait for a node finish) based on node name
+        """Update waiting edges (edges that wait for a node finish) based on nodes that finished.
 
-        :param node_name: node that will trigger an edge
+        :param nodes: nodes that will trigger edges.
         """
         res = []
 
@@ -495,7 +526,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
     def _extend_parent_from_flow(self, dst_dict, flow_name, flow_id, key, compound=False):
         # pylint: disable=too-many-arguments,too-many-locals
-        """ Compute parent in a flow in case of propagate_parent flag
+        """Compute parent in a flow in case of propagate_parent flag.
 
         :param dst_dict: a dictionary that should be extended with calculated parents
         :param flow_name: a flow name for which propagate_parent is calculated
@@ -555,7 +586,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         return res
 
     def _start_new_from_finished(self, new_finished):  # pylint: disable=too-many-locals
-        """ Start new based on finished nodes
+        """Start new based on finished nodes.
 
         :param new_finished: finished nodes based on which we should start new nodes
         :return: newly started nodes
@@ -643,7 +674,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         return new_started_nodes, selective_reuse
 
     def _start_and_update_retry(self):
-        """ Start the flow and update retry
+        """Start the flow and update retry.
 
         :return: new/next retry
         """
@@ -681,7 +712,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         return new_started_nodes, selective_reuse
 
     def _continue_and_update_retry(self, previously_reused):
-        """ Continue with the flow based on previous runs
+        """Continue with the flow based on previous runs.
 
         :return: tuple describing newly started and reused nodes by selective run
         """
@@ -716,7 +747,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         return new_started_nodes, selective_reuse, fallback_started
 
     def update(self):
-        """ Check the current state in the system and start new nodes if possible
+        """Check the current state in the system and start new nodes if possible.
 
         :return: retry count - can be None (do not retry dispatcher) or time in seconds to retry
         """

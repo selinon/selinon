@@ -4,26 +4,17 @@
 # Copyright (C) 2016-2017  Fridolin Pokorny, fridolin.pokorny@gmail.com
 # This file is part of Selinon project.
 # ######################################################################
-""" Path traversal manipulation """
+"""Path traversal manipulation."""
 
 from collections import deque
 import copy
-import enum
 from itertools import chain
 
 from .config import Config
 
 
-@enum.unique
-class SelectiveState(enum.Enum):
-    """ TODO """
-    RUNNING = 'RUNNING'
-    FALLBACK = 'FALLBACK'
-    SUBSEQUENT = 'SUBSEQUENT'
-
-
 def _get_all_subflows_dict(flow_name):
-    """ Get all subflows for the given flow name, the result is stored in a dict
+    """Get all subflows for the given flow name, the result is stored in a dict.
 
     The resulting dict has keys that correspond to all transitive subflows for flow flow_name and values for a subflow
     is a list of flows that are directly parent for corresponding subflow (key).
@@ -70,7 +61,7 @@ def _get_all_subflows_dict(flow_name):
 
 
 def _normalize_path(paths):
-    """ Normalize multiple graph traversals by edges into one that traverses all edges
+    """Normalize multiple graph traversals by edges into one that traverses all edges.
 
     In general we can get to a task by multiple paths. As we would like to ensure that all paths are traversed, we
     compound multiple traversals into a single one that traverses all necessary edges.
@@ -89,7 +80,7 @@ def _normalize_path(paths):
 
 
 def _compute_paths(flow_name, task_name):
-    """ Compute all paths in a flow to a node
+    """Compute all paths in a flow to a node.
 
     :param flow_name: name of flow that should be traversed
     :param task_name: a name of node that should be visited
@@ -123,7 +114,7 @@ def _compute_paths(flow_name, task_name):
 
 
 def _raise_for_result_check(task_names, path):
-    """ Check that all nodes stated in task_names are present in path - i.e. they are visited during traversing
+    """Check that all nodes stated in task_names are present in path - i.e. they are visited during traversing.
 
     :param task_names: a list of node names that should be checked
     :param path: traverses that are per-flow specific
@@ -141,7 +132,7 @@ def _raise_for_result_check(task_names, path):
 
 
 def _compute_subsequent_edges(flow_name, node_names):
-    """ Compute nodes that are subsequent nodes based on node_names
+    """Compute nodes that are subsequent nodes based on node_names.
 
     :param flow_name: name of the flow in which subsequent nodes should be found
     :param node_names: a list of nodes that were run, note that they does not need to be necessarily stated in flow_name
@@ -163,7 +154,7 @@ def _compute_subsequent_edges(flow_name, node_names):
 
 
 def _compute_traversals(flow_name, task_names, follow_subflows=True):
-    """ Compute all traversals/paths to nodes from a flow
+    """Compute all traversals/paths to nodes from a flow.
 
     :param flow_name: a name of flow to start traversing with
     :param task_names: a list of nodes we want to visit/traverse
@@ -207,13 +198,13 @@ def _compute_traversals(flow_name, task_names, follow_subflows=True):
 
 
 def compute_selective_run(flow_name, task_names, follow_subflows=False, run_subsequent=False):
-    """
+    """Compute selective run for a flow.
 
-    :param flow_name:
-    :param task_names:
-    :param follow_subflows:
-    :param run_subsequent:
-    :return:
+    :param flow_name: a name of the flow that should be run
+    :param task_names: a list of tasks that should be run
+    :param follow_subflows: apply selective run to all subflows (transitively)
+    :param run_subsequent: run tasks that depend on task_names
+    :return: computed selective run dictionary
     """
     traversals = _compute_traversals(flow_name, task_names, follow_subflows)
     result = {

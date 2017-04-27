@@ -4,9 +4,7 @@
 # Copyright (C) 2016-2017  Fridolin Pokorny, fridolin.pokorny@gmail.com
 # This file is part of Selinon project.
 # ######################################################################
-"""
-A pool that carries all database connections for workers
-"""
+"""A pool that carries all database connections for workers."""
 
 import traceback
 
@@ -17,18 +15,23 @@ from .trace import Trace
 
 
 class StoragePool(object):
-    """
-    A pool that carries all database connections for workers
-    """
+    """A pool that carries all database connections for workers."""
+
     _storage_pool_locks = LockPool()
 
     def __init__(self, id_mapping, flow_name):
+        """Initialize storage pool instance based on the current context.
+
+        :param id_mapping: mapping tasks and their ids
+        :param flow_name: name of flow for which StoragePool context is created
+        """
         self._id_mapping = id_mapping or {}
         self._flow_name = flow_name
 
     @classmethod
     def get_storage_name_by_task_name(cls, task_name, graceful=False):
-        """
+        """Get name of storage that was assigned to the given task.
+
         :param task_name: name of a task
         :param graceful: return None instead of raising an exception
         :return: storage name for task
@@ -42,7 +45,8 @@ class StoragePool(object):
 
     @classmethod
     def get_storage_by_task_name(cls, task_name):
-        """
+        """Get storage instance that was assigned to the given task.
+
         :param task_name: task's name for which storage should be get
         :rtype: DataStorage
         """
@@ -55,8 +59,7 @@ class StoragePool(object):
 
     @classmethod
     def get_connected_storage(cls, storage_name):
-        """
-        Retrieve connected storage based by its name stated in configuration
+        """Retrieve connected storage based by its name stated in configuration.
 
         :param storage_name: name of storage
         :return: connected storage
@@ -74,8 +77,7 @@ class StoragePool(object):
         return storage
 
     def get(self, task_name):
-        """
-        Retrieve data for task based on mapping for the current context
+        """Retrieve data for task based on mapping for the current context.
 
         :param task_name: task's name that we are retrieving data for
         :return: task's result for the current context
@@ -84,8 +86,7 @@ class StoragePool(object):
 
     @classmethod
     def retrieve(cls, flow_name, task_name, task_id):
-        """
-        Retrieve task's result from database which was configured to be used for desired task
+        """Retrieve task's result from database which was configured to be used for desired task.
 
         :param flow_name: flow in which the retrieval is taking place
         :param task_name: name of task for which result should be retrieved
@@ -121,8 +122,7 @@ class StoragePool(object):
     @classmethod
     def set(cls, node_args, flow_name, task_name, task_id, result):
         # pylint: disable=too-many-arguments
-        """
-        Store result for task
+        """Store result for task.
 
         :param node_args: arguments that were passed to the node
         :param flow_name: flow in which task was run
@@ -150,8 +150,7 @@ class StoragePool(object):
     @classmethod
     def set_error(cls, node_args, flow_name, task_name, task_id, exc_info):
         # pylint: disable=too-many-arguments
-        """
-        Store error information for task failure
+        """Store error information for task failure.
 
         :param node_args: arguments that were passed to the node
         :param flow_name: flow in which task was run

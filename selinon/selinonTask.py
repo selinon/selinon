@@ -4,9 +4,7 @@
 # Copyright (C) 2016-2017  Fridolin Pokorny, fridolin.pokorny@gmail.com
 # This file is part of Selinon project.
 # ######################################################################
-"""
-Base class for user-defined tasks
-"""
+"""Base class for user-defined tasks."""
 
 import abc
 import logging
@@ -18,12 +16,11 @@ from .storagePool import StoragePool
 
 
 class SelinonTask(metaclass=abc.ABCMeta):
-    """
-    Base class for user-defined tasks
-    """
+    """Base class for user-defined tasks."""
 
     def __init__(self, flow_name, task_name, parent, task_id, dispatcher_id):
-        """
+        """Initialize SelinonTask (called by SelinonTaskEnvelope).
+
         :param flow_name: name of flow under which this tasks runs on
         :param task_name: name of task, note it can be aliased since we can have different task name and class name
         :param parent: direct task's predecessors stated in flow dependency
@@ -39,8 +36,7 @@ class SelinonTask(metaclass=abc.ABCMeta):
         self.log = logging.getLogger(__name__)
 
     def _selinon_dereference_task_id(self, flow_names, task_name, index):
-        """
-        Compute task id based on mapping of ancestors (from parent sub-flows)
+        """Compute task id based on mapping of ancestors (from parent sub-flows).
 
         :param flow_names: name of parent flow or list of flow names in case of nested flows
         :param task_name: name of task in parent flow
@@ -72,13 +68,15 @@ class SelinonTask(metaclass=abc.ABCMeta):
 
     @property
     def storage(self):
-        """
+        """Storage instance assigned to this task.
+
         :return: tasks's configured storage as stated in YAML config
         """
         return StoragePool.get_storage_by_task_name(self.task_name)
 
     def parent_task_result(self, parent_name):
-        """
+        """Retrieve parent task result.
+
         :param parent_name: name of parent task to retrieve result from
         :return: result of parent task
         """
@@ -91,7 +89,8 @@ class SelinonTask(metaclass=abc.ABCMeta):
         return StoragePool.retrieve(self.flow_name, parent_name, parent_task_id)
 
     def parent_flow_result(self, flow_names, task_name, index=None):
-        """
+        """Retrieve result of parent sub-flow task.
+
         Get parent subflow results; note that parent flows can return multiple results from task of same type
         because of loops in flows
 
@@ -106,7 +105,7 @@ class SelinonTask(metaclass=abc.ABCMeta):
         return StoragePool.retrieve(parent_flow_name, task_name, task_id)
 
     def parent_task_exception(self, parent_name):
-        """Retrieve parent task exception. You have to call this from a fallback (direct or transitive)
+        """Retrieve parent task exception. You have to call this from a fallback (direct or transitive).
 
         :param parent_name: name of task that failed (ancestor of calling task)
         :return exception that was raised in the ancestor
@@ -125,7 +124,7 @@ class SelinonTask(metaclass=abc.ABCMeta):
         return celery_result.result
 
     def parent_flow_exception(self, flow_names, task_name, index=None):
-        """Retrieve parent task exception. You have to call this from a fallback (direct or transitive)
+        """Retrieve parent task exception. You have to call this from a fallback (direct or transitive).
 
         :param flow_names: name of parent flow or list of flow names in case of nested flows
         :param task_name: name of task that failed (ancestor of calling task)
@@ -145,8 +144,7 @@ class SelinonTask(metaclass=abc.ABCMeta):
 
     @staticmethod
     def retry(countdown=0):
-        """
-        Retry, always raises Retry, this is compatible with Celery's self.retry() except you cannot modify arguments
+        """Retry, always raises Retry, this is compatible with Celery's retry except you cannot modify arguments.
 
         :param countdown: countdown for rescheduling
         """
@@ -154,8 +152,7 @@ class SelinonTask(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def run(self, node_args):
-        """
-        Task's entrypoint - user defined computation
+        """Entrypoint - user defined computation.
 
         :param node_args: arguments passed to flow/node
         :return: tasks's result that will be stored in database as configured

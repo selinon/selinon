@@ -4,9 +4,7 @@
 # Copyright (C) 2016-2017  Fridolin Pokorny, fridolin.pokorny@gmail.com
 # This file is part of Selinon project.
 # ######################################################################
-"""
-Selinon Dispatcher worker implementation
-"""
+"""Selinon Dispatcher task implementation."""
 
 import json
 import traceback
@@ -20,9 +18,8 @@ from .trace import Trace
 
 
 class Dispatcher(Task):
-    """
-    Selinon Dispatcher worker implementation
-    """
+    """Selinon Dispatcher worker implementation."""
+
     # Celery configuration
     ignore_result = False
     acks_late = True
@@ -31,7 +28,7 @@ class Dispatcher(Task):
     name = "selinon.Dispatcher"
 
     def selinon_retry(self, flow_name, node_args, parent, selective, retried_count):
-        """"Retry whole flow on failure if configured so, forget any progress done so far
+        """"Retry whole flow on failure if configured so, forget any progress done so far.
 
         :param flow_name: name of the flow to be retried
         :param node_args: flow arguments
@@ -61,8 +58,7 @@ class Dispatcher(Task):
 
     def run(self, flow_name, node_args=None, parent=None, retried_count=None, retry=None, state=None, selective=False):
         # pylint: disable=too-many-arguments,arguments-differ
-        """
-        Dispatcher entry-point - run each time a dispatcher is scheduled
+        """Dispatcher entry-point - run each time a dispatcher is scheduled.
 
         :param flow_name: name of the flow
         :param parent: flow parent nodes
@@ -73,7 +69,6 @@ class Dispatcher(Task):
         :param selective: selective flow information if run in selective flow
         :raises: FlowError
         """
-
         Trace.log(Trace.DISPATCHER_WAKEUP, {
             'flow_name': flow_name,
             'dispatcher_id': self.request.id,
