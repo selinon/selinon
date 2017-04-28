@@ -6,7 +6,7 @@
 # ######################################################################
 
 from selinon import SystemState
-from selinonlib.storages import DataStorage
+from selinon import DataStorage
 from selinonTestCase import SelinonTestCase
 
 

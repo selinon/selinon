@@ -9,7 +9,7 @@ import pytest
 from selinonTestCase import SelinonTestCase
 
 from selinon import SystemState
-from selinonlib.storages import DataStorage
+from selinon import DataStorage
 from selinon.config import Config
 
 
