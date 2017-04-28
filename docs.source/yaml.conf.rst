@@ -1,7 +1,7 @@
 .. _yaml-conf:
 
-YAML Configuration
-==================
+YAML Configuration Specification
+================================
 
 The only thing you have to provide is a configuration file that describes how should be your flow organized. A flow is defined by nodes that can be either tasks or another flows (subflows). Once you create a YAML configuration file, this file is parsed and checked using Selinonlib tool (you can even visualize your flows based on configuration). Selinonlib automatically generates Python code for Dispatcher to let Dispatcher know what to do when.
 

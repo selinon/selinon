@@ -3,22 +3,33 @@
 Task Implementation
 ===================
 
-A task is of type `SelinonTask`. Constructor of task is transparently called by `SelinonTaskEnvelope`, which handles arguments propagation, parent node propagation. Base class SelinonTask also handles how data should be retrieved from database in case you want to retrieve data from parent tasks.
+Each task you want to run in Selinon has to be of type :obj:`SelinonTask <selinon.selinonTask>`.
 
-The only thing you need to define is `node_args` parameter based on which Task computes its results. The return value of your Task is than checked against JSON schema and stored to database if configured so.
+The only thing you need to define is the ``node_args`` parameter based on which this task computes its results. The return value of your Task is after that checked against JSON schema (if configured so) and stored to a database or a storage if a storage was assigned to the task in the YAML configuration.
 
-::
+.. code-block:: python
 
   from selinon import SelinonTask
 
   class MyTask(SelinonTask):
      def run(self, node_args):
-       pass
+        # let's
+        return {'c': node_args['a'] + node_args['b']}
 
-In order to retrieve data from parent task/flow, one can call `self.parent_task_result()` or `self.parent_flow_result()` (see `sources <https://selinon.github.io/selinon/api/selinon.selinonTask.html>`_). Results of parent nodes that are flows are propagated only if `propagate_finished` or `propagate_compound_finished` was set. In that case parent key is a name of flow and consists of dictionary containing task names run that were run as a keys and and list of task ids as value.
 
-If your task should not be rescheduled due to a fatal error, raise `FatalTaskError`. This will cause fatal task error and task will not be rescheduled. Keep in mind that `max_retry` from YAML configuration file will be ignored).
+In order to retrieve data from parent tasks or flows you can use prepared :class:`SelinonTask <selinon.selinonTask.SelinonTask>` methods. You can also access configured storage and so.
 
-In case you want to reschedule your task without affecting `max_retry`, just call `self.retry()`. Optional argument `countdown` specifies countdown for rescheduling.
+If your task should not be rescheduled due to a fatal error, raise :exc:`FatalTaskError <selinon.errors.FatalTaskError>`. This will cause fatal task error and task will not be rescheduled. Keep in mind that `max_retry` from YAML configuration file **will be ignored**! If you want to retry, just raise any appropriate exception that you want to track in trace logs.
 
-See `SelinonTask <https://selinon.github.io/selinon/api/selinon.selinonTask.html>`_ constructor to get more info about available attributes or methods.
+In case you want to reschedule your task without affecting ``max_retry``, just call ``self.retry()``. Optional argument ``countdown`` specifies countdown in seconds for rescheduling. Note that this method is not fully compatible with Celery's `retry mechanism <http://docs.celeryproject.org/en/latest/reference/celery.app.task.html#celery.app.task.Task.retry>`_.
+
+Check :class:`SelinonTask <selinon.selinonTask.SelinonTask>` code documentation.
+
+Some implementation details
+###########################
+
+Here are some implementation details that are not necessary helpful for you:
+
+* :obj:`SelinonTask <selinon.selinonTask>` is not Celery task
+* the constructor of the task is transparently called by :obj:`SelinonTaskEnvelope <selinon.selinonTaskEnvelope>`, which handles flow details propagation and also :ref:`Selinon tracepoints <trace>`
+* :obj:`SelinonTaskEnvelope <selinon.selinonTaskEnvelope>` is of type `Celery task <http://docs.celeryproject.org/en/latest/userguide/tasks.html#custom-task-classes>`_

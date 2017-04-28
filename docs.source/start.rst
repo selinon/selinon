@@ -1,7 +1,7 @@
 .. _start:
 
-A Quick Start
--------------
+A Quick Start Guide
+-------------------
 
 This section aims to provide you a very high overview of the Selinon project and its configuration. If you want to get deeper, follow next sections.
 

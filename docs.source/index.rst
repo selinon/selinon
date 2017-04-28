@@ -49,22 +49,22 @@ Documentation
    :maxdepth: 1
 
    start
-   faq
-   yaml.conf
    tasks
    storage
    trace
    migration
    patterns
+   yaml.conf
+   faq
    development
    selinon/doc/selinon
 
 See also
 ********
 
- * `Selinonlib documentation <https://selinonlib.readthedocs.org/>`_
- * `Selinonlib project <https://github.com/selinon/selinonlib>`_
- * `Celery configuration <http://docs.celeryproject.org/en/latest/configuration.html>`_
+* `Selinonlib documentation <https://selinonlib.readthedocs.org/>`_
+* `Selinonlib project <https://github.com/selinon/selinonlib>`_
+* `Celery configuration <http://docs.celeryproject.org/en/latest/configuration.html>`_
 
 
 Indices and tables

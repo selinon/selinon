@@ -3,10 +3,9 @@
 Storage Implementation
 ======================
 
-Currently, there are available three database adapters, see 'selinon.storages' module. In order to use these storages, you have to manually install database adapters as they are not explicitly included by Pypi.
+Currently, there are available prepared database adapters, see `Selinonlib <https://github.com/selinon/selinonlib>`_ module. In order to use these storages, you have to manually install database adapters as they are not explicitly included by PyPi.
 
   * `SqlStorage` - SQLAlchemy adapter for SQL databases
-    Example:
 
     .. code-block:: yaml
 
@@ -20,7 +19,6 @@ Currently, there are available three database adapters, see 'selinon.storages' m
             echo: false
 
   * `RedisStorage` - Redis database adapter
-    Example:
 
     .. code-block:: yaml
 
@@ -38,7 +36,6 @@ Currently, there are available three database adapters, see 'selinon.storages' m
             port: 27017
 
   * `MongoStorage` - MongoDB database adapter
-    Example:
 
     .. code-block:: yaml
 
@@ -52,7 +49,25 @@ Currently, there are available three database adapters, see 'selinon.storages' m
             host: 'mongohost'
             port: 27017
 
-You can define your own storage by inheriting from `DataStorage` defined in `selinon.storage`:
+  * `S3` - AWS S3 database adapter
+
+    .. code-block:: yaml
+
+      storages:
+        - name: 'MyMongoStorage'
+          classname: 'S3Storage'
+          import: 'selinon.storage'
+          configuration:
+            db_name: 'database_name'
+            collection_name: 'collection_name'
+            host: 'mongohost'
+            port: 27017
+
+
+Using a Custom Storage Adapter
+##############################
+
+You can define your own storage by inheriting from :class:`DataStorage <selinon.dataStorage.DataStorage>` abstract class:
 
 ::
 
@@ -81,15 +96,17 @@ You can define your own storage by inheriting from `DataStorage` defined in `sel
 
       def store(self, flow_name, task_name, task_id, result):
           # define how to store result from task with id task_id based on flow and task name
-        pass
+          pass
 
-You can also reuse current implementation of a storage in order to  define your custom `retrieve()` and `store()` methods based on your requirements.
+      def store_error(self, node_args, flow_name, task_name, task_id, exc_info):
+          # optionally define how to track errors/task failures if you need to
+          pass
+
+You can also reuse `Selinonlib <https://github.com/selinon/selinonlib>`_ implementation of storages in order to define your custom ``retrieve()`` and ``store()`` methods based on your requirements.
 
 Database Connection Pool
 ########################
 
-Each Celery worker is trying to be efficient when it comes to number of connections to a database. There is held only one instance of `DataStorage` class per whole worker. Selinon transparently takes care of concurrent-safety when calling methods of `DatStorage` if you plan to run your worker with concurrency level bigger than one.
+Each worker is trying to be efficient when it comes to number of connections to a database. There is held only one instance of :class:`DataStorage <selinon.dataStorage.DataStorage>` class per whole worker. Selinon transparently takes care of concurrent-safety when calling methods of `DatStorage` if you plan to run your worker with concurrency level higher than one.
 
-You can simply share connection across multiple `DataStorage` classes in inheritance hierarchy and reuse already defined connections.
-
-If you would like to limit number of connections to database, you have to do it on your own by sharing connection information in parent of type `DataStorage` and implement connection limitation logic in your database adapter. This is not possible on Selinon level, since database adapters are black box for Selinon and they can share connection across multiple instances.
+A small tip for you: you can also simply share connection across multiple :class:`DataStorage <selinon.dataStorage.DataStorage>` classes in inheritance hierarchy and reuse already defined connections. You can also do storage aliasing as described in :ref:`practices`.
