@@ -45,7 +45,7 @@ Documentation
    migration
    patterns
    development
-   selinon/doc/selinon/selinon
+   selinon/doc/selinon
 
 See also
 ********

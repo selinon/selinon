@@ -34,7 +34,7 @@ check:
 	@[ -n "${NOPYDOCSTYLE}" ] || { echo ">>> Running pydocstyle"; pydocstyle --match='(?!test_|version).*\.py' selinon; }
 
 api:
-	@sphinx-apidoc -e -o docs.source/selinon/doc/selinon selinon -f
+	@sphinx-apidoc -e -o docs.source/selinon/doc/ selinon -f
 
 doc: api
 	@make -f Makefile.docs html
