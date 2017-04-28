@@ -1,7 +1,7 @@
 Storage Implementation
 ======================
 
-Currently, there are available three database adapters, see 'selinon.storage' module. In order to use these storages, you have to manually install database adapters as they are not explicitly included by Pypi.
+Currently, there are available three database adapters, see 'selinon.storages' module. In order to use these storages, you have to manually install database adapters as they are not explicitly included by Pypi.
 
   * `SqlStorage` - SQLAlchemy adapter for SQL databases
     Example:
@@ -86,7 +86,7 @@ You can also reuse current implementation of a storage in order to  define your 
 Database Connection Pool
 ########################
 
-Each Celery worker is trying to be efficient when it comes to number of connections to a database. There is held only one instance of `DataStorage` class per whole worker. This means that your database has to be concurrency-safe if you plan to run your Celery worker with concurrency level bigger than one.
+Each Celery worker is trying to be efficient when it comes to number of connections to a database. There is held only one instance of `DataStorage` class per whole worker. Selinon transparently takes care of concurrent-safety when calling methods of `DatStorage` if you plan to run your worker with concurrency level bigger than one.
 
 You can simply share connection across multiple `DataStorage` classes in inheritance hierarchy and reuse already defined connections.
 

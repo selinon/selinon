@@ -18,4 +18,4 @@ Each flow adds overhead for flow. If you would like to add a new flow, it should
 Dispatcher implementation was desingned to be lazy. That means it was designed not to add overhead for you unleas you really need it.
 This means that if you don't need flags such as `propagate_parent` or `propagate_finished` you don't need to state them in YAML file. If you state them, it will add additional computational overhead that you don't necessarily need.
 
-*
+* Make flow edges as minimal as possible. This will help you in the future if you would like to disable some tasks without purging queues.

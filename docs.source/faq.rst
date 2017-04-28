@@ -9,7 +9,7 @@ Check your result backend configuration in Celery. Currently, there is supported
 Can I see how does it work?
 ***************************
 
-See `Selinon-demo <https://github.com/selinon/demo>`_.
+See `Selinon demo <https://github.com/selinon/demo>`_.
 
 I'm getting Python related errors
 *********************************
