@@ -1,3 +1,5 @@
+.. _selective-run:
+
 Selective task run
 ==================
 

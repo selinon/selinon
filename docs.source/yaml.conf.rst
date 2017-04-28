@@ -1,3 +1,5 @@
+.. _yaml-conf:
+
 YAML Configuration
 ==================
 

@@ -1,5 +1,7 @@
+.. _index:
+
 A Dynamic Task Flow Management on top of Celery
-===============================================
+-----------------------------------------------
 
 What is Selinon and why should I use it?
 ########################################

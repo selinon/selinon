@@ -1,3 +1,5 @@
+.. _storage:
+
 Storage Implementation
 ======================
 

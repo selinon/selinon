@@ -1,3 +1,5 @@
+.. _trace:
+
 Trace Flow Actions
 ==================
 

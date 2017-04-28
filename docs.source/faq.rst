@@ -1,5 +1,7 @@
+.. _faq:
+
 Frequently Asked Questions (FAQ)
-================================
+--------------------------------
 
 Dispatcher does not work properly or hangs in an infinite loop.
 ***************************************************************

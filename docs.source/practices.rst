@@ -1,3 +1,5 @@
+.. _practices:
+
 Best Practices
 ==============
 

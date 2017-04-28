@@ -1,3 +1,5 @@
+.. _patterns:
+
 Useful Flow Patterns
 ====================
 
