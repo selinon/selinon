@@ -5,7 +5,7 @@
 # This file is part of Selinon project.
 # ######################################################################
 
-from selinonlib.storages import DataStorage
+from selinon import DataStorage
 
 
 class MySimpleStorage(DataStorage):
