@@ -22,7 +22,7 @@ class MySimpleStorage(DataStorage):
     def disconnect(self):
         pass
 
-    def retrieve(self, task_name, task_id):
+    def retrieve(self, flow_name, task_name, task_id):
         pass
 
     def store(self, node_args, flow_name, task_name, task_id, result):
