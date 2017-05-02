@@ -1,7 +1,7 @@
 .. _patterns:
 
 Useful Flow Patterns
-====================
+--------------------
 
 TODO: this section needs to be revisited
 

@@ -1,7 +1,7 @@
 .. _storage:
 
 Storage Implementation
-======================
+----------------------
 
 Currently, there are available prepared database adapters, see `Selinonlib <https://github.com/selinon/selinonlib>`_ module. In order to use these storages, you have to manually install database adapters as they are not explicitly included by PyPi.
 
@@ -107,6 +107,9 @@ You can also reuse `Selinonlib <https://github.com/selinon/selinonlib>`_ impleme
 Database Connection Pool
 ########################
 
-Each worker is trying to be efficient when it comes to number of connections to a database. There is held only one instance of :class:`DataStorage <selinon.dataStorage.DataStorage>` class per whole worker. Selinon transparently takes care of concurrent-safety when calling methods of `DatStorage` if you plan to run your worker with concurrency level higher than one.
+Each worker is trying to be efficient when it comes to number of connections to a database. There is held only one instance of :class:`DataStorage <selinon.dataStorage.DataStorage>` class per whole worker. Selinon transparently takes care of concurrent-safety when calling methods of :class:`DataStorage <selinon.dataStorage.DataStorage>` if you plan to run your worker with concurrency level higher than one.
 
-A small tip for you: you can also simply share connection across multiple :class:`DataStorage <selinon.dataStorage.DataStorage>` classes in inheritance hierarchy and reuse already defined connections. You can also do storage aliasing as described in :ref:`practices`.
+
+.. note::
+
+  You can also simply share connection across multiple :class:`DataStorage <selinon.dataStorage.DataStorage>` classes in inheritance hierarchy and reuse already defined connections. You can also do storage aliasing as described in :ref:`practices`.

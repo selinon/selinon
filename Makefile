@@ -23,7 +23,7 @@ venv:
 clean:
 	find . -name '*.pyc' -or -name '__pycache__' -print0 | xargs -0 rm -rf
 	rm -rf venv coverage.xml
-	rm -rf dist selinon.egg-info build docs.source/api docs/build/
+	rm -rf dist selinon.egg-info build docs/
 
 check:
 	@# We have to adjust PYTHONPATH so we use our own Celery and modified Selinon Dispatcher for testing

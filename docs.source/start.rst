@@ -18,6 +18,25 @@ Selinon is configured by easy to learn, easy to read and easy to maintain declar
 
 In order to use Selinon, you have to :ref:`implement tasks <tasks>` and define your flows in a YAML configuration file (or split it across multiple YAML configuration files).
 
+Setting up Selinon
+##################
+
+In order to configure Selinon you need to do create a Celery's ``app`` instance, pass all Celery-related configuration to it. After that you are ready to configure Selinon:
+
+.. code-block:: python
+
+  from selinon import Config
+  from celery import Celery
+  from myapp.celery_settings import CelerySettings
+
+  app = Celery('tasks')
+  app.config_from_object(CelerySettings)
+
+  Config.set_celery_app(app)
+  Config.set_config_yaml('path/to/nodes.yaml', ['path/to/flow1.yaml', 'path/to/flow2.yaml'])
+
+Please refer to `Celery configuration <http://docs.celeryproject.org/en/latest/userguide/configuration.html>`_ for Celery-related pieces.
+
 Naming Convention
 #################
 
@@ -34,7 +53,7 @@ In the flow `flow2` (shown above) we start node `Task4` on condition that is alw
 
 The second flow is slightly more complex. We (always) start with `Task1`. `Task1` will transparently store results in `Storage1`. After `Task1` finishes, Selinon (to be more precise dispatcher task) checks results of `Task1` in `Storage1` and if condition ```result['foo'] == 'bar'``` is evaluated as True, dispatcher starts nodes `Task2` and `flow2`. After both `Task2` and `flow2` finish, dispatcher starts `Task3`. If the condition ```result['foo'] == bar``` is met, `Task1` is started and the whole process is recursively done again. Results of all tasks are stored in database named `Storage1` except for results computed in sub-flow `flow2`, where `Storage2` is used.
 
-Note that `Task2` and the whole `flow2` could be executed in parallel as there are no data nor time dependencies between these two nodes. Selinon runs as many nodes as possible in parallel. This makes it really easy to scale your system - the only bottleneck you can get is number of computational nodes in your cluster (or limitations on storage/database side).
+Note that `Task2` and the whole `flow2` could be executed in parallel as there are no data nor time dependencies between these two nodes. Selinon runs as many nodes as possible in parallel. This makes it really easy to scale your system - the only bottleneck you can get is number of computational nodes in your cluster or limitations on storage/database side.
 
 Refer to `Selinonlib <https://github.com/selinon/selinonlib>`_ for plotting flow graphs. The YAML configuration that was used to plot examples is shown bellow.
 
@@ -85,47 +104,47 @@ You can separate flows into multiple files, just provide ``flow-definitions`` ke
 
   ---
     flow-definitions:
-        - name: 'flow1'
-          edges:
-              - from:
-                to:
-                  - 'Task1'
-              - from:
-                  - 'Task1'
-                to:
-                  - 'Task2'
-                  - 'flow2'
-                condition:
-                    name: 'fieldEqual'
-                    node: 'Task1'
-                    args:
-                        key: 'foo'
-                        value: 'bar'
-              - from:
-                  - 'Task2'
-                  - 'flow2'
-                to:
-                  - 'Task3'
-              - from:
-                  - 'Task3'
-                to:
-                  - 'Task1'
-                condition:
-                    name: 'argsFieldEqual'
-                    node: 'Task3'
-                    args:
-                        key: 'foo'
-                        value: 'bar'
+      - name: 'flow1'
+        edges:
+            - from:
+              to:
+                - 'Task1'
+            - from:
+                - 'Task1'
+              to:
+                - 'Task2'
+                - 'flow2'
+              condition:
+                  name: 'fieldEqual'
+                  node: 'Task1'
+                  args:
+                      key: 'foo'
+                      value: 'bar'
+            - from:
+                - 'Task2'
+                - 'flow2'
+              to:
+                - 'Task3'
+            - from:
+                - 'Task3'
+              to:
+                - 'Task1'
+              condition:
+                  name: 'argsFieldEqual'
+                  node: 'Task3'
+                  args:
+                      key: 'foo'
+                      value: 'bar'
 
-        - name: 'flow2'
-          edges:
-              - from:
-                to:
-                  - 'Task4'
-              - from:
-                  - 'Task4'
-                to:
-                  - 'Task5'
+      - name: 'flow2'
+        edges:
+            - from:
+              to:
+                - 'Task4'
+            - from:
+                - 'Task4'
+              to:
+                - 'Task5'
 
 Entities in the System
 ######################
@@ -136,70 +155,70 @@ This configuration could be placed to ``nodes.yaml``:
 
   ---
     tasks:
-        - name: 'Task1'
-          output_schema: 'path/to/schema1.json'
-          # `classname` is omitted, it defaults to `name`
-          # from worker.task1 import Task1
-          import: 'worker.task1'
-          storage: 'Storage1'
-          # queue name to which messages will be sent
-          queue: 'queue_Task1_v0'
+      - name: 'Task1'
+        output_schema: 'path/to/schema1.json'
+        # `classname` is omitted, it defaults to `name`
+        # from worker.task1 import Task1
+        import: 'worker.task1'
+        storage: 'Storage1'
+        # queue name to which messages will be sent
+        queue: 'queue_Task1_v0'
 
-        - name: 'Task2'
-          import: 'worker.task2'
-          storage: 'Storage1'
-          output_schema: 'path/to/schema2.json'
-          # task names are not bound to class names (you can create aliases)
-          # from worker.task2 import MyTask2 as Task2
-          classname: 'MyTask2'
-          queue: 'queue_Task2_v1'
+      - name: 'Task2'
+        import: 'worker.task2'
+        storage: 'Storage1'
+        output_schema: 'path/to/schema2.json'
+        # task names are not bound to class names (you can create aliases)
+        # from worker.task2 import MyTask2 as Task2
+        classname: 'MyTask2'
+        queue: 'queue_Task2_v1'
 
-        - name: 'Task3'
-          import: 'worker.task3'
-          storage: 'Storage1'
-          output_schema: 'path/to/schema3.json'
-          classname: 'Task1'
-          max_retry: 1
-          # If queue is omitted, Celery's default queue (celery) will be used
-          #queue: 'celery'
+      - name: 'Task3'
+        import: 'worker.task3'
+        storage: 'Storage1'
+        output_schema: 'path/to/schema3.json'
+        classname: 'Task1'
+        max_retry: 1
+        # If queue is omitted, Celery's default queue (celery) will be used
+        #queue: 'celery'
 
-        - name: 'Task4'
-          import: 'worker.task4'
-          storage: 'Storage2'
-          output_schema: 'path/to/schema4.json'
-          classname: 'Task4'
-          max_retry: 1
+      - name: 'Task4'
+        import: 'worker.task4'
+        storage: 'Storage2'
+        output_schema: 'path/to/schema4.json'
+        classname: 'Task4'
+        max_retry: 1
 
-        - name: 'Task5'
-          import: 'worker.task1'
-          storage: 'Storage2'
-          output_schema: 'path/to/schema1.json'
-          classname: 'Task4'
-          # in case of failure retry once after 10 seconds before marking node as failed
-          max_retry: 1
-          retry_countdown: 10
+      - name: 'Task5'
+        import: 'worker.task1'
+        storage: 'Storage2'
+        output_schema: 'path/to/schema1.json'
+        classname: 'Task4'
+        # in case of failure retry once after 10 seconds before marking node as failed
+        max_retry: 1
+        retry_countdown: 10
 
 
     flows:
-        # state all flows you have in your system, otherwise Selinon will complain
-        - 'flow1'
-        - 'flow2'
+      # state all flows you have in your system, otherwise Selinon will complain
+      - 'flow1'
+      - 'flow2'
 
 
     storages:
-        - name: 'Storage1'
-          # from storage.storage1 import MyStorage as Storage1
-          # This way you can have multiple storages of a same type with different
-          # configuration (different reference name)
-          classname: 'MyStorage'
-          import: 'storage.storage1'
-          configuration: 'put your configuration for Storage1 here'
+      - name: 'Storage1'
+        # from storage.storage1 import MyStorage as Storage1
+        # This way you can have multiple storages of a same type with different
+        # configuration (different reference name)
+        classname: 'MyStorage'
+        import: 'storage.storage1'
+        configuration: 'put your configuration for Storage1 here'
 
-        - name: 'Storage2'
-          # classname is omitted, it defaults to `name`
-          # from storage.storage2 import Storage2
-          import: 'storage.storage2'
-          configuration: 'put your configuration for Storage2 here'
+      - name: 'Storage2'
+        # classname is omitted, it defaults to `name`
+        # from storage.storage2 import Storage2
+        import: 'storage.storage2'
+        configuration: 'put your configuration for Storage2 here'
 
 
 See :ref:`yaml-conf` section for more details.

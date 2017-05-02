@@ -116,7 +116,7 @@ class SelinonTask(metaclass=abc.ABCMeta):
             raise KeyError("No such parent '%s' in task '%s' in flow '%s', check your configuration"
                            % (parent_name, self.task_name, self.flow_name))
 
-        # Celery stores exceptions in
+        # Celery stores exceptions in result field
         celery_result = AsyncResult(parent_task_id)
         if not celery_result.failed():
             raise ValueError("Parent task '%s' did not raised exception" % parent_name)

@@ -1,4 +1,5 @@
 *.pyc
+docs/
 __pycache__
 build
 selinon.egg-info
