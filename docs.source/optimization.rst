@@ -5,58 +5,108 @@ Optimization
 
 Selinon offers you a highly scalable solution. By design, you can find two optimization techniques interesting. Both are discussed in the following sections.
 
-Flow Optimization & Dispatcher scheduling
+Flow optimization & Dispatcher scheduling
 =========================================
 
-In order to optimize your flow execution, you need to deeply understand core concept behind Selinon. As you already read, the key idea behind Selinon is dispatcher (see :class:`Dispacher <selinon.dispatcher.Dispatcher>`). Dispatcher is periodically scheduled and checks state of tasks in the flow and schedules new if neccessary.
+In order to optimize your flow execution, you need to :ref:`deeply understand core concept behind Selinon <internals>`. As you already read, the key idea behind Selinon is dispatcher (see :class:`Dispacher <selinon.dispatcher.Dispatcher>`). Dispatcher is periodically scheduled and checks state of tasks in the flow and schedules new if necessary.
 
-To understand it even more, let's assume that we have the following flow `flow1` and we request Selinon to run it:
+As there is non-zero overhead for each dispatcher run - queue message, receive message, check task status (querying result backend) and queue message for dispatcher again, it is generally a good idea to optimize dispatcher scheduling.
+
+Selinon offers you to optimize dispatcher scheduling by configuring `sampling strategies`.
+
+A sampling strategy basically gives information on when the dispatcher should be scheduled (or to be more precise retried) in order to check the current flow status.
+
+By default dispatcher is rescheduled every 2 seconds. Note that it means "give dispatcher *at least* 2 seconds to retry". If you have full queues (and busy workers) your dispatcher can be rescheduled even after days.
+
+Selinonlib offers you couple of predefined sampling strategies (refer to `Selinonlib documentation <https://selinonlib.readthedocs.io>`_ for more info):
+
+.. code-block:: yaml
+
+  flow-definitions:
+    - name: 'flow1'
+      # define sampling strategy
+      sampling:
+        name: 'constant'
+        args:
+          # check for flow state at least each 10 seconds
+          retry: 10
+      edges:
+        # a list of edges follows
+
+You can also provide your own sampling strategy. Basically sampling strategy is given by a number which tells Selinon when to reschedule dispatcher in the flow. This number is computed in the sampling strategy function which accepts one positional argument `status` and keywords arguments that are passed to sampling strategy function based on the YAML configuration you provided.
+
+Now let's assume that we want to optimize scheduling dispatcher. We have the following flow definition:
+
+.. code-block:: yaml
+
+  flow-definitions:
+    - name: 'flow1'
+      edges:
+        - from:
+          to: 'Task1'
+        - from: 'Task1'
+          to: 'Task2'
+
+Here is corresponding flow visualization:
 
 .. image:: _static/optimization_flow1.png
   :align: center
 
-If you are interested, here is YAML configuration used to generate this example:
+Based on statistics we have we know that the execution time of task `Task1` is 10 seconds in average and the execution time for task `Task2` is 15 seconds in average. You can easily write your sampling strategy function:
+
+.. code-block:: python
+
+  import random
+
+  def my_sampling_strategy(status, randomness):
+      if not status['active_nodes']:
+          return None
+
+      if 'Task1' in status['new_started_nodes']:
+          return 10 * random.uniform(-randomness, randomness)
+
+      if 'Task2' in status['new_started_nodes']:
+          return 15 * random.uniform(-randomness, randomness)
+
+      return max(status['previous_retry'] / 2, 2)
+
+
+.. note::
+
+  This example is oversimplified. You would probably want to get more information such as what distribution task execution time has based on flow arguments and what are other parameters that affect task time execution. The argument ``randomness`` is used for demonstrating arguments propagation.
+
+
+Now you can plug and use your sampling strategy function in your YAML configuration file:
 
 .. code-block:: yaml
 
-  ---
-    tasks:
-      - name: 'Task1'
-        import: 'myproject.tasks'
-      - name: 'Task2'
-        import: 'myproject.tasks'
-      - name: 'Task3'
-        import: 'myproject.tasks'
-      - name: 'Task4'
-        import: 'myproject.tasks'
+  flow-definitions:
+    - name: 'flow1'
+      sampling:
+         # from myapp.sampling import my_sampling_strategy
+         name: 'my_sampling_strategy'
+         import: 'myapp.sampling'
+         args:
+           randomness: 3
+      edges:
+        - from:
+          to: 'Task1'
+        - from: 'Task1'
+          to: 'Task2'
 
-    flows:
-      - 'flow1'
+Now your sampling strategy function will be called each time dispatcher will want to reschedule. If ``None`` is returned, dispatcher should end flow immediately.  Otherwise a positive integer has to be returned that represents number of seconds for retry.
 
-    flow-definitions:
-      - name: 'flow1'
-        queue: 'flow1_queue'
-        edges:
-          - from:
-            to: 'Task1'
-          - from:
-            to: 'Task2'
-          - from: 'Task1'
-            to: 'Task3'
-          - from:
-              - 'Task2'
-              - 'Task3'
-            to: 'Task4'
+.. danger::
 
-**TODO**
+  As the sampling strategy function is executed by dispatcher it **can not raise any exception**! If an exception is raised, the behaviour is undefined.
 
-Storage Optimization & Distributed Caches
+Storage optimization & Distributed caches
 =========================================
 
 By using Selinon you can reach to two main issues with your cluster on heavy load:
 
   1. Your cluster is not powerful enough to serve requested number of tasks.
-  2. Your storage/database cannot process requested numbers of requests.
+  2. Your storage/database cannot process requested numbers of requests or your network is not capable to transmit such number of queries.
 
 
 In the first case the solution is simple: buy/use more hardware.
@@ -65,7 +115,7 @@ In the later one there are two main approaches how to tackle such bottleneck. Yo
 
 If the above solution is not suitable for you or you want to optimize even more, Selinon offers you an optimization that introduces distributed caches. These caches are distributed across nodes (workers) in your cluster and act like a caching mechanism to reduce number of requests to storages/databases and keep data more close to execution nodes.
 
-Selinon by default uses cache of size 0 (no items are added to the cache). There are prepared in-memory caches like FIFO (First-In-First-Out cache), LIFO (Last-In-First-Out cache), LRU (Least-Recently-Used cache), MRU (Most-Recently-Used cache), RR (Random-Replacement cache). See `Selinonlib documentation <https://selinonlib.readthedocs.org>`_ for more info.
+Selinon by default uses cache of size 0 (no items are added to the cache). There are prepared in-memory caches like FIFO (First-In-First-Out cache), LIFO (Last-In-First-Out cache), LRU (Least-Recently-Used cache), MRU (Most-Recently-Used cache), RR (Random-Replacement cache). See `Selinonlib documentation <https://selinonlib.readthedocs.io>`_ for more info.
 
 
 .. note::
@@ -133,3 +183,7 @@ The ``RedisCache`` implementation has to derive from :class:`Cache <selinon.cach
 .. note::
 
   Caching task states is generally a good idea if you depend on many task states in your flow edges (a lot of source tasks in edges) and these tasks have various execution time (very "width" flows).
+
+.. note::
+
+  Due to results consistency information about task states are added to caches only if task (or flow) fails or finishes - there won't be any flow or task with the same id executed in the future.

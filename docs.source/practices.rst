@@ -1,6 +1,6 @@
 .. _practices:
 
-Best Practices
+Best practices
 --------------
 
 Here are some notes and tips on how to write YAML config files:
@@ -11,7 +11,7 @@ Do not introduce a new flow unless it is necessary
 Each flow adds some overhead. It is reasonable to introduce a new flow when:
 
 * you want to reuse certain implementation.
-* you want to encapsulate flow so you can run fallback tasks for the whole group of tasks
+* you want to encapsulate flow so you can run fallback nodes for the whole group of tasks
 * you want to throttle or optimize certain tasks (you want to let specific workers do specific flows or tasks)
 * you want to recursively run the whole flow or you have dependencies on flows so they are not resolvable except copying YAML configuration logic
 * you want to refer to flow as a group of tasks - a separate indivisible logic
@@ -38,12 +38,14 @@ You probably saw (based on examples) that you can easily define a task alias - t
 .. code-block:: yaml
 
   tasks:
+    # from myapp.tasks import Task1
     - name: 'Task1'
-      import: 'worker.task1'
+      import: 'myapp.tasks'
 
+    # from myapp.tasks import Task1 as Task2
     - name: 'Task2'
       classname: 'Task1'
-      import: 'worker.task1'
+      import: 'myapp.tasks'
 
 This is useful when you want to run same code multiple times in a flow (since nodes are referenced by names).
 
@@ -52,16 +54,18 @@ You can also define storage alias - useful when you want to use same database/st
 .. code-block:: yaml
 
     storages:
+      # from myapp.storages import PostgreSQL as UserPostgres
       - name: 'UserPostgres'
         classname: 'PostgreSQL'
-        import: 'storage.storage1'
+        import: 'myapp.storages'
         configuration:
           host: postgres-user
           port: 5432
 
+      # from myapp.storages import PostgreSQL as AdminPostgres
       - name: 'AdminPostgres'
         classname: 'PostgreSQL'
-        import: 'storage.storage1'
+        import: 'myapp.storages'
         configuration:
           host: postgres-admin
           port: 5432
@@ -85,3 +89,23 @@ You can also create flow aliases. This is especially helpful if you want to re-u
           name: 'flow1_sla'
           queue: 'flow1_sla_v1'
           # node_args_from_first and edges configuration will be taken from flow1
+
+Make your queue names configurable via environment variables
+============================================================
+
+You can easily make queue names (for tasks and for flows/dispatcher) dependent on environment variables:
+
+.. code-block:: yaml
+
+   tasks:
+     - name: 'Task1'
+       import: 'myapp.tasks'
+       queue: '{DEPLOYMENT_PREFIX}_task1_v1'
+
+Selinon will expand queue name for you based on ``DEPLOYMENT_PREFIX``. Let's say you set ``DEPLOYEMENT_PREFIX`` to ``testing``. The expanded queue name will be ``testing_task1_v1``.
+
+.. danger::
+
+  Note that the ``DEPLOYMENT_PREFIX`` variable needs to be set in the environment, otherwise queue name expansion will fail.
+
+Now you can deploy two instances of your system on the same cluster without affecting each other. This might be helpful for testing purposes when you have a testing cluster where you want to run integration tests that do not affect each other. Similarly you can introduce such option for storages.

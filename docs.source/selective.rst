@@ -1,6 +1,6 @@
 .. _selective:
 
-Selective Task Run
+Selective task run
 ------------------
 
 Selinon offers you a way how to create a declarative configuration written in YAML files that enable you to define flows. You can run these flows as one unit - all tasks in the flow get executed based on conditions and their time and data dependencies (edges that you stated).
@@ -32,7 +32,7 @@ Selinon will now by default run only `Task1` and `Task2` as that is the computed
   * bug fixes in some task does not require you to run the whole flow again - you can use ``run_subsequent`` to run also affected tasks that are direct on indirect dependencies of requested task
   * and anything specific for your application
 
-Reuse Results in Selective Flows
+Reuse results in selective flows
 ================================
 
 If you would like to avoid running some task in selective runs (let's say `Task1` from the previous example) and reuse results from previous runs, you can simply register a `selective run function` in your YAML configuration file in task definition:
@@ -51,7 +51,7 @@ This function gets called by dispatcher in order to decide whether the desired t
 
 .. note::
 
-  Refer to `Selinonlib <https://selinonlib.readthedocs.org/>`_ for default selective run function definition.
+  Refer to `Selinonlib <https://selinonlib.readthedocs.io/>`_ for default selective run function definition.
 
 The selective run function signature is:
 
@@ -90,14 +90,14 @@ The selective run function is called only for tasks on the path, they are never 
   * if there is a direct or indirect cyclic edge to a task, this cyclic edge is always included (you can pass explicit flow arguments to avoid this behaviour)
   * naturally, it is possible that the selective flow run does not reach desired tasks (tasks that were requested to start) due to condition evaluation on the path
 
-Sub-flows and Subsequent Tasks in Selective Task Runs
+Sub-flows and subsequent tasks in selective task runs
 =====================================================
 
 Selinon by default computes only paths for one flow - the flow that you stated in the selective run. If you wish to run desired task also in sub-flows, configure ``run_subsequent`` as true. In this case Selinon will check all sub-flows for desired task occurrence and run also sub-flows, if necessary. Note that desired task in this case needs to be present in any of sub-flows (not necessary in the top-level one).
 
 If you wish to run all subsequent tasks that depend on tasks that you stated in your selective task run, pass ``run_subsequent`` as true in your selective configuration. In this case the selective run function will not get called, rather all subsequent tasks get scheduled based on condition as in basic flow run.
 
-Using Selective Task Runs from YAML Configuration
+Using selective task runs from YAML configuration
 =================================================
 
 Now let's consider that you defined a flow in our YAML configuration file and you want to reuse this definition in order to run this flow from another flow. Moreover, we want to run only some certain tasks. Selinon easily offers you a solution to this:
@@ -138,7 +138,7 @@ Note that in this particular scenario you can also do:
 Without the ``selective`` part in your `flow2` configuration. Using ``selective`` in your YAML configuration is highly dependent on your use-case (and the selective run function implementation).
 
 
-YAML Configuration Used in Examples
+YAML configuration used in examples
 ===================================
 
 .. code-block:: yaml

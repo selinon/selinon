@@ -5,7 +5,7 @@ Development and Contributing
 
 If you use Selinon and you spot some weird behaviour, feel free to `open an issue <https://github.com/selinon/selinon/issues>`_ (Selinonlib has its own repo where you can `report an issue <https://github.com/selinon/selinonlib/issues>`_ as well). Feel free to dive into source code and submit a pull request to make Selinon a better and more stable project.
 
-Preparing Development Environment
+Preparing development environment
 =================================
 
 To prepare your environment make sure that you have all development requirements installed. Check shipped ``Makefile`` for prepared commands that can be directly issued.
@@ -28,7 +28,7 @@ Now make sure that you have installed all development requirements:
 
   make devenv
 
-Now you are ready to hack! 😎
+Now you are ready to hack! B-)
 
 Tests
 =====
@@ -69,4 +69,5 @@ Documentation for Developers
 
 .. note::
 
-  Browse `Selinonlib documentation <https://selinonlib.readthedocs.org/>`_ as well as there is done a lot more stuff.
+  Browse `Selinonlib documentation <https://selinonlib.readthedocs.io/>`_ as well as there is done a lot more stuff.
+

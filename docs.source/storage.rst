@@ -1,9 +1,9 @@
 .. _storage:
 
-Storage Implementation
-----------------------
+Storage adapter implementation
+------------------------------
 
-Currently, there are available prepared database adapters, see `Selinonlib <https://github.com/selinon/selinonlib>`_ module. In order to use these storages, you have to manually install database adapters as they are not explicitly included by PyPi.
+Currently, there are available prepared database adapters, see `Selinonlib <https://github.com/selinon/selinonlib>`_ module. In order to use these storages, you have to manually install database adapters as they are not explicitly included by requirements.
 
   * `SqlStorage` - SQLAlchemy adapter for SQL databases
 
@@ -64,14 +64,14 @@ Currently, there are available prepared database adapters, see `Selinonlib <http
             port: 27017
 
 
-Using a Custom Storage Adapter
+Using a custom storage adapter
 ##############################
 
 You can define your own storage by inheriting from :class:`DataStorage <selinon.dataStorage.DataStorage>` abstract class:
 
 ::
 
-  from selinon.storage import DataStorage
+  from selinon import DataStorage
 
   class MyStorage(DataStorage):
       def __init__(self, host, port):
@@ -79,7 +79,7 @@ You can define your own storage by inheriting from :class:`DataStorage <selinon.
           pass
 
       def is_connected():
-          # predicate that is used to connect to database
+          # predicate used to check connection
           return False
 
       def connect():
@@ -87,24 +87,36 @@ You can define your own storage by inheriting from :class:`DataStorage <selinon.
           pass
 
       def disconnect():
-          # define how to disconnect from database
+          # define how to disconnect from storage
           pass
 
       def retrieve(self, flow_name, task_name, task_id):
-          # define how to retrieve result based on flow, task name and task id
+          # define how to retrieve results
           pass
 
       def store(self, flow_name, task_name, task_id, result):
-          # define how to store result from task with id task_id based on flow and task name
+          # define how to store results
           pass
 
       def store_error(self, node_args, flow_name, task_name, task_id, exc_info):
           # optionally define how to track errors/task failures if you need to
           pass
 
+And pass this storage to Selinon in your YAML configuration:
+
+.. code-block:: yaml
+
+  storages:
+    # from myapp.storages import MyStorage
+    - name: 'MyStorage'
+      import: 'myapp.storages'
+      configuration:
+        host: 'localhost'
+        port: '5432'
+
 You can also reuse `Selinonlib <https://github.com/selinon/selinonlib>`_ implementation of storages in order to define your custom ``retrieve()`` and ``store()`` methods based on your requirements.
 
-Database Connection Pool
+Database connection pool
 ########################
 
 Each worker is trying to be efficient when it comes to number of connections to a database. There is held only one instance of :class:`DataStorage <selinon.dataStorage.DataStorage>` class per whole worker. Selinon transparently takes care of concurrent-safety when calling methods of :class:`DataStorage <selinon.dataStorage.DataStorage>` if you plan to run your worker with concurrency level higher than one.

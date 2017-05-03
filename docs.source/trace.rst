@@ -1,6 +1,6 @@
 .. _trace:
 
-Trace Flow Actions
+Trace flow actions
 ------------------
 
 Selinon offers you a mechanism for tracing flow actions. By default Selinon does not output any logs, but you can configure tracing in your application. To trace by Python's logging, set ``trace`` to ``true`` in the global section of your configuration:
@@ -21,18 +21,18 @@ The full list of all events with corresponding details that are captured are ava
 
 .. note::
 
-  All tasks have instantiated logging instance under ``self.log`` (see :class:`SelinonTask <selinon.selinonTask.SelinonTask>`). Feel free to use this logger to do logging.
+  All tasks have instantiated logger instance under ``self.log`` (see :class:`SelinonTask <selinon.selinonTask.SelinonTask>`). Feel free to use this logger to do logging.
 
-If you would like to create your own trace logger, you can do so by registering your custom tracing function in the YAML configuration in ``global`` section:
+If you would like to create your own trace logger, you can do so by registering your custom tracing function in the YAML configuration in the ``global`` section:
 
 
 .. code-block:: yaml
 
   global:
     trace:
-      # from my_project.trace import my_trace_func
-      function: 'my_trace_func'
-      import: 'my_project.trace'
+      # from myapp.trace import my_trace_func
+      function: 'myapp'
+      import: 'myapp.trace'
 
 The tracing function has two arguments - ``event`` and ``msg_dict``. Argument ``event`` semantically corresponds to the tracepoint that is being captured and ``msg_dict`` captures all the details related to the tracepoint (see :obj:`selinon.trace`):
 

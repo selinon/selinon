@@ -1,17 +1,17 @@
 .. _start:
 
-A Quick Start Guide
+A quick start guide
 -------------------
 
 This section aims to provide you a very high overview of the Selinon project and its configuration. If you want to get deeper, follow next sections.
 
 
-Selinon Concept Overview
+Selinon concept overview
 ========================
 
 A system consist of flows, :ref:`storages or databases <storage>` and :ref:`tasks <tasks>`. Each flow defines a directed graph (that can be even cyclic, so no DAG limitations) of well defined dependencies on nodes that compute results. A node can be either a task or another flow, so you can make flows as nested as desired. You can make decisions on when to run which nodes based on conditions that are made of predicates.
 
-YAML Configuration Overview
+YAML configuration overview
 ===========================
 
 Selinon is configured by easy to learn, easy to read and easy to maintain declarative configuration files written in `YAML markup language <http://yaml.org/>`_.
@@ -35,9 +35,9 @@ In order to configure Selinon you need to do create a Celery's ``app`` instance,
   Config.set_celery_app(app)
   Config.set_config_yaml('path/to/nodes.yaml', ['path/to/flow1.yaml', 'path/to/flow2.yaml'])
 
-Please refer to `Celery configuration <http://docs.celeryproject.org/en/latest/userguide/configuration.html>`_ for Celery-related pieces.
+Please refer to `Celery configuration <http://docs.celeryproject.org/en/latest/userguide/configuration.html>`_ or `Selinon demo <https://github.com/selinon/demo>`_ for Celery-related pieces
 
-Naming Convention
+Naming convention
 #################
 
 
@@ -51,27 +51,27 @@ In the flow `flow2` (shown above) we start node `Task4` on condition that is alw
 .. image:: _static/flow1.png
     :align: center
 
-The second flow is slightly more complex. We (always) start with `Task1`. `Task1` will transparently store results in `Storage1`. After `Task1` finishes, Selinon (to be more precise dispatcher task) checks results of `Task1` in `Storage1` and if condition ```result['foo'] == 'bar'``` is evaluated as True, dispatcher starts nodes `Task2` and `flow2`. After both `Task2` and `flow2` finish, dispatcher starts `Task3`. If the condition ```result['foo'] == bar``` is met, `Task1` is started and the whole process is recursively done again. Results of all tasks are stored in database named `Storage1` except for results computed in sub-flow `flow2`, where `Storage2` is used.
+The second flow is slightly more complex. We (always) start with `Task1`. `Task1` will transparently store results in `Storage1`. After `Task1` finishes, Selinon (to be more precise dispatcher task) checks results of `Task1` in `Storage1` and if condition ``result['foo'] == 'bar'`` is evaluated as True, dispatcher starts nodes `Task2` and `flow2`. After both `Task2` and `flow2` finish, dispatcher starts `Task3`. If the condition ``result['foo'] == bar`` is met, `Task1` is started and the whole process is iteratively done again. Results of all tasks are stored in database named `Storage1` except for results computed in sub-flow `flow2`, where `Storage2` is used.
 
 Note that `Task2` and the whole `flow2` could be executed in parallel as there are no data nor time dependencies between these two nodes. Selinon runs as many nodes as possible in parallel. This makes it really easy to scale your system - the only bottleneck you can get is number of computational nodes in your cluster or limitations on storage/database side.
 
 Refer to `Selinonlib <https://github.com/selinon/selinonlib>`_ for plotting flow graphs. The YAML configuration that was used to plot examples is shown bellow.
 
-Flow Definitions
+Flow definitions
 ################
 
 Conditions
 **********
 
-Conditions are made of predicates that can be nested as desired using logical operators - `and`, `or` and `not`. There are predefined predicates available in `Selinonlib <https://selinonlib.readthedocs.org/>`_. However you can define your own predicates based on your requirements.
+Conditions are made of predicates that can be nested as desired using logical operators - `and`, `or` and `not`. There are predefined predicates available in `Selinonlib <https://selinonlib.readthedocs.io/>`_. However you can define your own predicates based on your requirements.
 
 These conditions are evaluated by dispatcher and if a condition is met, desired node or nodes are scheduled. If the condition is evaluated as false, destination nodes on the given edge are not run. Note that conditions are run only once only if all source nodes successfully finish.
 
 If you do not state ``condition`` in edge definition, edge condition will be evaluated always as true.
 
-Since there could run multiple nodes of a type (name) due to cyclic dependencies an edge condition is evaluated for each possible permutation (and only once for the given permutation). If you want to avoid such behaviour, check :ref:`patterns` section for possible solutions.
+Since there could run multiple nodes of a type (name) due to cyclic dependencies, an edge condition is evaluated for each possible combination (and only once for the given combination). If you want to avoid such behaviour, check :ref:`patterns` section for possible solutions.
 
-Starting Nodes
+Starting nodes
 **************
 
 You can have a single or multiple starting nodes in your flow. If you define a single starting node, the result of starting node can be propagated to other nodes as arguments if ``node_args_from_first`` is set. If you define more than one starting node, the result cannot be propagated (due to time-dependent evaluation), however you can still explicitly define arguments that are passed to the flow (or make part of your flow a sub-flow).
@@ -79,9 +79,9 @@ You can have a single or multiple starting nodes in your flow. If you define a s
 Flows
 *****
 
-Flows can be nested as desired. The only limitation is that you cannot now inspect results of sub-flow in a parent flow. There is a plan to remove such limitation in `next Selinon releases <https://github.com/selinon/selinon/issues/16>`_. Nevertheless you can still reorganize your flow (in most cases) so you are not limited with such restriction.
+Flows can be nested as desired. The only limitation is that you cannot now inspect results of sub-flow using edge conditions in a parent flow. There is a plan to remove such limitation in `next Selinon releases <https://github.com/selinon/selinon/issues/16>`_. Nevertheless you can still reorganize your flow (in most cases) so you are not limited with such restriction.
 
-Node Failures
+Node failures
 *************
 
 You can define fallback tasks and fallback flows that are run if a node fails. These fallback tasks and flows (fallback nodes) are not prone to time-dependent evaluation (to be more precise - there is no such thing in the whole Selinon design, so you can be sure that such thing does not occur on Selinon level). These fallback nodes are scheduled on task or flow failures and their aim is to recover from a failure.
@@ -90,12 +90,12 @@ Failures are propagated from sub-flows to parent flows. You can find analogy to 
 
 Now let's assume that you defined two fallbacks. One waits for `Task1` and `Task2` failure and another one waits only for `Task1` failure. Let's say that `Task1` failed. In this case the decision which fallback would be run depends on `Task2` failure (not on time-dependent evaluation). Fallback evaluation is greedy, so if `Task2` fails, there is run the first stated fallback. If `Task2` succeeds, the latter one fallback is used.
 
-Results of Tasks
+Results of tasks
 ****************
 
 Results of tasks are stored in databases transparently based on your definition in YAML configuration files. The only thing you need to provide is a database adapter that handles database connection and data storing/retrieval. See :ref:`storage <storage>` section for more info.
 
-YAML Configuration Example
+YAML configuration example
 **************************
 
 You can separate flows into multiple files, just provide ``flow-definitions`` key to find all flows defined in the YAML file.
@@ -146,7 +146,7 @@ You can separate flows into multiple files, just provide ``flow-definitions`` ke
               to:
                 - 'Task5'
 
-Entities in the System
+Entities in the system
 ######################
 
 This configuration could be placed to ``nodes.yaml``:
@@ -221,6 +221,6 @@ This configuration could be placed to ``nodes.yaml``:
         configuration: 'put your configuration for Storage2 here'
 
 
-See :ref:`yaml-conf` section for more details.
+See :ref:`yaml` section for more details.
 
 

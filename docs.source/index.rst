@@ -15,17 +15,18 @@ What is Selinon and why should I use it?
        tasks
        storage
        trace
-       optimization
-       patterns
-       practices
        selective
-       yaml.conf
+       yaml
+       practices
+       patterns
        faq
+       internals
+       optimization
        migration
        development
 
 
-`Selinon <https://github.com/selinon/selinon>`_ is a tool that gives you a power to define flows, sub-flows of tasks that should be executed in `Celery <http://www.celeryproject.org>`_ - a distributed task queue. If you want to define very simple flows, Celery offers you workflow primitives that can be used. Unfortunately these workflow primitives are very limited when it comes to extending your workflow, working with multiple dependencies or scheduling tasks based on particular conditions.
+`Selinon <https://github.com/selinon/selinon>`_ is a tool that gives you a power to define flows, sub-flows of tasks that should be executed in `Celery <http://www.celeryproject.org>`_ - a distributed task queue. If you want to define very simple flows, Celery offers you workflow primitives that can be used. Unfortunately these workflow primitives are very limited when it comes to extending your workflow, working with multiple dependencies or scheduling tasks based on particular conditions or events.
 
 If you are looking for a workflow solution, take a look at existing solutions, such as `Azkaban <https://azkaban.github.io/>`_, `Apache Airflow <https://github.com/apache/incubator-airflow>`_, `Apache Nifi <https://nifi.apache.org>`_, `Spotify Luigi <https://luigi.readthedocs.io>`_ and others. The main advantage of using Selinon over these is the fact, that you can use it in fully distributed systems and for example let `Kubernetes <https://kubernetes.io>`_ or `OpenShift <https://openshift.io>`_ do the workload (and much more, such as recursive flows, sub-flows support, selective task runs, ...).
 
@@ -53,7 +54,7 @@ In order to use Selinon, you need:
   * a basic knowledge of Python3 (yes, there is no support for Python2!)
   * `YAML markup language <http://yaml.org/>`_ (very intuitive and easy to learn)
   * a basic knowledge of Celery 4 (older versions are not supported) and its `configuration <http://docs.celeryproject.org/en/latest/userguide/configuration.html>`_
-  * vegetable appetite 😆
+  * vegetable appetite ;-)
 
 How does it work? - a high level overview
 #########################################
@@ -65,7 +66,7 @@ The only thing that needs to be provided by you is a YAML configuration file tha
 See also
 ********
 
-* `Selinonlib documentation <https://selinonlib.readthedocs.org/>`_
+* `Selinonlib documentation <https://selinonlib.readthedocs.io/>`_
 * `Selinonlib project <https://github.com/selinon/selinonlib>`_
 * `Celery configuration <http://docs.celeryproject.org/en/latest/configuration.html>`_
 

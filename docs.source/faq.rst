@@ -6,9 +6,9 @@ Frequently Asked Questions (FAQ)
 I see only one contributor, should I trust you?
 ***********************************************
 
-There is currently one contributor, but every project started somehow. Selinon was designed for `fabric8-analytics project at Red Hat <https://github.com/fabric8-analytics>`_, where it is still used and it already served (I believe) hundreds of thousands tasks or flows (if not more). If you find Selinon interesting for your use-case, feel free to use it (and buy me some beer or at least let me know `that you like it or any experiences you have <https://saythanks.io/to/fridex>`_).
+There is currently one contributor, but every project started somehow. Selinon was designed for `fabric8-analytics project at Red Hat <https://github.com/fabric8-analytics>`_ that gathers project information for `openshift.io <https://openshift.io>`_ (introduced at the Red Hat 2017 summit keynote), where it is still used and it already served (I believe) hundreds of thousands tasks or flows (if not more). If you find Selinon interesting for your use-case, feel free to use it (and buy me some beer or at least let me know `that you like it or any experiences you have <https://saythanks.io/to/fridex>`_).
 
-If you find a bug, place for enhancement or anything where I can be helpful, feel free to let me know. And not to forget even you can be :ref:`Selinon developer <development>`.
+If you find a bug, place for enhancement or anything where I can be helpful, feel free to let me know. And not to forget - even you can be :ref:`Selinon developer <development>`.
 
 Dispatcher does not work properly or hangs in an infinite loop.
 ***************************************************************
@@ -18,25 +18,36 @@ Check your `result backend configuration for Celery <http://docs.celeryproject.o
 Can I see Selinon in action?
 ****************************
 
-See `Selinon demo <https://github.com/selinon/demo>`_ or `fabric8-analytics project <https://github.com/fabric8-analytics>`_
+See `Selinon demo <https://github.com/selinon/demo>`_ or `fabric8-analytics project <https://github.com/fabric8-analytics>`_.
 
-I'm getting Python related errors
-*********************************
+Can I simulate Selinon run without deploying huge infrastructure?
+*****************************************************************
+
+Yes, you can. Just use shipped simulator:
+
+.. code-block:: console
+
+  selinonlib-cli simulate --nodes-definition nodes.yml --flow-definitions flow1.yml flow2.yml --help
+
+This way you can also use Selinon to run your flows from a CLI.
+
+I'm getting Python related errors!
+**********************************
 
 Check your Python version. Selinon and Selinonlib currently support only Pyhon3+ as Celery project is about to `drop Python2 support <http://docs.celeryproject.org/en/master/whatsnew-4.0.html#last-major-version-to-support-python-2>`_.
 
 Should I replace Celery with Selinon?
 *************************************
 
-Well, hard to say. Celery is a great project and offers a lot of features. Selinon should be suitable for you when you have time and data dependencies between tasks and you can group these tasks into flows that are more sophisticated than Celery's primitives such as chain or chord. If this is true for you just give Selinon a try. If you are already using Celery, check prepared guide on :ref:`how to migrate from raw Celery to Selinon <migration>`.
+Well, hard to say. Celery is a great project and offers a lot of features. Selinon should be suitable for you when you have time and data dependencies between tasks and you can group these tasks into flows that are more sophisticated than Celery's primitives such as chain or chord. If this is true for you, just give Selinon a try. If you are already using Celery, check prepared guide on :ref:`how to migrate from raw Celery to Selinon <migration>`.
 
 How should I name tasks and flows?
 **********************************
 
 You should use names that can became part of function name (or Python3 identifier). Keep in mind that there is no strict difference between tasks, flows and sub-flows, so they share name space.
 
-How can I access nested keys in a dict in default predicates
-************************************************************
+How can I access nested keys in a dict in default predicates?
+*************************************************************
 
 Assuming you are using predicates from `Selinonlib <https://github.com/selinon/selinonlib>`_. What you want is (in Python3):
 
@@ -56,10 +67,10 @@ Predicates were designed to deal with this - just provide list of keys, where po
             - 'bar'
         value: 'baz'
 
-I need a custom predicate
-*************************
+I need a custom predicate, how to write it?
+*******************************************
 
-If `Selinonlib <https://github.com/selinon/selinonlib>`_ predicates are not suitable for you or you miss a specific predicate, you can define your own module in the ``global`` configuration. See :ref:`YAML configuration section <yaml-conf>` for details.
+If `Selinonlib <https://github.com/selinon/selinonlib>`_ predicates are not suitable for you or you miss a specific predicate, you can define your own module in the ``global`` configuration. See :ref:`YAML configuration section <yaml>` for details.
 
 What exceptions can predicates raise?
 *************************************
@@ -120,8 +131,14 @@ Why there is no support for older Celery versions?
 
 One of the requirements of Selinon is, that it defines tasks (:class:`Dispatcher <selinon.dispatcher.Dispatcher>` and :class:`SelinonTaskEnvelope <selinon.selinonTaskEnvelope.SelinonTaskEnvelope>`) before the Celery's application gets instantiated. Older versions of Celery requested tasks to be registered after the Celery's application was created. This makes it chicken-egg problem.
 
+What queue type do I need?
+**************************
+
+Selinon uses Celery for queue handling and running, so you have to use queue implementation that is supported by Celery - such as SQS or RabbitMQ.
+
+Selinon requires that you messages are delivered - it's okay if messages are delivered more than once (see for example SQS details regarding deliver at least one). You will just end up with multiple tasks executed at the same time. You can tackle that in your application logic.
 
 What does Selinon mean?
 ***********************
 
-Selinon means Celery in Greek language. τι κάνεις? καλὰ? The main reason for using Greek language was the fact that there are already successful project out there that do distributed systems and have Greek names (see `Kubernetes <https://kubernetes.io>`_ as an example). But Greek language is cool anyway ☺.
+Selinon means Celery in Greek language. The main reason for using Greek language was the fact that there are already successful project out there that do distributed systems and have Greek names (see `Kubernetes <https://kubernetes.io>`_ as an example). But Greek language is cool anyway :-).

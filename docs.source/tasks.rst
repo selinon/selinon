@@ -1,6 +1,6 @@
 .. _tasks:
 
-Task Implementation
+Task implementation
 -------------------
 
 Each task you want to run in Selinon has to be of type :obj:`SelinonTask <selinon.selinonTask>`.
@@ -13,11 +13,27 @@ The only thing you need to define is the ``run()`` method which accepts ``node_a
 
   class MyTask(SelinonTask):
       def run(self, node_args):
-         # compute A + B
-         return {'c': node_args['a'] + node_args['b']}
+          # compute a + b
+          return {'c': node_args['a'] + node_args['b']}
 
+
+Now you need to point to the task implementation from YAML configuration files (``nodes.yaml``):
+
+.. code-block:: yaml
+
+  tasks:
+    # from myapp.tasks import MyTask
+    - name: 'MyTask'
+      import: 'myapp.tasks'
+
+See :ref:`YAML configuration <yaml>` section for all possible configuration options.
 
 In order to retrieve data from parent tasks or flows you can use prepared :class:`SelinonTask <selinon.selinonTask.SelinonTask>` methods. You can also access configured storage and so.
+
+Task failures
+#############
+
+First, make sure you are familiar with retry options that can be passed in the :ref:`YAML configuration <yaml>`.
 
 If your task should not be rescheduled due to a fatal error, raise :exc:`FatalTaskError <selinon.errors.FatalTaskError>`. This will cause fatal task error and task will not be rescheduled. Keep in mind that `max_retry` from YAML configuration file **will be ignored**! If you want to retry, just raise any appropriate exception that you want to track in trace logs.
 
