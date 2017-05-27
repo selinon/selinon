@@ -1,15 +1,21 @@
 language: python
 python:
-  - "3.4"
-  - "3.5"
-  - "3.6"
-  #- "nightly"
-# we force update dev_requirements.txt so we get latest master of selinonlib to
-# be consistent with test
-install: 
-  - pip3 install -r requirements.txt 
-  - pip3 install -U -r dev_requirements.txt
-  - pip3 install -U coala-bears
+- '3.4'
+- '3.5'
+- '3.6'
+install:
+- pip3 install -r requirements.txt
+- pip3 install -U -r dev_requirements.txt
+- pip3 install -U coala-bears
 script: make check
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+- bash <(curl -s https://codecov.io/bash)
+deploy:
+  provider: pypi
+  user: fridex
+  password:
+    secure: m66LR/IjH0kN9JYrpEN07tDsnv0pdq5EEX4U4HpbPMpivzcIwKSMS+0AHWJlqdk6kkTC5lsT3ZT8+5BogIT3DqxdO7G6ZYOANtVo7Pr7kAZqZCF0scnoc9GfisdsJgMvvR6dDqkTGU+KQnzkJcdAwOp59Ek2/Ek4NGs5GhhGzPfvRtYO7N4R1SzEV2RRaPJM/9islv3U9V3cxt+JEn4rJqAW2dMUjEBp/bD9mtDvMZfvbte2fzSQ9fCVyWAi+augwxAzF8QUdW+C/oRJVpmu2P/2B3G0jdwchXdJS2LkN1A0bJAwGOmBwohoOak4mj5zlBFqDTdkvd1iX6MoygM++JvZkCa4yblCqfiLMm3eFunYoOQfiqKkh+TNTTyiqDBAeDL0TRJyBVqt7WznDjd1o0nhijwa5u7uKiZ/v7g7/7eUzg0FkqAuehoC5Ch7Y3Tbqj5EashWZV77U70hRAqEf7zuurNqTBtGbmt6+SbSoxJxsPU3VVWl9rhzfMczSuU2WMTs+2gQ0FlZIxNNIx91H7aeAO29aUPk1Do6QnBfMsGL0Fshlx+ZnxOAKa1EFSAA1fQNA2gfRqPwkq/V3P6PqJLG4u+QullwAFCNN/JQ/35q7pbxi5sDhyKYphsZOSIGBdsnbMie6g+exUgKiwYyCxjXdGnhMdzEV5pq1kgIDcM=
+  on:
+    tags: true
+    branch: master
+  distributions: "sdist bdist_wheel"
