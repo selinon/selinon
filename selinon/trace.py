@@ -112,7 +112,7 @@ import platform
 
 def _default_trace_func(event, msg_dict):
     # pylint: disable=unused-argument
-    """Default tracing function that is used for storing results - do nothing.
+    """Use default tracing function that is used for storing results - do nothing.
 
     :param event: event that triggered trace point
     :param msg_dict: a dict holding additional trace information for event
@@ -241,7 +241,7 @@ class Trace(object):
 
     @classmethod
     def log(cls, event, *msg_dict):
-        """Main tracing function called on events.
+        """Log an event.
 
         :param event: tracing event
         :param msg_dict: message to be printed

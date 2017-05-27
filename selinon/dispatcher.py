@@ -28,7 +28,7 @@ class Dispatcher(Task):
     name = "selinon.Dispatcher"
 
     def selinon_retry(self, flow_name, node_args, parent, selective, retried_count):
-        """"Retry whole flow on failure if configured so, forget any progress done so far.
+        """Retry whole flow on failure if configured so, forget any progress done so far.
 
         :param flow_name: name of the flow to be retried
         :param node_args: flow arguments

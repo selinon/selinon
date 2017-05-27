@@ -1,5 +1,4 @@
-# Use the latest selinonlib so we know we are in sync
-git+https://github.com/selinon/selinonlib@master
+-r requirements.txt
 pytest>=3
 pytest-timeout
 pytest-cov
