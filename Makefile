@@ -27,13 +27,27 @@ clean:
 	rm -rf venv coverage.xml
 	rm -rf dist selinon.egg-info build docs/
 
-check:
+pytest:
 	@# We have to adjust PYTHONPATH so we use our own Celery and modified Selinon Dispatcher for testing
 	@# Make sure we have -p no:celery otherwise py.test is trying to do dirty stuff with loading celery.contrib
+	@echo ">>> Executing testsuite"
 	PYTHONPATH="test/:${PYTHONPATH}" python3 -m pytest -s --cov=./selinon -vvl --nocapturelog --timeout=2 -p no:celery test/*.py
-	@[ -n "${NOPYLINT}" ] || { echo ">>> Running PyLint"; pylint selinon; }
-	#@[ -n "${NOCOALA}" ] || { echo ">>> Running Coala bears"; coala --non-interactive; }
-	@[ -n "${NOPYDOCSTYLE}" ] || { echo ">>> Running pydocstyle"; pydocstyle --match='(?!test_|version).*\.py' selinon; }
+
+pylint:
+	@echo ">>> Running pylint"
+	pylint selinon
+
+coala:
+	@# We need to run coala in a virtual env due to dependency issues
+	@echo ">>> Coala disabled"
+	@#@echo ">>> Running coala"
+	@#coala --non-interactive
+
+pydocstyle:
+	@echo ">>> Running pydocstyle"
+	pydocstyle --match='(?!test_|version).*\.py' selinon
+
+check: pytest pylint pydocstyle coala
 
 api:
 	@sphinx-apidoc -e -o docs.source/selinon/doc/ selinon -f
