@@ -1,1 +1,1 @@
-selinon_version = '0.1.0rc3'
+selinon_version = '0.1.0rc4'
