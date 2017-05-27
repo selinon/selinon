@@ -1,10 +1,11 @@
+# Use the latest selinonlib so we know we are in sync
+git+https://github.com/selinon/selinonlib@master
 pytest>=3
 pytest-timeout
 pytest-cov
-coala-bears
+#coala-bears
 flexmock
 pylint
 pytest-capturelog
 pydocstyle
-# Use latest selinonlib so we know we are in sync
-git+https://github.com/selinon/selinonlib@master
+

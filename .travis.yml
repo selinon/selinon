@@ -4,9 +4,8 @@ python:
 - '3.5'
 - '3.6'
 install:
-- pip3 install -r requirements.txt
-- pip3 install -U -r dev_requirements.txt
-- pip3 install -U coala-bears
+- pip3 install -U -r requirements.txt
+- pip3 install -U --force-reinstall -r dev_requirements.txt
 script: make check
 after_success:
 - bash <(curl -s https://codecov.io/bash)
