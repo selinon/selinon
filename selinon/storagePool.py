@@ -142,7 +142,6 @@ class StoragePool(object):
             'storage_task_name': storage_task_name,
             'task_id': task_id,
             'storage_name': Config.task2storage_mapping[task_name],
-            'result': result,
             'record_id': record_id
         })
         return record_id
