@@ -13,6 +13,12 @@ An advanced task flow management on top of [Celery](https://www.celeryproject.or
 
 Is this project helpful? [Send me a simple warm message](https://saythanks.io/to/fridex)!
 
+## Crossroad
+
+ * [PyPI](https://pypi.python.org/pypi/selinon)
+ * [Documentation](https://selinon.readthedocs.io/en/latest/)
+ * [Developers documentation](https://selinon.readthedocs.io/en/latest/development.html)
+
 ## TLDR;
 
 An advanced flow management above Celery (an asynchronous distributed task queue) written in Python3, that allows you to:
