@@ -161,6 +161,20 @@ class Config(object):
         celery_app.tasks.register(Dispatcher())
         celery_app.tasks.register(SelinonTaskEnvelope())
 
+    @classmethod
+    def init(cls, celery_app, nodes_definition_file, flow_definition_files, config_py=None, keep_config_py=False):
+        """Initialize Selinon configuration.
+
+        :param celery_app: celery application to be used
+        :param nodes_definition_file: definition of system nodes - YAML configuration
+        :param flow_definition_files: list of flow definition files
+        :param config_py: a file that should be used for storing generated config.py
+        :param keep_config_py: do not remove config_py file after run
+        """
+        # pylint: disable=too-many-arguments
+        cls.set_config_yaml(nodes_definition_file, flow_definition_files, config_py, keep_config_py)
+        cls.set_celery_app(celery_app)
+
     @staticmethod
     def _should_config(node_name, dst_node_name, configuration):
         """Syntax sugar for configuration entries that accept lists/booleans.
