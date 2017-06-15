@@ -1,6 +1,7 @@
 *.pyc
 docs/
 venv/
+venv-coala/
 __pycache__
 build
 selinon.egg-info

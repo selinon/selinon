@@ -10,8 +10,9 @@ import json
 import sys
 import traceback
 
-from celery import Task
 import jsonschema
+
+from celery import Task
 
 from .config import Config
 from .errors import FatalTaskError

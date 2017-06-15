@@ -1,6 +1,6 @@
 TEMPFILE := $(shell mktemp -u)
 
-.PHONY: install clean uninstall venv check doc docs html api
+.PHONY: install clean uninstall venv check doc docs html api coala pylint pydocstyle pytest
 
 install:
 	sh ./bump-version.sh
@@ -19,12 +19,12 @@ devenv:
 	pip3 install -U --force-reinstall git+https://github.com/selinon/selinonlib@master
 
 venv:
-	virtualenv venv && source venv/bin/activate && pip3 install -r requirements.txt
+	virtualenv -p python3 venv && source venv/bin/activate && pip3 install -r requirements.txt
 	@echo "Run 'source venv/bin/activate' to enter virtual environment and 'deactivate' to return from it"
 
 clean:
 	find . -name '*.pyc' -or -name '__pycache__' -print0 | xargs -0 rm -rf
-	rm -rf venv coverage.xml
+	rm -rf venv venv-coala coverage.xml
 	rm -rf dist selinon.egg-info build docs/
 
 pytest:
@@ -39,9 +39,13 @@ pylint:
 
 coala:
 	@# We need to run coala in a virtual env due to dependency issues
-	@echo ">>> Coala disabled"
-	@#@echo ">>> Running coala"
-	@#coala --non-interactive
+	@if [ `python3 --version | cut -f2 -d' ' | cut -f2 -d.` != '6' ]; then \
+	  echo ">>> Preparing virtual environment for coala" &&\
+	  # setuptools is pinned due to dependency conflict &&\
+	  [ -d venv-coala ] || virtualenv -p python3 venv-coala && . venv-coala/bin/activate && pip3 install coala-bears "setuptools>=17.0" &&\
+	  echo ">>> Running coala" &&\
+	  venv-coala/bin/python3 venv-coala/bin/coala --non-interactive || exit 1; \
+	else echo ">>> Skipping coala tests due to errors on Python 3.6"; fi
 
 pydocstyle:
 	@echo ">>> Running pydocstyle"
