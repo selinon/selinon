@@ -315,6 +315,8 @@ A flow definition is placed into a list of flow definitions in the YAML configur
         args:
           # check for flow state each 10 seconds
           retry: 10
+      throttling:
+         seconds: 10
       edges:
         - from:
             - 'Task1'
@@ -487,6 +489,27 @@ Define a custom module where dispatcher sampling strategy function (see :ref:`op
   * **Defaults:** as listed in each configuration key
 
 Refer to `Selinonlib documentation <http://selinonlib.readthedocs.io>`_ for additional info.
+
+throttling
+##########
+
+Task execution throttling configuration.
+
+  * **Possible values:**
+
+    * following keys for time delay configuration, each configurable using a positive integer, if omitted defaults to 0:
+
+      * days
+      * seconds
+      * microseconds
+      * milliseconds
+      * minutes
+      * hours
+      * weeks
+
+  * **Required:** false
+
+  * **Default:** all time delay configuration keys set to zero - no throttling is performed
 
 cache
 #####
