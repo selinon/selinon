@@ -225,7 +225,9 @@ class Trace(object):
         SELECTIVE_RUN_FUNC,\
         SELECTIVE_TASK_REUSE,\
         STORAGE_STORE_ERROR,\
-        STORAGE_OMIT_STORE_ERROR = range(38)
+        STORAGE_OMIT_STORE_ERROR,\
+        FALLBACK_COND_FALSE,\
+        FALLBACK_COND_TRUE = range(40)
 
     WARN_EVENTS = (
         NODE_FAILURE,
@@ -274,7 +276,9 @@ class Trace(object):
         'SELECTIVE_RUN_FUNC',
         'SELECTIVE_TASK_REUSE',
         'STORAGE_STORE_ERROR',
-        'STORAGE_OMIT_STORE_ERROR'
+        'STORAGE_OMIT_STORE_ERROR',
+        'FALLBACK_COND_FALSE',
+        'FALLBACK_COND_TRUE'
     )
 
     def __init__(self):

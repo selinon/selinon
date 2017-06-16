@@ -430,7 +430,72 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
 
         return started, selective_reuse
 
-    def _run_fallback(self):
+    def _run_fallback(self, failure_node, combination):
+        """Evaluate fallback condition and run fallback iff condition is true.
+
+        :param failure_node: failure node that should be evaluated
+        :param combination: combination of failed nodes
+        :return: triplet started - records about started nodes, should_continue - True if other fallbacks can be
+                 run, skip_failure_node - true if the current failure node should be skipped in this fallback run
+                 (preserves infinite deps)
+        """
+        traced_nodes_arr = []
+        # compute affected nodes
+        for node in combination:
+            if node[0] not in self._failed_nodes.keys():
+                # this means that some fallback was previously run and some node in the combination was already handled
+                return [], True, True
+            traced_nodes_arr.append({'name': node[0], 'id': self._failed_nodes[node[0]][0]})
+
+        trace_dict = {
+            'flow_name': self._flow_name,
+            'dispatcher_id': self._dispatcher_id,
+            'nodes': traced_nodes_arr,
+            'selective': self._selective,
+            'fallback': None
+        }
+
+        should_continue = True
+        skip_failure_node = True
+        started = []
+        affected_nodes = set()
+
+        for idx, fallback in enumerate(failure_node['fallback']):
+            trace_dict['fallback'] = fallback
+            trace_dict['condition_strs'] = failure_node['condition_strs'][idx]
+            if not failure_node['conditions'][idx](StoragePool({}, self._flow_name), self._node_args):
+                Trace.log(Trace.FALLBACK_COND_FALSE, trace_dict)
+                continue
+
+            # preserve infinite loops when no fallback is run due to condition evaluation - proceed to next failure node
+            skip_failure_node = False
+            Trace.log(Trace.FALLBACK_COND_TRUE, trace_dict)
+
+            # we will run some fallback, remove affected failed nodes from failed_nodes
+            for node in combination:
+                affected_nodes.add(node[0])
+
+            Trace.log(Trace.FALLBACK_START, trace_dict)
+            if fallback is True:
+                continue
+
+            for node_name in fallback:
+                record = self._start_node(node_name, parent=None, node_args=self._node_args)
+                if node_name not in Config.nowait_nodes[self._flow_name]:
+                    started.append(record)
+                else:
+                    # wait for fallback to finish in order to avoid time dependent flow evaluation
+                    should_continue = False
+
+        # clean nodes for which a fallback was run
+        for node_name in affected_nodes:
+            self._failed_nodes[node_name].pop(0)
+            if not self._failed_nodes[node_name]:
+                del self._failed_nodes[node_name]
+
+        return started, should_continue, skip_failure_node
+
+    def _compute_and_run_fallback(self):
         """Run fallback in the system.
 
         :return: fallbacks that were run
@@ -442,58 +507,24 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         # pylint: disable=too-many-nested-blocks
         for i in range(len(failed_nodes), 0, -1):
             for combination in itertools.combinations(failed_nodes, i):
-                change = True
-                while change:
-                    change = False
-                    try:
-                        failure_nodes = Config.failures[self._flow_name]
-                        failure_node = reduce(lambda n, c: n['next'][c[0]], combination[1:],
-                                              failure_nodes[combination[0][0]])
-                    except KeyError:
-                        # such failure not found in the tree of permutations - this means that this
-                        # flow will always fail, but run defined fallbacks for defined failures first
-                        continue
+                try:
+                    failure_nodes = Config.failures[self._flow_name]
+                    failure_node = reduce(lambda n, c: n['next'][c[0]], combination[1:],
+                                          failure_nodes[combination[0][0]])
+                except KeyError:
+                    # such failure not found in the tree of permutations - this means that this
+                    # flow will always fail, but run defined fallbacks for defined failures first
+                    continue
 
-                    if isinstance(failure_node['fallback'], list) and failure_node['fallback']:
-                        traced_nodes_arr = []
+                while True:
+                    fallback_run, should_continue, skip_failure_node = self._run_fallback(failure_node, combination)
+                    ret.extend(fallback_run)
 
-                        for node in combination:
-                            traced_nodes_arr.append({'name': node[0], 'id': self._failed_nodes[node[0]][0]})
-                            self._failed_nodes[node[0]].pop(0)
-                            if not self._failed_nodes[node[0]]:
-                                del self._failed_nodes[node[0]]
-
-                        Trace.log(Trace.FALLBACK_START, {'flow_name': self._flow_name,
-                                                         'dispatcher_id': self._dispatcher_id,
-                                                         'nodes': traced_nodes_arr,
-                                                         'selective': self._selective,
-                                                         'fallback': failure_node['fallback']})
-
-                        for node in failure_node['fallback']:
-                            # TODO: parent should be tasks from traced_nodes_arr, we need to compute sub-flow ids
-                            record = self._start_node(node, parent=None, node_args=self._node_args)
-                            ret.append(record)
-
-                        # wait for fallback to finish in order to avoid time dependent flow evaluation
+                    if not should_continue:
                         return ret
-                    elif failure_node['fallback'] is True:
-                        change = True
-                        traced_nodes_arr = []
-                        for node in combination:
-                            traced_nodes_arr.append({'name': node[0], 'id': self._failed_nodes[node[0]][0]})
-                            self._failed_nodes[node[0]].pop(0)
-                            if not self._failed_nodes[node[0]]:
-                                del self._failed_nodes[node[0]]
-                                # we have reached zero in failed nodes, we cannot continue with failure
-                                # combination otherwise we get KeyError
-                                change = False
 
-                        Trace.log(Trace.FALLBACK_START, {'flow_name': self._flow_name,
-                                                         'dispatcher_id': self._dispatcher_id,
-                                                         'nodes': traced_nodes_arr,
-                                                         'selective': self._selective,
-                                                         'fallback': True})
-                        # continue with fallback in other combinations, nothing started
+                    if skip_failure_node or not all(node[0] in self._failed_nodes.keys() for node in combination):
+                        break
 
         return ret
 
@@ -732,7 +763,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             # We wait until all active nodes finish if there are some failed nodes try to recover from failure,
             # otherwise mark flow as failed
             if not self._active_nodes and self._failed_nodes:
-                fallback_started = self._run_fallback()
+                fallback_started = self._compute_and_run_fallback()
                 if not fallback_started and self._failed_nodes:
                     # We will propagate state information so we can correctly propagate parent and failed nodes in
                     # parent flow if there is any

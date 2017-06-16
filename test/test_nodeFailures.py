@@ -73,7 +73,10 @@ class TestNodeFailures(SelinonTestCase):
                       {'from': [], 'to': ['Task1'], 'condition': self.cond_true}]
         }
         failures = {
-            'flow1': {'Task1': {'next:': {}, 'fallback': True}}
+            'flow1': {'Task1': {'next:': {}, 'fallback': [True],
+                                'conditions': [self.cond_true],
+                                'condition_strs': ['cond_true']
+                                }}
 
         }
         self.init(edge_table, failures=failures)
@@ -123,7 +126,10 @@ class TestNodeFailures(SelinonTestCase):
                       {'from': ['Task3'], 'to': ['Task4'], 'condition': self.cond_true}]
         }
         failures = {
-            'flow1': {'Task1': {'next:': {}, 'fallback': ['Task3']}}
+            'flow1': {'Task1': {'next:': {}, 'fallback': [['Task3']],
+                                'conditions': [self.cond_true],
+                                'condition_strs': ['cond_true']
+                                }}
 
         }
         self.init(edge_table, failures=failures)
@@ -184,7 +190,10 @@ class TestNodeFailures(SelinonTestCase):
                       {'from': ['Task4'], 'to': ['Task6'], 'condition': self.cond_true}]
         }
         failures = {
-            'flow1': {'Task1': {'next:': {}, 'fallback': ['Task3', 'Task4']}}
+            'flow1': {'Task1': {'next:': {}, 'fallback': [['Task3', 'Task4']],
+                                'conditions': [self.cond_true],
+                                'condition_strs': ['cond_true']
+                                }}
 
         }
         self.init(edge_table, failures=failures)
@@ -279,7 +288,10 @@ class TestNodeFailures(SelinonTestCase):
             'flow2': [{'from': [], 'to': ['Task3'], 'condition': self.cond_true}]
         }
         failures = {
-            'flow1': {'Task1': {'next:': {}, 'fallback': ['flow2']}}
+            'flow1': {'Task1': {'next:': {}, 'fallback': [['flow2']],
+                                'conditions': [self.cond_true],
+                                'condition_strs': ['cond_true']
+                                }}
         }
         self.init(edge_table, failures=failures)
 
@@ -330,7 +342,10 @@ class TestNodeFailures(SelinonTestCase):
             'flow2': []
         }
         failures = {
-            'flow1': {'flow2': {'next:': {}, 'fallback': ['Task2']}}
+            'flow1': {'flow2': {'next:': {}, 'fallback': [['Task2']],
+                                'conditions': [self.cond_true],
+                                'condition_strs': ['cond_true']
+                                }}
         }
         self.init(edge_table, failures=failures)
 
@@ -465,8 +480,18 @@ class TestNodeFailures(SelinonTestCase):
                       {'from': [], 'to': ['Task1', 'Task2'], 'condition': self.cond_true}],
         }
         failures = {
-            'flow1': {'Task1': {'next': {'Task2': {'next': {}, 'fallback': ['Task5']}}, 'fallback': []},
-                      'Task2': {'next': {'Task1': {'next': {}, 'fallback': ['Task5']}}, 'fallback': []}
+            'flow1': {'Task1': {'next': {'Task2': {'next': {},
+                                                   'fallback': [['Task5']],
+                                                   'conditions': [self.cond_true],
+                                                   'condition_strs': ['cond_true'],
+                                                   }},
+                                'fallback': []},
+                      'Task2': {'next': {'Task1': {'next': {},
+                                                   'fallback': [['Task5']],
+                                                   'conditions': [self.cond_true],
+                                                   'condition_strs': ['cond_true'],
+                                                   }},
+                                'fallback': []}
                       }
         }
         self.init(edge_table, failures=failures)
@@ -675,7 +700,9 @@ class TestNodeFailures(SelinonTestCase):
                             'next': {
                                 'flow4': {
                                     'next': {},
-                                    'fallback': ['TaskX']
+                                    'fallback': [['TaskX']],
+                                    'conditions': [self.cond_true],
+                                    'condition_strs': ['cond_true']
                                 },
                                 'fallback': []
                             },
@@ -881,7 +908,8 @@ class TestNodeFailures(SelinonTestCase):
         edge_table = {'flow1': [{'from': [], 'to': ['flow2'], 'condition': self.cond_true}],
                       'flow2': []}  # flow2 handled manually
         failures = {
-            'flow1': {'flow2': {'next': {}, 'fallback': True}},
+            'flow1': {'flow2': {'next': {}, 'fallback': [True], 'conditions': [self.cond_true],
+                                'condition_strs': ['cond_true']}},
             'flow2': {}
         }
         self.init(edge_table, failures=failures)
@@ -913,7 +941,10 @@ class TestNodeFailures(SelinonTestCase):
         #  flow1 will have three tasks, Task1 will be instantiated twice. We will provide fallback for Task1
         edge_table = {'flow1': [{'from': [], 'to': ['Task0', 'Task1'], 'condition': self.cond_true}]}
         failures = {
-            'flow1': {'Task1': {'next': {}, 'fallback': True}},
+            'flow1': {'Task1': {'next': {}, 'fallback': [True],
+                                'conditions': [self.cond_true],
+                                'condition_strs': ['cond_true']
+                                }},
         }
         self.init(edge_table, failures=failures)
 
