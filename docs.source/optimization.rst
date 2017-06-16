@@ -187,3 +187,57 @@ The ``RedisCache`` implementation has to derive from :class:`Cache <selinon.cach
 .. note::
 
   Due to results consistency information about task states are added to caches only if task (or flow) fails or finishes - there won't be any flow or task with the same id executed in the future.
+
+Prioritization of tasks and flows
+=================================
+
+You can easily prioritize tasks or flows by placing them on separate queues and dedicate more workers to process these tasks or flows (see ``queue`` option in the :ref:`YAML configuration section <yaml>`). Note that queues that are reserved for flows are used for dispatcher task that does scheduling based on state (not for tasks in general that are stated in the flow).
+
+.. note::
+
+  Think about prioritization before you do production deployment - place each flow and task on a separate queue and you can easily prioritize flows and tasks without purging queues or performing redeployment.
+
+To run Celery worker only the given queues ``queue1`` and ``queue2`` specify Celery's ``-Q`` argument:
+
+.. code-block:: bash
+
+   celery worker -A myapp.start -Q queue1,queue2 # additional parameters follow
+
+
+Throttling of tasks and flows
+=============================
+
+Throttling can be performed by reducing number of workers that process given task or flow as opposite to described prioritization (see above).
+
+If you would like to perform even more robust throttling, you can apply throttling option on task or flow level (see ``throttling`` option in the :ref:`YAML configuration section <yaml>`). Note that for setting up throttling properly you need to dedicate one cluster node that would accept dispatcher task (flow on a separate queue) in the given flow with throttled tasks or flows. This guarantees that scheduling of throttled tasks or flows is done on one place so the given worker node can perform time-based throttling properly based on internally kept state.
+
+Flow throttling is done on flow level (not on task level) similarly as flow prioritization described above.
+
+.. note::
+
+  Place each task and flow (dispatcher scheduling) on a separate queue so you can easily do throttling without purging queues when changing prioritization or throttling related configuration.
+
+
+An example of configuration:
+
+.. code-block:: yaml
+
+  ---
+  tasks:
+    - name: Task1
+      import: myapp.tasks
+      queue: task1_v0
+      throttling:  # task level throttling
+        seconds: 10
+
+  # additional entries follow
+
+  flow-definitions:
+    - name: flow1
+      queue: flow1_v0
+      throttling:  # flow level throttling
+        minutes: 30
+        seconds: 10
+      edges:
+
+  # additional entries follow

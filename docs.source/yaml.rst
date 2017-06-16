@@ -199,7 +199,7 @@ Selective run function that should be applied on :ref:`selective task runs <sele
 throttling
 ##########
 
-Task execution throttling configuration.
+Task execution throttling configuration. See :ref:`Optimization section <optimization>` for more detailed explanation.
 
   * **Possible values:**
 
@@ -493,7 +493,7 @@ Refer to `Selinonlib documentation <http://selinonlib.readthedocs.io>`_ for addi
 throttling
 ##########
 
-Task execution throttling configuration.
+Flow execution throttling configuration. See :ref:`Optimization section <optimization>` for more detailed explanation.
 
   * **Possible values:**
 
