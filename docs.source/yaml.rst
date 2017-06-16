@@ -297,6 +297,8 @@ A flow definition is placed into a list of flow definitions in the YAML configur
         - 'flow2'
       node_args_from_first: true
       #propagate_compound_finished:
+      max_retry: 2
+      retry_countdown: 10
       propagate_finished:
         - 'flow2'
       propagate_node_args:
@@ -431,6 +433,32 @@ Do not wait for a node (a task or a sub-flow) to finish. This node cannot be sta
  * **Required:** false
   
  * **Default:** an empty list - wait for all nodes to complete in order to end flow
+
+max_retry
+#########
+
+Maximum number of retries of the flow in case of flow failures. A flow can fail when one of nodes is marked as failed (task or any sub-flow). In case of retries, all tasks are scheduled from the beginning as in the first run.
+
+ * **Possible values:**
+
+   * positive integer - maximum number of retries to be performed
+
+ * **Required:** false
+
+ * **Default:** 0 - no retries on flow retries are done
+
+retry_countdown
+###############
+
+Number of seconds before a flow should be retried (retry delay).
+
+ * **Possible values:**
+
+   * positive integer - number of seconds for retry delay
+
+ * **Required:** false
+
+ * **Default:** 0 - no delay is performed
 
 sampling
 ########
