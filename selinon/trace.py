@@ -105,25 +105,16 @@ List of events that can be traced:
 """
 
 import datetime
+import functools
 import json
 import logging
 import platform
 
 
-def _default_trace_func(event, msg_dict):
-    # pylint: disable=unused-argument
-    """Use default tracing function that is used for storing results - do nothing.
-
-    :param event: event that triggered trace point
-    :param msg_dict: a dict holding additional trace information for event
-    """
-    pass
-
-
 class Trace(object):
     """Trace system flow actions."""
 
-    _trace_func = _default_trace_func
+    _trace_functions = []
     _logger = None
 
     DISPATCHER_WAKEUP, \
@@ -229,7 +220,21 @@ class Trace(object):
             logger = logging.getLogger(__name__)
 
         cls._logger = logger
-        cls._trace_func = cls.logging_trace_func
+        cls._trace_functions.append(cls.logging_trace_func)
+
+    @classmethod
+    def trace_by_sentry(cls, dsn=None):
+        """Trace using Sentry (see https://sentry.io).
+
+        :param dsn: data source name for connecting to Sentry
+        """
+        try:
+            from raven import Client
+        except ImportError as exc:
+            raise ImportError("Failed to import Raven for Sentry logging, install it using `pip3 install raven`")\
+                from exc
+
+        cls._trace_functions.append(functools.partial(cls.sentry_trace_func, Client(dsn)))
 
     @classmethod
     def trace_by_func(cls, func):
@@ -237,7 +242,7 @@ class Trace(object):
 
         :param func: function with a one single argument
         """
-        cls._trace_func = func
+        cls._trace_functions.append(func)
 
     @classmethod
     def log(cls, event, *msg_dict):
@@ -246,10 +251,15 @@ class Trace(object):
         :param event: tracing event
         :param msg_dict: message to be printed
         """
+        if not cls._trace_functions:
+            return
+
         to_report = {}
         for msg in msg_dict:
             to_report.update(msg)
-        cls._trace_func(event, to_report)
+
+        for trace_func in cls._trace_functions:
+            trace_func(event, to_report)
 
     @classmethod
     def event2str(cls, event):
@@ -283,3 +293,18 @@ class Trace(object):
             logger.warning(message)
         else:
             logger.info(message)
+
+    @classmethod
+    def sentry_trace_func(cls, raven_client, event, msg_dict):
+        """Trace using Sentry - requires Raven to be installed.
+
+        :param raven_client: instantiated Raven client
+        :param event: event that triggered trace point
+        :param msg_dict: a dict holding additional trace information for event
+        """
+        if event is not cls.TASK_FAILURE:
+            # Capture only task failures as they are relevant for end-user
+            return
+
+        # TODO: proper way would be to add exc_info directly to msg_dict and pass exception explicitly in args
+        raven_client.captureException(extra=msg_dict)

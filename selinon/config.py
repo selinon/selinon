@@ -146,6 +146,14 @@ class Config(object):
         Trace.trace_by_logging()
 
     @classmethod
+    def trace_by_sentry(cls, dsn=None):
+        """Use Sentry for tracing.
+
+        :param dsn: DSN for sentry to be used (uses env variables if omitted, see Sentry docs)
+        """
+        Trace.trace_by_sentry(dsn)
+
+    @classmethod
     def set_celery_app(cls, celery_app):
         """Set celery application that should be used.
 

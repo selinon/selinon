@@ -15,7 +15,7 @@ from celery.result import AsyncResult
 from selinonlib.caches import LRU
 from selinon.config import Config
 from selinon.systemState import SystemState
-from selinon.trace import Trace, _default_trace_func
+from selinon.trace import Trace
 
 
 class _ThrottleTasks(object):
@@ -116,7 +116,7 @@ class SelinonTestCase(object):
         self._update_edge_table()
 
         # Make sure we restore tracing function in tests
-        Trace._trace_func = _default_trace_func
+        Trace._trace_functions = []
 
     @staticmethod
     def _update_edge_table():
