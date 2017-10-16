@@ -8,7 +8,8 @@ Selinon offers you a mechanism for tracing flow actions. By default Selinon does
 .. code-block:: yaml
 
   global:
-    trace: true
+    trace:
+      - logging: true
 
 Selinon will transparently print log messages of important events in your flow to stdout (informative tracepoints using ``logging.info()``) and stderr (warnings about failures using ``logging.warning()``). These logs have by default the following structure:
 
@@ -31,8 +32,9 @@ If you would like to create your own trace logger, you can do so by registering 
   global:
     trace:
       # from myapp.trace import my_trace_func
-      function: 'myapp'
-      import: 'myapp.trace'
+      - function:
+          name: 'my_trace_func'
+          import: 'myapp.trace'
 
 The tracing function has two arguments - ``event`` and ``msg_dict``. Argument ``event`` semantically corresponds to the tracepoint that is being captured and ``msg_dict`` captures all the details related to the tracepoint (see :obj:`selinon.trace`):
 
@@ -51,3 +53,32 @@ The tracing function has two arguments - ``event`` and ``msg_dict``. Argument ``
 .. note::
 
   If you are using ELK (Elastic Search, Logstash, Kibana) stack for aggregating logs, check `python-logstash <https://pypi.python.org/pypi/python-logstash>`_.
+
+Selinon also offers you to put trace events to a storage. For this purpose you can define the following configuration entry:
+
+.. code-block:: yaml
+
+  global:
+    trace:
+      - storage:
+          name: 'MyStorage'
+          method: 'trace'
+
+By providing the configuration option stated above, Selinon will call ``MyStorage.trace()`` method on each event. Note that the storage needs to be defined in the ``storage`` section in ``nodes.yaml``, Selinon will automatically instantiate storage adapter and connect to the storage/database once needed.
+
+As you can see, the ``trace`` section consists of list of tracing mechanisms being used. You can define as many tracing entries as you want.
+
+Sentry integration
+==================
+
+If you would like to use `Sentry <https://sentry.io>`_ for monitoring, you can use already existing support. Selinon reports all ``TASK_FAILURE`` events to the Sentry instance if you provide the following configuration:
+
+
+.. code-block:: yaml
+
+  global:
+    trace:
+      - sentry:
+          dsn: 'http://5305e373726b40ca894d8cfd121dea34:78c848fac46040d1a3218cc0bf8ef6a7@sentry:9000/2'
+
+You need to adjust the `Sentry DSN <https://docs.sentry.io/quickstart/#configure-the-dsn>`_ configuration so it points to correctly set up Sentry instance. You can browse `Selinon demo <https://github.com/selinon/demo>`_ to see Sentry integration in action.

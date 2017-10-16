@@ -144,6 +144,8 @@ queue
 
 Broker queue that should be used for message publishing for the given task.
 
+Queue name can use environment variables that get expanded (e.g. ``queue: {DEPLOYMENT_PREFIX}_queue_v0`` will get expanded to ``testing_queue_v0`` if ``DEPLOYMENT_PREFIX`` environment variable is ``testing``). This allows you to parametrize resources used in deployment.
+
  * **Possible values:**
 
    * string - a name of queue
@@ -332,6 +334,19 @@ A flow definition is placed into a list of flow definitions in the YAML configur
               value: 'baz'
         - from: 'flow2'
           to: 'Task3'
+        - from: 'Task3'
+          to: 'flow3'
+          condition:
+            name: 'fieldEqual'
+            args:
+              key:
+                - 'foo'
+              value: 'bar'
+          foreach:
+            import: 'myapp.foreach'
+            function: 'iter_foreach'
+            # result of the function would be used as sub-flow arguments to flow3
+            propagate_result: false
       failures:
         nodes:
           - 'Task1'
@@ -427,6 +442,8 @@ nowait
 
 Do not wait for a node (a task or a sub-flow) to finish. This node cannot be stated as a dependency in the YAML configuration file. Note that node failure will not be tracked if marked as ``nowait``.
 
+This option is an optimization - if all tasks that are not stated in `nowait` finish, dispatcher will schedule nowait nodes and marks the flow finished/failed (based on task/fallback success) and will *not* retry.
+
  * **Possible values:**
 
    * string - a node that should be started with nowait flag
@@ -481,8 +498,9 @@ Define a custom module where dispatcher sampling strategy function (see :ref:`op
 
         **Default:**
 
-          ``start_retry`` - 2
-          ``max_retry`` - 120
+          * ``start_retry: 2``
+
+          * ``max_retry: 120``
 
   * **Required:** false
 
@@ -519,7 +537,7 @@ Cache to be used for node state caching, see :ref:`cache <yaml-cache>` section a
 edges
 #####
 
-A list of edges describing dependency on nodes. See :ref:`edge definition <yaml-edge>`.
+A list of edges describing dependency on nodes. See `Flow edge definition`_.
 
 Flow edge definition
 ====================
@@ -588,12 +606,15 @@ An example of a condition definition:
             key: 'baz'
             value: 42
 
+Please refer to the ``predicates`` module available in `Selinonlib <https://selinonlib.readthedocs.io>`_. This module states default predicates that could be immediately used. You can also provide your own predicates by configuring used module in the global_ configuration section.
+
 foreach
 #######
 
-Spawn multiple (let's say N, where N is variable) nodes. The foreach function will be called iff ``condition`` is evaluated as true. See :ref:`patterns` for more info.
+Spawn multiple (let's say N, where N is a variable determinated on run time) nodes. The foreach function will be called iff ``condition`` is evaluated as true. See :ref:`patterns` for more info.
 
   * **Possible values:**
+
     * foreach function definition:
        * ``function`` - a name of the function that should be used
        * ``import`` - a module from which the foreach function should be imported
@@ -614,6 +635,7 @@ A list of failures that can occur in the system and their fallback nodes.
 
      * ``nodes`` - a node name or a list of node names that can trigger fallback scheduling in case of failure
      * ``fallback`` - a node name or a list of node names (a task name or flow names) that should be scheduled in case of failure
+     * ``condition`` - condition that would be evaluated, if true the fallback is triggered; see condition definition on task flow edges for more info and examples
   
  * **Required:** false
   

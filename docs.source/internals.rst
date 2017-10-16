@@ -82,7 +82,7 @@ Sub-flows
 
 As dispatcher is a task as any other, sub-flows are handled by scheduling dispatcher task that handles given sub-flow. So if you have two flows `flow1` and `flow2`, and you run `flow2` as a sub-flow in `flow1` flow, dispatcher in `flow1` will schedule dispatcher task handling `flow2` as a task that is a node in the task dependency graph you provided in the YAML configuration file.
 
-Each dispatcher reports information about finished and failed nodes as a JSON that is stored in the result backend. There are tracked only nodes that are run in the given flow. Any sub-flow related information needs to be computed when requested (such as ``propagate_finished``).
+Each dispatcher reports information about finished and failed nodes as a JSON that is stored in the result backend. There are tracked only nodes that are run in the given flow. Any sub-flow related information needs to be computed when requested (such as ``propagate_finished``, see :ref:`YAML configuration <yaml>`).
 
 Failure handling
 ################
