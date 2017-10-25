@@ -40,7 +40,8 @@
 
   global:
     # trace using Python's logging
-    trace: true
+    trace:
+      - logging: true
 
   flow-definitions:
     - name: flow1
