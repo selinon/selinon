@@ -13,6 +13,7 @@ from .errors import InternalError
 from .selinonTask import SelinonTask
 from .storagePool import StoragePool
 from .systemState import SystemState
+from .trace import Trace
 from .utils import run_flow
 from .utils import run_flow_selective
 from .version import selinon_version

@@ -216,7 +216,7 @@ class Trace(object):
 
         :param logger: optional logger that should be used
         """
-        if not logger:
+        if not logger and not cls._logger:
             logger = logging.getLogger(__name__)
 
         cls._logger = logger
