@@ -12,3 +12,4 @@ docs.source/api
 .codecov
 coverage.xml
 .coverage
+example/*.png
