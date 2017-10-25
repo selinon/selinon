@@ -15,7 +15,7 @@ from celery.result import AsyncResult
 from selinonlib.caches import LRU
 from selinon.config import Config
 from selinon.systemState import SystemState
-from selinon.trace import Trace, _default_trace_func
+from selinon.trace import Trace
 
 
 class _ThrottleTasks(object):
@@ -71,15 +71,14 @@ class SelinonTestCase(object):
         GetTaskInstance.clear()
         SystemState._throttled_tasks = {}
         SystemState._throttled_flows = {}
+        # Make sure we restore tracing function in tests
+        Trace._trace_functions = []
 
     def init(self, edge_table, **kwargs):
         """
         :param edge_table: table dict as defined in YAML file containing edges
         :param kwargs: additional parameters for test configuration
         """
-        # If you would like to have a really verbose debug messages, just comment this out
-        #Config.trace_by_logging()
-
         Config.edge_table = edge_table
         flows = list(edge_table.keys())
 
@@ -114,9 +113,6 @@ class SelinonTestCase(object):
             raise ValueError("Unknown config options provided: %s" % set(kwargs.keys()))
 
         self._update_edge_table()
-
-        # Make sure we restore tracing function in tests
-        Trace._trace_func = _default_trace_func
 
     @staticmethod
     def _update_edge_table():
@@ -243,4 +239,3 @@ class SelinonTestCase(object):
     def remove_all_tasks_by_name(task_name):
         """ Remove all flows with the given name """
         Config.get_task_instance.remove_all_tasks_by_name(task_name)
-

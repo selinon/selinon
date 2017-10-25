@@ -38,11 +38,6 @@
       configuration:
         connection_string: foo
 
-  global:
-    # trace using Python's logging
-    trace:
-      - logging: true
-
   flow-definitions:
     - name: flow1
       nowait: task1

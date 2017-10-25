@@ -27,3 +27,6 @@ class MySimpleStorage(DataStorage):
 
     def store(self, node_args, flow_name, task_name, task_id, result):
         pass
+
+    def trace(self, event, msg_dict):
+        pass

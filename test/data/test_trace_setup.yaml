@@ -1,0 +1,35 @@
+---
+  tasks:
+    - name: task1
+      classname: Task1
+      import: testapp.tasks
+      storage: MyStorage
+
+  flows:
+    - flow1
+
+  storages:
+    - name: MyStorage
+      classname: MySimpleStorage
+      import: testapp.storages
+      configuration:
+        connection_string: foo
+
+  global:
+    # trace using Python's logging
+    trace:
+      - logging: true
+      - storage:
+         name: MyStorage
+         method: trace
+      - function:
+         name: my_custom_trace_func
+         import: testapp.trace
+      - sentry:
+         dsn: 'http://fb2427cf83b74a1e80540bf0a18a2ca1:fafcdd65d7654c308c7664737c0999a6@sentry:9000/2'
+
+  flow-definitions:
+    - name: flow1
+      edges:
+        - from:
+          to: task1
