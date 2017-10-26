@@ -81,6 +81,21 @@ Flows
 
 Flows can be nested as desired. The only limitation is that you cannot now inspect results of sub-flow using edge conditions in a parent flow. There is a plan to remove such limitation in `next Selinon releases <https://github.com/selinon/selinon/issues/16>`_. Nevertheless you can still reorganize your flow (in most cases) so you are not limited with such restriction.
 
+Running a flow
+**************
+
+Once you set up Selinon and Selinon does not report any errors in your configuration files, you can run flow simply by calling the ``run_flow`` function (see documentation of :func:`run_flow() <selinon.utils.run_flow>`):
+
+
+.. code-block:: python
+
+  from selinon import run_flow
+
+  dispatcher_id = run_flow('flow1', {'foo': 'bar'})
+
+If you wish to do selective task runs, please refer to :ref:`selective` documentation.
+
+
 .. _node_failures:
 
 Node failures
