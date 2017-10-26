@@ -716,15 +716,29 @@ Queue for dispatcher task. This queue will be used for all dispatcher tasks (ove
 trace
 #####
 
-Keep track of actions that are done in flow. See :ref:`trace` for more info.
+Keep track of actions that are done in flow. See :ref:`trace` for more info with configuration examples.
 
   * **Possible values:**
 
-    * true - use Python's logging
-    * for defining a custom tracing function:
+    * an array where each entry configures tracing mechanism used
 
-      * ``function`` - a name of the function that should be imported and used
-      * ``import`` - specify a module name that should be used to import the tracing function
+      * ``function`` - register a callback function that is called on each event, configuration options:
+
+        * ``import`` - import to be used to import tracing function
+        * ``name`` - name of function to be imported
+
+      * ``logging`` - use Python's logging facilities, configuration options:
+
+        * ``true`` (boolean) - turn on Python's logging
+
+      * ``sentry``  - use Sentry for monitoring task failures (only events of type ``TASK_FAILURE``), configuration options:
+
+        * ``dsn`` - Sentry's DSN to describe target service and Sentry's project to log to
+
+      * ``storage`` - use storage adapter to store traced events, configuration options:
+
+        * ``name`` - name of storage to be used
+        * ``method`` - name of method to call on storage adapter instance
 
   * **Required:** false
 
