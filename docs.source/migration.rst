@@ -11,6 +11,7 @@ Supposing you are already using Celery and you want to migrate to Selinon, this 
 * If you are using Celery primitives, remove them. Instead define Selinon YAML configuration.
 * If you are using features like ``self.retry()`` or you raise Celery specific exceptions, rewrite semantics to YAML configuration and remove these Celery-specific pieces. Also note that changing arguments for a task by ``self.retry()`` is not supported by Selinon.
 * Pass application context and configuration files to Selinon :class:`Config <selinon.config.Config>`
+* Do not adjust Celery's task status (like revoked tasks), they will not work with Selinon
 
 
 * **Feel free to extend this list...**
