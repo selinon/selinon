@@ -6,7 +6,7 @@ Frequently Asked Questions (FAQ)
 I see only one contributor, should I trust you?
 ***********************************************
 
-There is currently one contributor, but every project started somehow. Selinon was designed for `fabric8-analytics project at Red Hat <https://github.com/fabric8-analytics>`_ that gathers project information for `openshift.io <https://openshift.io>`_ (introduced at the Red Hat 2017 summit keynote), where it is still used and it already served (I believe) hundreds of thousands tasks or flows (if not more). If you find Selinon interesting for your use-case, feel free to use it (and buy me some beer or at least let me know `that you like it or any experiences you have <https://saythanks.io/to/fridex>`_).
+There is currently one contributor, but every project started somehow. Selinon was designed for `fabric8-analytics project at Red Hat <https://github.com/fabric8-analytics>`_ that gathers project information for `openshift.io <https://openshift.io>`_ (introduced at the Red Hat 2017 summit keynote), where it is still used and it already served millions flows and even more tasks. If you find Selinon interesting for your use-case, feel free to use it (and buy me some beer or at least let me know `that you like it or share any experiences you have <https://saythanks.io/to/fridex>`_).
 
 If you find a bug, place for enhancement or anything where I can be helpful, feel free to let me know. And not to forget - even you can be :ref:`Selinon developer <development>`.
 
@@ -18,7 +18,7 @@ Check your `result backend configuration for Celery <http://docs.celeryproject.o
 Can I see Selinon in action?
 ****************************
 
-See `Selinon demo <https://github.com/selinon/demo>`_ or `fabric8-analytics project <https://github.com/fabric8-analytics>`_.
+See `Selinon demo <https://github.com/selinon/demo>`_ or `fabric8-analytics project <https://github.com/fabric8-analytics>`_, especially it's `fabric8-analytics-worker <https://github.com/fabric8-analytics/fabric8-analytics-worker>`_.
 
 Can I simulate Selinon run without deploying huge infrastructure?
 *****************************************************************
@@ -29,7 +29,7 @@ Yes, you can. Just use shipped simulator:
 
   selinonlib-cli simulate --nodes-definition nodes.yml --flow-definitions flow1.yml flow2.yml --help
 
-This way you can also use Selinon to run your flows from a CLI.
+This way you can also use Selinon to run your flows from a CLI. You can also explore prepared `containerized demo <http://github.com/selinon/demo>`_.
 
 I'm getting Python related errors!
 **********************************
@@ -131,10 +131,10 @@ Why there is no support for older Celery versions?
 
 One of the requirements of Selinon is, that it defines tasks (:class:`Dispatcher <selinon.dispatcher.Dispatcher>` and :class:`SelinonTaskEnvelope <selinon.selinonTaskEnvelope.SelinonTaskEnvelope>`) before the Celery's application gets instantiated. Older versions of Celery requested tasks to be registered after the Celery's application was created. This makes it chicken-egg problem.
 
-What queue type do I need?
-**************************
+What broker type do I need?
+***************************
 
-Selinon uses Celery for queue handling and running, so you have to use queue implementation that is supported by Celery - such as SQS or RabbitMQ.
+Selinon uses Celery for queue handling and running, so you have to use broker implementation that is `supported by Celery <http://docs.celeryproject.org/en/latest/getting-started/brokers/>`_ - such as SQS or RabbitMQ.
 
 Selinon requires that you messages are delivered - it's okay if messages are delivered more than once (see for example SQS details regarding deliver at least one). You will just end up with multiple tasks executed at the same time. You can tackle that in your application logic.
 

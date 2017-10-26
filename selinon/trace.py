@@ -4,103 +4,174 @@
 # Copyright (C) 2016-2017  Fridolin Pokorny, fridolin.pokorny@gmail.com
 # This file is part of Selinon project.
 # ######################################################################
+# pylint: disable=line-too-long
 """Built-in tracing mechanism.
 
-List of events that can be traced:
+A list of events that can be traced:
 
-+----------------------------------------+-------------------------+------------------------------------+
-| Logged event                           |  Event name             | msg_dict.keys()                    |
-+========================================+=========================+====================================+
-| Signalize Dispatcher run by Celery,    |                         | flow_name, dispatcher_id, args,    |
-| each time a Dispatcher is              | `DISPATCHER_WAKEUP`     | retry, state, queue                |
-| started/retried                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize a flow start - called when   |                         |                                    |
-| starting nodes are run                 | `FLOW_START`            | flow_name, dispatcher_id, args,    |
-|                                        |                         | queue                              |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize a task scheduling by         | `TASK_SCHEDULE`         | flow_name, task_name, task_id,     |
-| Dispatcher                             |                         | parent, args, queue                |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize task start by Celery         | `TASK_START`            | flow_name, task_name, task_id,     |
-|                                        |                         | parent, args                       |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize subflow start by Dispatcher  | `SUBFLOW_SCHEDULE`      | flow_name, dispatcher_id,          |
-|                                        |                         | child_flow_name, args, parent      |
-|                                        |                         | child_dispatcher_id, queue         |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize end of task from             | `TASK_END`              | flow_name, task_name, task_id,     |
-| SelinonTaskEnvelope                    |                         | parent, args, storage              |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize a node success from          | `NODE_SUCCESSFUL`       | flow_name, dispatcher_id,          |
-| Dispatcher                             |                         | node_name, node_id                 |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize that the result of task was  | `TASK_DISCARD_RESULT`   | flow_name, task_name, task_id,     |
-| discarded                              |                         | parent, args, result               |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize task failure from            | `TASK_FAILURE`          | flow_name, task_name, task_id,     |
-| SelinonTaskEnvelope                    |                         | parent, args, what, retried_count  |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize task retry                   | `TASK_RETRY`            | flow_name, task_name, task_id,     |
-|                                        |                         | parent, args, what, retried_count  |
-|                                        |                         | max_retry, retry_countdown,        |
-|                                        |                         | user_retry                         |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize when a flow ends because of  | `FLOW_FAILURE`          | flow_name, dispatcher_id, what     |
-| error in nodes without fallback        |                         | queue                              |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize unexpected dispatcher failure| `DISPATCHER_FAILURE`    | flow_name, dispatcher_id, what     |
-| this should not occur (e.g. bug,       |                         | state, node_args, parent, finished |
-| database connection error, ...)        |                         | retry, queue                       |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize a node failure from          | `NODE_FAILURE`          | flow_name, dispatcher_id,          |
-| Dispatcher                             |                         | node_name, node_id, what           |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize fallback evaluation          | `FALLBACK_START`        | flow_name, dispatcher_id, nodes,   |
-|                                        |                         | fallback                           |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize Dispatcher retry             | `DISPATCHER_RETRY`      | flow_name, dispatcher_id, retry,   |
-|                                        |                         | state_dict, args, queue            |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalize flow end                     | `FLOW_END`              | flow_name, dispatcher_id,          |
-|                                        |                         | finished_nodes, queue              |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signal storage connect                 | `STORAGE_CONNECT`       | storage_name                       |
-|                                        |                         |                                    |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signal storage disconnect              | `STORAGE_DISCONNECT`    | storage_name                       |
-|                                        |                         |                                    |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signal storage access for reading      | `STORAGE_RETRIEVE`      | flow_name, task_name, storage      |
-|                                        |                         |                                    |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signal storage access for writing      | `STORAGE_STORE`         | flow_name, task_name, task_id,     |
-|                                        |                         | storage, result, record_id         |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalized when edge condition is      | `EDGE_COND_FALSE`       | nodes_to, nodes_from, flow_name,   |
-| is evaluated as false                  |                         | parent, node_args, dispatcher_id   |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
-| Signalized result of foreach  ing      | `FOREACH_RESULT`        | nodes_to, nodes_from, flow_name,   |
-|                                        |                         | parent, node_args, dispatcher_id   |
-|                                        |                         |                                    |
-+----------------------------------------+-------------------------+------------------------------------+
+
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+| Event                      |  Event description                  | Emitter         |  msg_dict.keys()                   |
++============================+=====================================+=================+====================================+
+|                            | Dispatcher was started and will     |                 |  dispatcher_id, state, selective,  |
+|   `DISPATCHER_WAKEUP`      | check flow status.                  | Dispatcher      |  retry, queue, node_args,          |
+|                            |                                     |                 |  flow_name                         |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | A new flow is starting, this event  |                 |  dispatcher_id, selective,         |
+|   `FLOW_START`             | is emitted on after                 | Dispatcher      |  queue, node_args, flow_name       |
+|                            | `DISPATCHER_WAKEUP`.                |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Emitted when a new task is          |                 |  countdown, condition_str,         |
+|   `TASK_SCHEDULE`          | scheduled by dispatcher.            | Dispatcher      |  task_name, queue,                 |
+|                            |                                     |                 |  node_args, dispatcher_id, parent, |
+|                            |                                     |                 |  task_id, selective, foreach_str,  |
+|                            |                                     |                 |  flow_name, selective_edge         |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Emitted when a task is going to     |                 |                                    |
+|   `TASK_START`             | be executed on worker side.         | Task            |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Emitted when a flow is scheduled    |                 |                                    |
+|   `SUBFLOW_SCHEDULE`       | by dispatcher.                      | Dispatcher      |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Signalizing end of task execution,  |                 |                                    |
+|   `TASK_END`               | task finished successfully.         | Task            |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Signalizing that a node in flow     |                 |                                    |
+|   `NODE_SUCCESSFUL`        | graph (task or flow) successfully   | Dispatcher      |                                    |
+|                            | finished.                           |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Signalizing that a task returned a  |                 |                                    |
+|   `TASK_DISCARD_RESULT`    | value other than None, but no       | Task            |                                    |
+|                            | storage was assigned to task to     |                 |                                    |
+|                            | store result.                       |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Signalizing end of task, task       |                 |                                    |
+|   `TASK_FAILURE`           | raised an exception, marking task   | Task            |                                    |
+|                            | as failed.                          |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Signalizing that a task failed by,  |                 |                                    |
+|   `TASK_RETRY`             | raising an exception and will be    | Task            |                                    |
+|                            | retried.                            |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Signalization of flow failure,      |                 |                                    |
+|   `FLOW_FAILURE`           | one more nodes in flow graph failed | Dispatcher      |                                    |
+|                            | without successful fallback run.    |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | This event shouldn't be normally    |                 |                                    |
+|   `DISPATCHER_FAILURE`     | seen - signalizing error in         | Dispatcher      |                                    |
+|                            | Selinon.                            |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Signalization of captured failure   |                 |                                    |
+|   `NODE_FAILURE`           | of node in task flow graph - flow   | Dispatcher      |                                    |
+|                            | or task failure.                    |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Fallback for node failures in flow  |                 |                                    |
+|   `FALLBACK_START`         | is started to handle node failures. | Dispatcher      |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Dispatcher finished scheduling new  |                 | dispatcher_id, state, selective,   |
+|   `DISPATCHER_RETRY`       | nodes and will retry to check flow  | Dispatcher      | retry, queue, node_args,           |
+|                            | status after a while.               |                 | state_dict, flow_name, parent      |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Flow has sucessfully ended.         |                 |                                    |
+|   `FLOW_END`               |                                     | Dispatcher      |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Given node did not connect to       |                 | storage_name                       |
+|   `STORAGE_CONNECT`        | storage yet so a new connection is  | Dispatcher/Task |                                    |
+|                            | requested by calling                |                 |                                    |
+|                            | DataStorage.connect()               |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Called when disconnecting from      |                 |                                    |
+|   `STORAGE_DISCONNECT`     | storage by calling                  | storage adapter |                                    |
+|                            | DataStorage.disconnect()            | destructor      |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Retrieve task result from storage   |                 |                                    |
+|   `STORAGE_RETRIEVE`       | that was assigned to the task.      | Dispatcher/Task |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Requested result of task was        |                 |                                    |
+|   `STORAGE_RETRIEVED`      | retrieved.                          | Dispatcher/Task |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Store result of task in the         |                 |                                    |
+|   `STORAGE_STORE`          | assigned storage.                   | Task            |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | The result of task has been stored  |                 |                                    |
+|   `STORAGE_STORED`         | in the assigned storage.            | Task            |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | The condition on edge was evaluated |                 |                                    |
+|   `EDGE_COND_FALSE`        | as false so destination nodes will  | Dispatcher      |                                    |
+|                            | not be scheduled.                   |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Reports result of foreach function, |                 |                                    |
+|   `FOREACH_RESULT`         | based on which N nodes will be      | Dispatcher      |                                    |
+|                            | scheduled (N is runtime variable)   |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Requested state of the node (if the |                 |                                    |
+|   `NODE_STATE_CACHE_GET`   | node was successful or failed) from | Dispatcher      |                                    |
+|                            | cache.                              |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Requested entry in the state cache  |                 |                                    |
+|   `NODE_STATE_CACHE_ADD`   | was not found and the node          | Dispatcher      |                                    |
+|                            | succeeded so new entry to state     |                 |                                    |
+|                            | is added.                           |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Requested entry was not found in    |                 |                                    |
+|   `NODE_STATE_CACHE_MISS`  | state cache.                        | Dispatcher      |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Requested entry was found in the    |                 |                                    |
+|   `NODE_STATE_CACHE_HIT`   | state cache and will be used.       | Dispatcher      |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Try to hit result cache for cached  |                 |                                    |
+|   `TASK_RESULT_CACHE_GET`  | already requested task result.      | Dispatcher/Task |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Add to result cache result of a     |                 |                                    |
+|   `TASK_RESULT_CACHE_ADD`  | task that was requested.            | Dispatcher/Task |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Requested task result was not found |                 |                                    |
+|   `TASK_RESULT_CACHE_MISS` | in the result cache.                | Dispatcher/Task |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Requested task result was found     |                 |                                    |
+|   `TASK_RESULT_CACHE_HIT`  | in the result cache.                | Dispatcher/Task |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Given edge will not be fired        |                 |                                    |
+|   `SELECTIVE_OMIT_EDGE`    | as it is not part of direct path    | Dispatcher      |                                    |
+|                            | to requested tasks on selective run.|                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | The desired node will not be        |                 |                                    |
+|   `SELECTIVE_OMIT_NODE`    | scheduled as it is not requested    | Dispatcher      |                                    |
+|                            | task nor dependency of requested    |                 |                                    |
+|                            | task in selective task runs.        |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Keeps track of results of selective |                 | dispatcher_id, parent, selective,  |
+|   `SELECTIVE_RUN_FUNC`     | run function on selective task      | Dispatcher      | node_args, flow_name,              |
+|                            | runs.                               |                 | result, node_name                  |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Signalizes reuse of already         |                 |                                    |
+|   `SELECTIVE_TASK_REUSE`   | computed results in selective task  | Dispatcher      |                                    |
+|                            | runs.                               |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Signalizes storing error information|                 |                                    |
+|   `STORAGE_STORE_ERROR`    | in assigned storage on task failure.| Task            |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Signalizes that storing error       |                 |                                    |
+| `STORAGE_OMIT_STORE_ERROR` | will not be done - missing storage  | Task            |                                    |
+|                            | adapter or `store_error()` is not   |                 |                                    |
+|                            | implemented.                        |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
 
 """
 

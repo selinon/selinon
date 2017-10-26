@@ -5,7 +5,7 @@ Selective task run
 
 Selinon offers you a way how to create a declarative configuration written in YAML files that enable you to define flows. You can run these flows as one unit - all tasks in the flow get executed based on conditions and their time and data dependencies (edges that you stated).
 
-Now suppose that you run same flow multiple times for the same flow arguments. In some cases you would like to run only some subset of tasks without stating all possible subsets of flows that can possibly occur. Selinon offers you a way how to cherry-pick tasks that should be run in your flow. Selinon will then compute all edges that need to be fired in order to get to your desired task.
+Now suppose that you run same flow multiple times for the same flow arguments. In some cases you would like to run only some subset of tasks without stating all possible subsets of flows that can possibly occur. Selinon offers you a way how to cherry-pick tasks that should be run in your flow. Selinon will then compute all edges that need to be fired in order to get to your desired task with respect to task dependencies.
 
 Now let's assume that you defined the following flow:
 
@@ -22,7 +22,7 @@ Now let's assume that you want to run only `Task2`. The only thing you need to d
 
 Refer to :func:`selinon.utils.run_flow_selective` for more information about this function.
 
-Selinon will now by default run only `Task1` and `Task2` as that is the computed path to `Task2` (avoiding `Task3` run).
+Selinon will now by default run only `Task1` and `Task2` as that is the computed path to `Task2` (avoiding `Task3` run). Running task `Task1` is also optional - results could be reused from previous runs as well - see selective run function that is discussed in the following sections.
 
 .. note::
 
@@ -73,7 +73,7 @@ The result of ``selective_run_function`` should be ``None`` if the node should b
 
 .. danger::
 
-  The selective run function gets executed by dispatcher. This means that it **cannot** raise any exceptions. Raising exceptions would cause ``FATAL_TASK_FAILURE`` (see :class:`tracing <selinon.trace.Trace>`) and the behaviour in such cases is undefined.
+  The selective run function gets executed by dispatcher. This means that it **cannot** raise any exceptions. If an exception is raised, the behaviour in such cases is undefined.
 
   And, of course, the id that is returned from this function **has to** exist.
 

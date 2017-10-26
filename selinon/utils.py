@@ -40,7 +40,7 @@ def run_flow_selective(flow_name, task_names, node_args, follow_subflows=False, 
     :param node_args: arguments that should be supplied to flow
     :param follow_subflows: if True, subflows will be followed and checked for nodes to be run
     :param run_subsequent: trigger run of all tasks that depend on the desired task
-    :return: a list of dispatchers that are scheduled in order to run desired task
+    :return: dispatcher id that is scheduled to run desired selective task flow
     :raises NoWay: there was no way found to the desired task in the flow
     """
     selective = compute_selective_run(flow_name, task_names, follow_subflows, run_subsequent)

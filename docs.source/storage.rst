@@ -7,61 +7,85 @@ Currently, there are available prepared database adapters, see `Selinonlib <http
 
   * `SqlStorage` - SQLAlchemy adapter for SQL databases
 
-    .. code-block:: yaml
+    * necessary dependencies for this storage adapter:
 
-      storages:
-        - name: 'MySqlStorage'
-          classname: 'SqlStorage'
-          import: 'selinon.storage'
-          configuration:
-            connection_string: 'postgres://postgres:postgres@postgres:5432/postgres'
-            encoding: 'utf-8'
+      `pip3 install SQLAlchemy SQLAlchemy-Utils`
+
+    * configuration example:
+
+      .. code-block:: yaml
+
+        storages:
+          - name: 'MySqlStorage'
+            classname: 'SqlStorage'
+            import: 'selinon.storage'
+            configuration:
+              connection_string: 'postgres://postgres:postgres@postgres:5432/postgres'
+              encoding: 'utf-8'
             echo: false
 
   * `RedisStorage` - Redis database adapter
 
-    .. code-block:: yaml
+    * necessary dependencies for this storage adapter:
 
-      storages:
-        - name: 'MyRedisStorage'
-          classname: 'RedisStorage'
-          import: 'selinon.storage'
-          configuration:
-            host: 'redishost'
-            port: 6379
-            db: 0
-            password: 'secretpassword'
-            charset: 'utf-8'
-            host: 'mongohost'
+      `pip3 install redis`
+
+    * configuration example:
+
+      .. code-block:: yaml
+
+        storages:
+          - name: 'MyRedisStorage'
+            classname: 'RedisStorage'
+            import: 'selinon.storage'
+            configuration:
+              host: 'redishost'
+              port: 6379
+              db: 0
+              password: 'secretpassword'
+              charset: 'utf-8'
+              host: 'mongohost'
             port: 27017
 
   * `MongoStorage` - MongoDB database adapter
 
-    .. code-block:: yaml
+    * necessary dependencies for this storage adapter:
 
-      storages:
-        - name: 'MyMongoStorage'
-          classname: 'MongoStorage'
-          import: 'selinon.storage'
-          configuration:
-            db_name: 'database_name'
-            collection_name: 'collection_name'
-            host: 'mongohost'
+      `pip3 install pymongo`
+
+    * configuration example:
+
+      .. code-block:: yaml
+
+        storages:
+          - name: 'MyMongoStorage'
+            classname: 'MongoStorage'
+            import: 'selinon.storage'
+            configuration:
+              db_name: 'database_name'
+              collection_name: 'collection_name'
+              host: 'mongohost'
             port: 27017
 
   * `S3` - AWS S3 database adapter
 
+    * necessary dependencies for this storage adapter:
+
+      `pip3 install boto3`
+
+    * configuration example:
+
     .. code-block:: yaml
 
       storages:
-        - name: 'MyMongoStorage'
+        - name: 'MyS3Storage'
           classname: 'S3Storage'
           import: 'selinon.storage'
           configuration:
-            db_name: 'database_name'
-            collection_name: 'collection_name'
-            host: 'mongohost'
-            port: 27017
+            bucket: 'my-bucket-name'
+            aws_access_key_id: 'AAAAAAAAAAAAAAAAAAAA'
+            aws_secret_access_key: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'
+            region_name: 'us-east-1'
 
 
 Using a custom storage adapter
@@ -114,7 +138,7 @@ And pass this storage to Selinon in your YAML configuration:
         host: 'localhost'
         port: '5432'
 
-You can also reuse `Selinonlib <https://github.com/selinon/selinonlib>`_ implementation of storages in order to define your custom ``retrieve()`` and ``store()`` methods based on your requirements.
+If you create an adapter for some well known storage and you feel that your adapter is generic enough, feel free to share it with community by opening a pull request!
 
 Database connection pool
 ########################
@@ -125,3 +149,14 @@ Each worker is trying to be efficient when it comes to number of connections to 
 .. note::
 
   You can also simply share connection across multiple :class:`DataStorage <selinon.dataStorage.DataStorage>` classes in inheritance hierarchy and reuse already defined connections. You can also do storage aliasing as described in :ref:`practices`.
+
+If you would like to request some storage from your configuration, you can request storage adapter from Selinon :class:`StoragePool <selinon.storagePool>`:
+
+.. code-block:: python
+
+   from selinon import StoragePool
+
+   # Name of storage was set to MyMongoStorage in nodes.yaml configuration file (section storages).
+   mongo = StoragePool.get_connected_storage('MyMongoStorage')
+
+Selinon will transparently take care of instantiation, connection and sharing connection pool across the whole process.

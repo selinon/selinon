@@ -3,7 +3,7 @@
 Best practices
 --------------
 
-Here are some notes and tips on how to write YAML config files:
+Here are some notes and tips on how to write YAML config files and how to work with Selinon.
 
 Do not introduce a new flow unless it is necessary
 ==================================================
@@ -23,7 +23,7 @@ Each flow adds some overhead. It is reasonable to introduce a new flow when:
 Do not add flags unless you really need them
 ============================================
 
-Selinon implementation was desingned to be lazy. That means it was designed not to add overhead for you unleas you really need it. If you don't need flags such as ``propagate_parent`` or ``propagate_finished`` you don't need to state them in the YAML configuration file. If you state them, it will add additional computational overhead that you don't necessarily need.
+Selinon implementation was desingned to be lazy. That means it was designed not to add overhead for you unless you really need it. If you don't need flags such as ``propagate_parent`` or ``propagate_finished`` you don't need to state them in the YAML configuration file. If you state them, it will add additional computational overhead that you don't necessarily need.
 
 Make flow edges as minimal as possible
 ======================================
@@ -47,7 +47,7 @@ You probably saw (based on examples) that you can easily define a task alias - t
       classname: 'Task1'
       import: 'myapp.tasks'
 
-This is useful when you want to run same code multiple times in a flow (since nodes are referenced by names).
+This is useful when you want to run same code multiple times in a flow (since nodes are referenced by names). Also check ``storage_task_name`` configuration option that enables you to do store with different task name compared to one stated in the `nodes.yaml` file.
 
 You can also define storage alias - useful when you want to use same database/storage adapter but with different configuration:
 

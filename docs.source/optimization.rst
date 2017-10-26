@@ -111,7 +111,7 @@ By using Selinon you can reach to two main issues with your cluster on heavy loa
 
 In the first case the solution is simple: buy/use more hardware.
 
-In the later one there are two main approaches how to tackle such bottleneck. You can always use more storage replicas or split data accross multiple storages and transparently configure Selinon to use different storages for different purposes (see storages aliasing in :ref:`practices`).
+In the latter one there are two main approaches how to tackle such bottleneck. You can always use more storage replicas or split data accross multiple storages and transparently configure Selinon to use different storages for different purposes (see storages aliasing in :ref:`practices`).
 
 If the above solution is not suitable for you or you want to optimize even more, Selinon offers you an optimization that introduces distributed caches. These caches are distributed across nodes (workers) in your cluster and act like a caching mechanism to reduce number of requests to storages/databases and keep data more close to execution nodes.
 
@@ -241,3 +241,11 @@ An example of configuration:
       edges:
 
   # additional entries follow
+
+
+Other optimizations
+===================
+
+If you would like to optimize performance take a look at `Celery's user guide for optimizing Celery execution <http://docs.celeryproject.org/en/latest/userguide/optimizing.html>`_.
+
+For example configuring `prefetch multiplier <http://docs.celeryproject.org/en/latest/userguide/optimizing.html#prefetch-limits>`_ (number of messages that are prefetched in a bulk mode from broker to worker) can result in significant speed up (more than 10 times based on my experience). In order to find the right and balanced solution for your cluster, you will need to experiment a bit.

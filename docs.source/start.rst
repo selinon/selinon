@@ -21,7 +21,7 @@ In order to use Selinon, you have to :ref:`implement tasks <tasks>` and define y
 Setting up Selinon
 ##################
 
-In order to configure Selinon you need to do create a Celery's ``app`` instance, pass all Celery-related configuration to it. After that you are ready to configure Selinon:
+In order to configure Selinon you need to create Celery's ``app`` instance, pass all Celery-related configuration to it. After that you are ready to configure Selinon:
 
 .. code-block:: python
 
@@ -35,7 +35,7 @@ In order to configure Selinon you need to do create a Celery's ``app`` instance,
   Config.set_celery_app(app)
   Config.set_config_yaml('path/to/nodes.yaml', ['path/to/flow1.yaml', 'path/to/flow2.yaml'])
 
-Please refer to `Celery configuration <http://docs.celeryproject.org/en/latest/userguide/configuration.html>`_ or `Selinon demo <https://github.com/selinon/demo>`_ for Celery-related pieces
+Please refer to `Celery configuration <http://docs.celeryproject.org/en/latest/userguide/configuration.html>`_ or `Selinon demo <https://github.com/selinon/demo>`_ for Celery-related pieces. You can also find an example in `Selinon demo configuration <https://github.com/selinon/demo/blob/master/worker/myapp/configuration.py>`_.
 
 Naming convention
 #################
@@ -51,11 +51,11 @@ In the flow `flow2` (shown above) we start node `Task4` on condition that is alw
 .. image:: _static/flow1.png
     :align: center
 
-The second flow is slightly more complex. We (always) start with `Task1`. `Task1` will transparently store results in `Storage1`. After `Task1` finishes, Selinon (to be more precise dispatcher task) checks results of `Task1` in `Storage1` and if condition ``result['foo'] == 'bar'`` is evaluated as True, dispatcher starts nodes `Task2` and `flow2`. After both `Task2` and `flow2` finish, dispatcher starts `Task3`. If the condition ``result['foo'] == bar`` is met, `Task1` is started and the whole process is iteratively done again. Results of all tasks are stored in database named `Storage1` except for results computed in sub-flow `flow2`, where `Storage2` is used.
+The second flow is slightly more complex. We (always) start with `Task1`. `Task1` will transparently store results in `Storage1`. After `Task1` finishes, Selinon (to be more precise dispatcher task) checks results of `Task1` in `Storage1` and if condition ``result['foo'] == 'bar'`` is evaluated as True, dispatcher starts nodes `Task2` and `flow2`. After both `Task2` and `flow2` finish, dispatcher starts `Task3`. If the condition ``result['foo'] == bar`` (now result of `Task3`) is met, `Task1` is started and the whole process is iteratively done again. Results of all tasks are stored in database named `Storage1` except for results computed in sub-flow `flow2`, where `Storage2` is used (see previous flow graph above).
 
 Note that `Task2` and the whole `flow2` could be executed in parallel as there are no data nor time dependencies between these two nodes. Selinon runs as many nodes as possible in parallel. This makes it really easy to scale your system - the only bottleneck you can get is number of computational nodes in your cluster or limitations on storage/database side.
 
-Refer to `Selinonlib <https://github.com/selinon/selinonlib>`_ for plotting flow graphs. The YAML configuration that was used to plot examples is shown bellow.
+Refer to `Selinonlib <http://selinonlib.readthedocs.io/>`_ for plotting flow graphs. The YAML configuration that was used to plot examples is shown bellow.
 
 Flow definitions
 ################
@@ -81,6 +81,8 @@ Flows
 
 Flows can be nested as desired. The only limitation is that you cannot now inspect results of sub-flow using edge conditions in a parent flow. There is a plan to remove such limitation in `next Selinon releases <https://github.com/selinon/selinon/issues/16>`_. Nevertheless you can still reorganize your flow (in most cases) so you are not limited with such restriction.
 
+.. _node_failures:
+
 Node failures
 *************
 
@@ -88,7 +90,12 @@ You can define fallback tasks and fallback flows that are run if a node fails. T
 
 Failures are propagated from sub-flows to parent flows. You can find analogy to exceptions as known in many programming languages (like in Python). If a node fails and there is no fallback node that would handle node failure, the whole flow is marked as failed. You can than capture this failure in the parent flow, but this failure will be marked as failure of the whole flow. Note that even in this case, there is no time-dependent evaluation - so if a node in your flow fails, dispatcher can still continue scheduling nodes that are not affected by the failure and once there is nothing to do more, dispatcher marks the flow as failed.
 
-Now let's assume that you defined two fallbacks. One waits for `Task1` and `Task2` failure and another one waits only for `Task1` failure. Let's say that `Task1` failed. In this case the decision which fallback would be run depends on `Task2` failure (not on time-dependent evaluation). Fallback evaluation is greedy, so if `Task2` fails, there is run the first stated fallback. If `Task2` succeeds, the latter one fallback is used.
+Now let's assume that you defined two fallbacks. One waits for `Task2` failure (`Fallback1`) and another one waits for a failure of `Task1` as well as `Task2` failure (`Fallback2`).
+
+.. image:: _static/fallback_example.png
+  :align: center
+
+Let's say that `Task1` failed. In that case the decision which fallback would be run depends on `Task2` failure (not on time-dependent evaluation). Fallback evaluation is greedy, so if `Task2` fails, there is run `Fallback2`. If `Task2` succeeds, `Fallback1` is run.
 
 Results of tasks
 ****************
@@ -98,7 +105,7 @@ Results of tasks are stored in databases transparently based on your definition 
 YAML configuration example
 **************************
 
-You can separate flows into multiple files, just provide ``flow-definitions`` key to find all flows defined in the YAML file.
+In this section you can find YAML configuration files that were used for generating images in the previous sections. You can separate flows into multiple files, just provide ``flow-definitions`` key to find all flows defined in the YAML file.
 
 .. code-block:: yaml
 
@@ -136,6 +143,10 @@ You can separate flows into multiple files, just provide ``flow-definitions`` ke
                       key: 'foo'
                       value: 'bar'
 
+.. code-block:: yaml
+
+  ---
+    flow-definitions:
       - name: 'flow2'
         edges:
             - from:
@@ -145,6 +156,31 @@ You can separate flows into multiple files, just provide ``flow-definitions`` ke
                 - 'Task4'
               to:
                 - 'Task5'
+
+
+Configuration for failures and failure handling fallbacks that were introduced in `Node failures`_ section can be found bellow (no storages in the example).
+
+.. code-block:: yaml
+
+  ---
+    flow-definitions:
+      - name: 'exampleFallback'
+        edges:
+          - from:
+            to: 'Task1'
+          - from:
+            to: 'Task2'
+        failures:
+          - nodes:
+              - 'Task1'
+              - 'Task1'
+            fallback:
+              - 'Fallback1'
+          - nodes:
+              - 'Task1'
+            fallback:
+              - 'Fallback2'
+
 
 Entities in the system
 ######################
@@ -221,6 +257,5 @@ This configuration could be placed to ``nodes.yaml``:
         configuration: 'put your configuration for Storage2 here'
 
 
-See :ref:`yaml` section for more details.
-
+See :ref:`YAML configuration <yaml>` section for more details.
 

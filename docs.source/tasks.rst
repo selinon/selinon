@@ -3,7 +3,7 @@
 Task implementation
 -------------------
 
-Each task you want to run in Selinon has to be of type :obj:`SelinonTask <selinon.selinonTask>`.
+Each task you want to run in Selinon has to be of a type :obj:`SelinonTask <selinon.selinonTask>`.
 
 The only thing you need to define is the ``run()`` method which accepts ``node_args`` parameter based on which this task computes its results. The return value of your Task is after that checked against JSON schema (if configured so) and stored in a database or a storage if a storage was assigned to the task in the YAML configuration.
 
@@ -22,7 +22,8 @@ Now you need to point to the task implementation from YAML configuration files (
 .. code-block:: yaml
 
   tasks:
-    # from myapp.tasks import MyTask
+    # Transcripts to:
+    #   from myapp.tasks import MyTask
     - name: 'MyTask'
       import: 'myapp.tasks'
 
