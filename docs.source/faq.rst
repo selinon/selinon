@@ -39,7 +39,7 @@ Check your Python version. Selinon and Selinonlib currently support only Pyhon3+
 Should I replace Celery with Selinon?
 *************************************
 
-Well, hard to say. Celery is a great project and offers a lot of features. Selinon should be suitable for you when you have time and data dependencies between tasks and you can group these tasks into flows that are more sophisticated than Celery's primitives such as chain or chord. If this is true for you, just give Selinon a try. If you are already using Celery, check prepared guide on :ref:`how to migrate from raw Celery to Selinon <migration>`.
+Well, hard to say. Celery is a great project and offers a lot of features. Selinon should be suitable for you when you have time and data dependencies between tasks and you can group these tasks into flows that are more sophisticated than Celery's primitives such as chain or chord. If this is true for you, just give Selinon a try. If you are already using Celery, check prepared guide on :ref:`how to migrate from raw Celery to Selinon <celery>`.
 
 How should I name tasks and flows?
 **********************************
@@ -107,9 +107,12 @@ This is currently a limitation of Selinon. You can try to reorganize your flows 
 Is it possible to do changes in the configuration and do continuous redeployment?
 *********************************************************************************
 
-You can change condition and redeploy your workers without purging queues as these conditions are evaluated dynamically (see also :ref:`practices`).
+Yes, you can do so. **BUT** make sure you do migrations - see the :ref:`migration section <migrations>` to get insights on how to do it properly.
 
-On the other hand adding new edges, removing edges or adding/removing new tasks is currently not supported. This requires something similar to database migrations for messages (see `configuration migrations RFE <https://github.com/selinon/selinonlib/issues/12>`_) as they carry state that was computed based on supplied YAML configuration.
+What happens if I forgot to do migrations?
+******************************************
+
+If you do changes in the YAML configuration files and you do not perform migrations, unpredictable things may happen if your queues have still old messages. It's **always** a good idea to check whether migration files need to be generated. See :ref:`migrations` for more details.
 
 Is my YAML config file correct? How to improve or correct it?
 *************************************************************

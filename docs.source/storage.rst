@@ -159,4 +159,4 @@ If you would like to request some storage from your configuration, you can reque
    # Name of storage was set to MyMongoStorage in nodes.yaml configuration file (section storages).
    mongo = StoragePool.get_connected_storage('MyMongoStorage')
 
-Selinon will transparently take care of instantiation, connection and sharing connection pool across the whole process.
+Selinon will transparently take care of instantiation, connection and sharing connection pool across the whole process. Check out other useful methods of :class:`StoragePool <selinon.storagePool>`.

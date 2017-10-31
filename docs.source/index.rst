@@ -22,8 +22,9 @@ What is Selinon and why should I use it?
        faq
        internals
        cli
+       migrations
        optimization
-       migration
+       celery
        development
 
 
