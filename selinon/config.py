@@ -38,6 +38,7 @@ class Config(object):
     propagate_compound_finished = None
     output_schemas = None
     async_result_cache = None
+    migration_dir = None
 
     storage_mapping = None
     task2storage_mapping = None
@@ -90,6 +91,9 @@ class Config(object):
 
         # Selective task configuration
         cls.selective_run_task = config_module['selective_run_task']
+
+        # Configuration migrations
+        cls.migration_dir = config_module['migration_dir']
 
         # call config init with Config class to set up other configuration specific values
         config_module['init'](cls)
