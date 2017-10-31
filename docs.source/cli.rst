@@ -15,9 +15,8 @@ Most of the sub-commands accept configuration files you use with Selinon so to u
 
 .. code-block:: bash
 
-  $ selinonlib-cli --nodes-definition myapp/config/nodes.yaml --flow-definitions myapp/config/flows/*.yaml --help
   usage: selinonlib-cli [-h] [--verbose] [--no-color]
-                        {simulate,plot,inspect,version} ...
+                        {simulate,migrate,plot,inspect,version} ...
 
   developer interaction tool for Selinon config files
 
@@ -28,8 +27,9 @@ Most of the sub-commands accept configuration files you use with Selinon so to u
     --no-color, -n        suppress colorized logging output
 
   sub-commands:
-    {simulate,plot,inspect,version}
+    {simulate,migrate,plot,inspect,version}
       simulate            simulate flow locally without Celery
+      migrate             generate config file migration
       plot                plot graphs from configuration files
       inspect             collect useful information from configuration files
       version             get version info and exit
@@ -73,3 +73,10 @@ To debug, explore, play or interact with task flow execution anyhow, Selinonlib 
 Simulator currently supports only single-process, single threaded simulation - one worker serving tasks. Worker accepts messages in a round-robin fashion based on message availability in queues.
 
 In order to see what is happening during simulator run, you can run simulator in a verbose mode. Simulator in that case prints all the execution actions. It can help you when you want to experiment with your flow configuration or you would like to debug strange flow behaviour.
+
+Generating migrations of configuration files
+============================================
+
+As Selinon offers you a mechanism to do changes in your configuration files and do re-deployment of workers, there needs to be a mechanism that ensures changes done in your configuration files are reflected to already present messages on queue. This lead to migrations design.
+
+You can generate migration files using the ``migrate`` sub-command. Please take a look to the :ref:`section that explains migrations in more detail <migrations>`.

@@ -744,6 +744,20 @@ Keep track of actions that are done in flow. See :ref:`trace` for more info with
 
   * **Default:** do not trace flow actions
 
+migration_dir
+#############
+
+A path to directory containing generated migrations. See :ref:`migrations` for more info.
+
+  * **Possible values:**
+
+    * string - a path to migration directory
+
+  * **Required:** false
+
+  * **Default:** no migration directory - no migrations will be performed
+
+
 cache
 =====
 

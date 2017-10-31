@@ -1,6 +1,6 @@
-.. _migration:
+.. _celery:
 
-Migration from raw Celery to Selinon
+Moving from raw Celery to Selinon
 ------------------------------------
 
 Supposing you are already using Celery and you want to migrate to Selinon, this section will give you a very high overview on what needs to be done and what are possible pitfalls when migrating. Also check :ref:`faq` for some notes on why you should and why you shouldn't migrate to Selinon.
