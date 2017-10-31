@@ -46,6 +46,9 @@ class Config(object):
     task_queues = None
     strategies = None
 
+    # Called from generated python code to mark that the configuration was correctly set up
+    initialized = False
+
     @classmethod
     def _set_config(cls, config_module):
         """Set configuration from Python's module.
