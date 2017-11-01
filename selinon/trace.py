@@ -76,8 +76,20 @@ A list of events that can be traced:
 |   `DISPATCHER_RETRY`       | nodes and will retry to check flow  | Dispatcher      | retry, queue, node_args,           |
 |                            | status after a while.               |                 | state_dict, flow_name, parent      |
 +----------------------------+-------------------------------------+-----------------+------------------------------------+
-|                            | Flow has sucessfully ended.         |                 |                                    |
+|                            | Flow has successfully ended.        |                 |                                    |
 |   `FLOW_END`               |                                     | Dispatcher      |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Flow has migration was done.        |                 |                                    |
+|   `MIGRATION`              |                                     | Dispatcher      |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Signalization of tainted flow when  |                 |                                    |
+|   `MIGRATION_TAINTED_FLOW` | migration was run.                  | Dispatcher      |                                    |
+|                            |                                     |                 |                                    |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
+|                            | Flow migration has error - skewed   |                 |                                    |
+|   `MIGRATION_SKEW`         | migration.                          | Dispatcher      |                                    |
 |                            |                                     |                 |                                    |
 +----------------------------+-------------------------------------+-----------------+------------------------------------+
 |                            | Given node did not connect to       |                 | storage_name                       |
@@ -232,7 +244,10 @@ class Trace(object):
         TASK_RESULT_CACHE_ISSUE,\
         STORAGE_ISSUE,\
         RESULT_BACKEND_ISSUE,\
-        FLOW_RETRY = range(45)
+        FLOW_RETRY,\
+        MIGRATION,\
+        MIGRATION_SKEW,\
+        MIGRATION_TAINTED_FLOW = range(48)
 
     WARN_EVENTS = (
         NODE_FAILURE,
@@ -245,7 +260,8 @@ class Trace(object):
         TASK_RESULT_CACHE_ISSUE,
         STORAGE_ISSUE,
         RESULT_BACKEND_ISSUE,
-        FLOW_RETRY
+        FLOW_RETRY,
+        MIGRATION_SKEW
     )
 
     _event_strings = (
@@ -293,7 +309,10 @@ class Trace(object):
         'TASK_RESULT_CACHE_ISSUE',
         'STORAGE_ISSUE',
         'RESULT_BACKEND_ISSUE',
-        'FLOW_RETRY'
+        'FLOW_RETRY',
+        'MIGRATION',
+        'MIGRATION_SKEW',
+        'MIGRATION_TAINTED_FLOW'
     )
 
     def __init__(self):
