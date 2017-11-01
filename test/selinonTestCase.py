@@ -64,15 +64,17 @@ class SelinonTestCase(object):
     DATA_DIR = os.path.join('test', 'data')
 
     def setup_method(self, method):
-        """
-        Clean up all class attributes from previous runs
-        """
+        """Clean up all class attributes from previous runs."""
         AsyncResult.clear()
         GetTaskInstance.clear()
         SystemState._throttled_tasks = {}
         SystemState._throttled_flows = {}
         # Make sure we restore tracing function in tests
         Trace._trace_functions = []
+
+    def teardown_method(self, method):
+        """Clean up resources and configuration after a test."""
+        Config.initialized = False
 
     def init(self, edge_table, **kwargs):
         """
@@ -108,6 +110,7 @@ class SelinonTestCase(object):
         Config.output_schemas = kwargs.pop('output_schemas', {})
         Config.async_result_cache = kwargs.pop('async_result_cache', _AsyncResultCacheMock(Config.is_flow))
         Config.selective_run_task = kwargs.pop('selective_run_task', _SelectiveRunFunctionMock())
+        Config.initialized = True
 
         if kwargs:
             raise ValueError("Unknown config options provided: %s" % set(kwargs.keys()))

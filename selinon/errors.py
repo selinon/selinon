@@ -23,3 +23,7 @@ class FlowError(Exception):
 
 class CacheMissError(Exception):
     """An error raised when there is requested an item from cache that is not stored in cache."""
+
+
+class ConfigNotInitializedError(Exception):
+    """An error raised when the configuration was requested, but not initialized."""
