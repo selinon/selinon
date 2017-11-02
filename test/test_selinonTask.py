@@ -11,6 +11,7 @@ from selinon import SelinonTask
 from selinon.retry import Retry
 from selinon.storagePool import StoragePool
 from selinonTestCase import SelinonTestCase
+from selinonlib import NoParentNodeError
 
 
 class _MyTask(SelinonTask):
@@ -58,7 +59,7 @@ class TestSelinonTask(SelinonTestCase):
         assert task.parent_task_result(parent_task_name) == result
 
     def test_parent_task_result_error(self, task, params):
-        with pytest.raises(KeyError):
+        with pytest.raises(NoParentNodeError):
             task.parent_task_result('some-not-existing-task')
 
     def test_parent_flow_result(self, task, params):
@@ -76,15 +77,15 @@ class TestSelinonTask(SelinonTestCase):
         assert task.parent_flow_result(parent_flow_name, parent_task_name, index=0) == result
 
     def test_parent_flow_result_error_no_flow(self, task, params):
-        with pytest.raises(KeyError):
+        with pytest.raises(NoParentNodeError):
             task.parent_flow_result('some-not-existing-flow', 'task2', index=0)
 
     def test_parent_flow_result_error_no_task(self, task, params):
-        with pytest.raises(KeyError):
+        with pytest.raises(NoParentNodeError):
             task.parent_flow_result('flow2', 'some-not-existing-task', index=0)
 
     def test_parent_flow_result_error_index(self, task, params):
-        with pytest.raises(IndexError):
+        with pytest.raises(NoParentNodeError):
             task.parent_flow_result('flow2', 'task3', index=42)
 
     def test_storage(self, task, params):

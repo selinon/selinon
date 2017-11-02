@@ -11,7 +11,9 @@ import os
 import runpy
 import tempfile
 
+from selinonlib import ConfigurationError
 from selinonlib import System
+from selinonlib import UnknownStorageError
 
 from .trace import Trace
 
@@ -321,11 +323,11 @@ class Config(object):
         :return: starting edges for a flow
         """
         if flow_name not in Config.edge_table:
-            raise ValueError("No such flow in configuration: %s" % flow_name)
+            raise UnknownStorageError("No such flow in configuration: %s" % flow_name)
 
         start_edges = [(i, edge) for i, edge in enumerate(Config.edge_table[flow_name]) if len(edge['from']) == 0]
         if not start_edges:
             # This should not occur since selinonlib raises exception if such occurs, but just to be sure...
-            raise ValueError("No starting node found for flow '%s'!" % flow_name)
+            raise ConfigurationError("No starting node found for flow '%s'!" % flow_name)
 
         return start_edges

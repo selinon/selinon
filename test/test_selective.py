@@ -8,6 +8,7 @@
 import pytest
 from selinon.selective import compute_selective_run
 from selinonTestCase import SelinonTestCase
+from selinonlib import SelectiveNoPathError
 
 
 class TestSelective(SelinonTestCase):
@@ -263,5 +264,5 @@ class TestSelective(SelinonTestCase):
                       {'from': ['Task2'], 'to': ['Task3'], 'condition': self.cond_true}],
         }
         self.init(edge_table)
-        with pytest.raises(ValueError):
+        with pytest.raises(SelectiveNoPathError):
             compute_selective_run('flow1', ['TaskX'], follow_subflows=False, run_subsequent=True)

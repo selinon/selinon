@@ -10,6 +10,8 @@ import abc
 import logging
 
 from celery.result import AsyncResult
+from selinonlib import NoParentNodeError
+from selinonlib import RequestError
 
 from .retry import Retry
 from .storagePool import StoragePool
@@ -50,20 +52,20 @@ class SelinonTask(metaclass=abc.ABCMeta):
         for flow_name in flow_names:
             try:
                 parent_flow = parent_flow[flow_name]
-            except KeyError:
-                raise KeyError("No such parent flow '%s' for task '%s', check your configuration; nested "
-                               "as %s from flow %s"
-                               % (flow_name, self.task_name, flow_names, self.flow_name))
+            except KeyError as exc:
+                raise NoParentNodeError("No such parent flow '%s' for task '%s', check your configuration; nested "
+                                        "as %s from flow %s"
+                                        % (flow_name, self.task_name, flow_names, self.flow_name)) from exc
         try:
             task_id = parent_flow[task_name][index]
-        except KeyError:
-            raise KeyError("No such parent task '%s' dereferenced by '%s' was run for task '%s' in flow '%s'"
-                           % (task_name, flow_names, self.task_name, self.flow_name))
-        except IndexError:
-            raise IndexError("Requested index %s in parent task '%s' dereferencered by '%s', but there were run only "
-                             "%s tasks in task %s flow %s"
-                             % (index, task_name, flow_names, len(parent_flow[task_name]), self.task_name,
-                                self.flow_name))
+        except KeyError as exc:
+            raise NoParentNodeError("No such parent task '%s' referenced by '%s' was run for task '%s' in flow '%s'"
+                                    % (task_name, flow_names, self.task_name, self.flow_name)) from exc
+        except IndexError as exc:
+            raise NoParentNodeError("Requested index %s in parent task '%s' referencered by '%s', but there were "
+                                    "run only %d tasks in task %s flow %s"
+                                    % (index, task_name, flow_names, len(parent_flow[task_name]), self.task_name,
+                                       self.flow_name)) from exc
         return task_id
 
     @property
@@ -82,9 +84,9 @@ class SelinonTask(metaclass=abc.ABCMeta):
         """
         try:
             parent_task_id = self.parent[parent_name]
-        except KeyError:
-            raise KeyError("No such parent '%s' in task '%s' in flow '%s', check your configuration"
-                           % (parent_name, self.task_name, self.flow_name))
+        except KeyError as exc:
+            raise NoParentNodeError("No such parent '%s' in task '%s' in flow '%s', check your configuration"
+                                    % (parent_name, self.task_name, self.flow_name)) from exc
 
         return StoragePool.retrieve(self.flow_name, parent_name, parent_task_id)
 
@@ -112,14 +114,14 @@ class SelinonTask(metaclass=abc.ABCMeta):
         """
         try:
             parent_task_id = self.parent[parent_name]
-        except KeyError:
-            raise KeyError("No such parent '%s' in task '%s' in flow '%s', check your configuration"
-                           % (parent_name, self.task_name, self.flow_name))
+        except KeyError as exc:
+            raise NoParentNodeError("No such parent '%s' in task '%s' in flow '%s', check your configuration"
+                                    % (parent_name, self.task_name, self.flow_name)) from exc
 
         # Celery stores exceptions in result field
         celery_result = AsyncResult(parent_task_id)
         if not celery_result.failed():
-            raise ValueError("Parent task '%s' did not raised exception" % parent_name)
+            raise RequestError("Parent task '%s' did not raised exception" % parent_name)
 
         return celery_result.result
 
@@ -137,8 +139,8 @@ class SelinonTask(metaclass=abc.ABCMeta):
         # Celery stores exceptions in result field
         celery_result = AsyncResult(task_id)
         if not celery_result.failed():
-            raise ValueError("Parent task '%s' from subflows %s did not raised exception"
-                             % (task_name, str(flow_names)))
+            raise RequestError("Parent task '%s' from subflows %s did not raised exception"
+                               % (task_name, str(flow_names)))
 
         return celery_result.result
 

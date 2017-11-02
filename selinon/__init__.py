@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 """Selinon - an advanced task flow management on top of Celery."""
 
+# Expose Selinonlib errors here as those are the ones that are designed for users.
+from selinonlib.errors import *  # pylint: disable=wildcard-import
+
 from .cache import Cache
 from .config import Config
 from .dataStorage import DataStorage
 from .dispatcher import Dispatcher
-from .errors import CacheMissError
-from .errors import ConfigError
-from .errors import FatalTaskError
-from .errors import FlowError
-from .errors import InternalError
 from .selinonTask import SelinonTask
 from .storagePool import StoragePool
 from .systemState import SystemState
