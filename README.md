@@ -7,6 +7,7 @@ An advanced task flow management on top of [Celery](https://www.celeryproject.or
 ![PyPI Implementation](https://img.shields.io/pypi/implementation/selinon.svg)
 ![PyPI Wheel](https://img.shields.io/pypi/wheel/selinon.svg)
 ![Travis CI](https://travis-ci.org/selinon/selinon.svg?branch=master)
+![Documentation Status](https://readthedocs.org/projects/selinon/badge/?version=latest)
 ![GitHub stars](https://img.shields.io/github/stars/selinon/selinon.svg)
 ![GitHub license](https://img.shields.io/badge/license-BSD-blue.svg)
 ![Twitter](https://img.shields.io/twitter/url/http/github.com/selinon/selinon.svg?style=social)
