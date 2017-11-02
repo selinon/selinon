@@ -8,7 +8,7 @@
 import pytest
 from selinonTestCase import SelinonTestCase
 
-from selinon import FlowError
+from selinon.errors import FlowError
 from selinon import SystemState
 
 

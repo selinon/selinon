@@ -13,6 +13,7 @@ from selinon.trace import Trace
 from selinon import run_flow
 from selinon.dispatcher import Dispatcher
 from selinon.retry import Retry
+from selinonlib import UnknownFlowError
 
 
 class TestOthers(SelinonTestCase):
@@ -28,11 +29,11 @@ class TestOthers(SelinonTestCase):
 
         assert run_flow('flow1', node_args={'foo': 'bar'}) == "<dispatcher_id>"
 
-    def test_run_flow_error(self):
+    def test_run_unknown_flow_error(self):
         # We run uninitialized Config
         self.init(edge_table={}, dispatcher_queues=None)
 
-        with pytest.raises(KeyError):
+        with pytest.raises(UnknownFlowError):
             run_flow('some_flow', node_args={'foo': 'bar'})
 
     def test_retry(self):

@@ -8,6 +8,8 @@
 
 import traceback
 
+from selinonlib import UnknownStorageError
+
 from .config import Config
 from .errors import CacheMissError
 from .lockPool import LockPool
@@ -39,7 +41,7 @@ class StoragePool(object):
         storage = Config.task2storage_mapping.get(task_name)
 
         if storage is None and not graceful:
-            raise KeyError("No storage for task '%s' defined" % task_name)
+            raise UnknownStorageError("No storage for task '%s' defined" % task_name)
 
         return storage
 
@@ -64,7 +66,7 @@ class StoragePool(object):
         :param storage_name: name of storage
         :return: connected storage
         """
-        # if this raises KeyError exception it means that the flow was not configured properly - should
+        # if this raises UnknownStorageError exception it means that the flow was not configured properly - should
         # be handled by Selinonlib
         storage = Config.storage_mapping[storage_name]
 

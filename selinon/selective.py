@@ -10,6 +10,8 @@ from collections import deque
 import copy
 from itertools import chain
 
+from selinonlib import SelectiveNoPathError
+
 from .config import Config
 
 
@@ -118,7 +120,7 @@ def _raise_for_result_check(task_names, path):
 
     :param task_names: a list of node names that should be checked
     :param path: traverses that are per-flow specific
-    :raises ValueError: there was not found any path to the given node
+    :raises SelectiveNoPathError: there was not found any path to the given node
     """
     visited_marking = dict.fromkeys(task_names, False)
     for node in visited_marking.keys():
@@ -128,7 +130,7 @@ def _raise_for_result_check(task_names, path):
 
     for node, visited in visited_marking.items():
         if not visited:
-            raise ValueError("No path to node '%s' found" % node)
+            raise SelectiveNoPathError("No path to node '%s' found" % node)
 
 
 def _compute_subsequent_edges(flow_name, node_names):

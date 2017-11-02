@@ -11,7 +11,7 @@ from flexmock import flexmock
 from selinonTestCase import SelinonTestCase
 from selinon import Dispatcher
 from selinon.systemState import SystemState
-from selinon import FlowError
+from selinon.errors import FlowError
 from requestMock import RequestMock
 
 

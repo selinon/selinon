@@ -8,6 +8,8 @@
 
 import logging
 
+from selinonlib import UnknownFlowError
+
 from .config import Config
 from .dispatcher import Dispatcher
 from .selective import compute_selective_run
@@ -23,7 +25,7 @@ def run_flow(flow_name, node_args=None):
     :return: flow ID (dispatcher ID)
     """
     if Config.dispatcher_queues is None or flow_name not in Config.dispatcher_queues:
-        raise KeyError("No flow with name '%s' defined" % flow_name)
+        raise UnknownFlowError("No flow with name '%s' defined" % flow_name)
 
     queue = Config.dispatcher_queues[flow_name]
     _logger.debug("Scheduling flow '%s' with node_args '%s' on queue '%s'", flow_name, node_args, queue)
@@ -41,7 +43,7 @@ def run_flow_selective(flow_name, task_names, node_args, follow_subflows=False, 
     :param follow_subflows: if True, subflows will be followed and checked for nodes to be run
     :param run_subsequent: trigger run of all tasks that depend on the desired task
     :return: dispatcher id that is scheduled to run desired selective task flow
-    :raises NoWay: there was no way found to the desired task in the flow
+    :raises selinonlib.errors.SelectiveNoPathError: there was no way found to the desired task in the flow
     """
     selective = compute_selective_run(flow_name, task_names, follow_subflows, run_subsequent)
     queue = Config.dispatcher_queues[flow_name]
