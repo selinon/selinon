@@ -15,7 +15,20 @@ from selinonlib import ConfigurationError
 from selinonlib import System
 from selinonlib import UnknownStorageError
 
+from .errors import ConfigNotInitializedError
 from .trace import Trace
+
+
+def requires_initialization(func):
+    """Check that method that requires config can access initialized configuration."""
+    def wrapper(class_, *args, **kwargs):
+        """Wrap call for checking initialization."""
+        if not class_.initialized:
+            raise ConfigNotInitializedError("Selinon not initialized, cannot access configuration attributes")
+
+        return func(class_, *args, **kwargs)
+
+    return wrapper
 
 
 class Config(object):
@@ -210,6 +223,7 @@ class Config(object):
         return False
 
     @classmethod
+    @requires_initialization
     def should_propagate_finished(cls, node_name, dst_node_name):
         """Check whether finished nodes should be propagated.
 
@@ -220,6 +234,7 @@ class Config(object):
         return cls._should_config(node_name, dst_node_name, cls.propagate_finished)
 
     @classmethod
+    @requires_initialization
     def should_propagate_node_args(cls, node_name, dst_node_name):
         """Check whether node arguments should be propagated.
 
@@ -230,6 +245,7 @@ class Config(object):
         return cls._should_config(node_name, dst_node_name, cls.propagate_node_args)
 
     @classmethod
+    @requires_initialization
     def should_propagate_parent(cls, node_name, dst_node_name):
         """Check whether parents be propagated.
 
@@ -240,6 +256,7 @@ class Config(object):
         return cls._should_config(node_name, dst_node_name, cls.propagate_parent)
 
     @classmethod
+    @requires_initialization
     def should_propagate_compound_finished(cls, node_name, dst_node_name):  # pylint: disable=invalid-name
         """Check whether finished should be propagated (compound/flattered mode).
 
@@ -250,6 +267,7 @@ class Config(object):
         return cls._should_config(node_name, dst_node_name, cls.propagate_compound_finished)
 
     @classmethod
+    @requires_initialization
     def get_task_instance(cls, task_name, flow_name, parent, task_id, dispatcher_id):
         """Get instance of SelinonTask.
 
@@ -271,6 +289,7 @@ class Config(object):
         )
 
     @classmethod
+    @requires_initialization
     def is_flow(cls, node_name):
         """Check if given node is a flow by its name.
 
@@ -280,6 +299,7 @@ class Config(object):
         return node_name in cls.flows
 
     @classmethod
+    @requires_initialization
     def is_task(cls, node_name):
         """Check if given node is a task by its name.
 
@@ -289,6 +309,7 @@ class Config(object):
         return node_name in cls.task_classes
 
     @classmethod
+    @requires_initialization
     def has_storage(cls, task_name):
         """Check whether the given task has assigned storage.
 
@@ -298,6 +319,7 @@ class Config(object):
         return task_name in cls.task2storage_mapping
 
     @classmethod
+    @requires_initialization
     def has_readonly_storage(cls, task_name):
         """Check whether the given task has storage in read-only mode (results are not saved).
 
@@ -307,6 +329,7 @@ class Config(object):
         return task_name in cls.storage_readonly
 
     @classmethod
+    @requires_initialization
     def has_readwrite_storage(cls, task_name):
         """Check whether the given task has storage assigned and results are stored.
 
@@ -316,6 +339,7 @@ class Config(object):
         return cls.has_storage(task_name) and not cls.has_readonly_storage(task_name)
 
     @classmethod
+    @requires_initialization
     def get_starting_edges(cls, flow_name):
         """Get starting edges for a flow.
 
