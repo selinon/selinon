@@ -13,3 +13,5 @@ docs.source/api
 coverage.xml
 .coverage
 example/*.png
+*.rej
+*.orig
