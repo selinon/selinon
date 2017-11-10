@@ -39,13 +39,11 @@ pylint:
 
 coala:
 	@# We need to run coala in a virtual env due to dependency issues
-	@if [ `python3 --version | cut -f2 -d' ' | cut -f2 -d.` != '6' ]; then \
-	  echo ">>> Preparing virtual environment for coala" &&\
+	@echo ">>> Preparing virtual environment for coala" &&\
 	  # setuptools is pinned due to dependency conflict &&\
 	  [ -d venv-coala ] || virtualenv -p python3 venv-coala && . venv-coala/bin/activate && pip3 install coala-bears "setuptools>=17.0" &&\
 	  echo ">>> Running coala" &&\
-	  venv-coala/bin/python3 venv-coala/bin/coala --non-interactive || exit 1; \
-	else echo ">>> Skipping coala tests due to errors on Python 3.6"; fi
+	  venv-coala/bin/python3 venv-coala/bin/coala --non-interactive
 
 pydocstyle:
 	@echo ">>> Running pydocstyle"
