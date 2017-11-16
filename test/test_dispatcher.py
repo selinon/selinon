@@ -94,14 +94,17 @@ class TestDispatcher(SelinonTestCase):
             dispatcher.run(flow_name)
 
     def test_selinon_retry(self):
-        def my_retry(kwargs, max_retries, countdown, queue):
+        def my_retry(kwargs=None, max_retries=None, countdown=None, queue=None, exc=None):
+            kwargs = kwargs or {}
             assert kwargs.get('flow_name') == flow_name
             assert kwargs.get('node_args') == node_args
             assert 'parent' in kwargs
-            assert kwargs.get('retried_count') == 1
+            assert 'selective' in kwargs
+            assert 'state' in kwargs
             assert max_retries == 1
             assert countdown == 5
             assert queue == 'queue_flow1'
+            assert exc is None
             raise RuntimeError()  # we re-raise as stated in Celery doc
 
         flow_name = 'flow1'

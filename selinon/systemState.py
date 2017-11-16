@@ -12,12 +12,15 @@ import datetime
 from functools import reduce
 import itertools
 import json
+import traceback
 
 from celery.result import AsyncResult
 
 from .config import Config
 from .errors import CacheMissError
+from .errors import DispatcherRetry
 from .errors import FlowError
+from .errors import StorageError
 from .lockPool import LockPool
 from .selective import compute_selective_run
 from .selinonTaskEnvelope import SelinonTaskEnvelope
@@ -63,20 +66,39 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         }
 
         with self._node_state_cache_lock.get_lock(self._flow_name):
-            try:
-                Trace.log(Trace.NODE_STATE_CACHE_GET, trace_msg)
-                res = cache.get(node_id)
-                Trace.log(Trace.NODE_STATE_CACHE_HIT, trace_msg)
-            except CacheMissError:
-                Trace.log(Trace.NODE_STATE_CACHE_MISS, trace_msg)
-                res = AsyncResult(id=node_id)
-                # we can cache only results of tasks that have finished or failed, not the ones that are going to
-                # be processed
-                if res.successful() or res.failed():
-                    Trace.log(Trace.NODE_STATE_CACHE_ADD, trace_msg)
-                    cache.add(node_id, res)
+            res = None
+            result_retrieved_from_cache = False
 
-        return res
+            Trace.log(Trace.NODE_STATE_CACHE_GET, trace_msg)
+            try:
+                res = cache.get(node_id)
+                result_retrieved_from_cache = True
+            except CacheMissError:
+                Trace.log(Trace.NODE_STATE_CACHE_MISS, trace_msg, what=traceback.format_exc())
+            except Exception:  # pylint: disable=broad-except
+                Trace.log(Trace.NODE_STATE_CACHE_ISSUE, trace_msg, what=traceback.format_exc())
+            else:
+                Trace.log(Trace.NODE_STATE_CACHE_HIT, trace_msg)
+
+            if not result_retrieved_from_cache:
+                try:
+                    res = AsyncResult(id=node_id)
+                    successful = res.successful()
+                    failed = res.failed()
+                except Exception as exc:  # pylint: disable=broad-except
+                    Trace.log(Trace.RESULT_BACKEND_ISSUE, trace_msg, what=traceback.format_exc())
+                    raise DispatcherRetry(keep_state=True, adjust_retry_count=False) from exc
+
+                # We can cache only results of tasks that have finished or failed, not the ones that are
+                # going to be processed (state will change).
+                if successful or failed:
+                    Trace.log(Trace.NODE_STATE_CACHE_ADD, trace_msg)
+                    try:
+                        cache.add(node_id, res)
+                    except Exception:  # pylint: disable=broad-except
+                        Trace.log(Trace.NODE_STATE_CACHE_ISSUE, trace_msg, what=traceback.format_exc())
+
+            return res
 
     def _instantiate_active_nodes(self, arr):
         """Retrieve all async results for active nodes.
@@ -142,7 +164,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         self._waiting_edges = []
         self._retry = retry
 
-        # TODO: fix this - for some reasons serializer uses strings in values
+        # TODO: fix this - for some reasons serializer uses strings in keys
         if self._selective:
             for flow in self._selective['waiting_edges_subset']:
                 self._selective['waiting_edges_subset'][flow] = \
@@ -680,7 +702,14 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                     # We could also examine results of subflow, there could be passed a list of subflows with
                     # finished_nodes to 'condition' in order to do inspection
                     storage_pool = StoragePool(storage_id_mapping, self._flow_name)
-                    if edge['condition'](storage_pool, self._node_args):
+
+                    try:
+                        condition_result = edge['condition'](storage_pool, self._node_args)
+                    except StorageError as exc:
+                        Trace.log(Trace.STORAGE_ISSUE, what=traceback.format_exc())
+                        raise DispatcherRetry(keep_state=True, adjust_retry_count=False) from exc
+
+                    if condition_result:
                         records, reused = self._fire_edge(i, edge, storage_pool,
                                                           parent=parent, node_args=self._node_args)
                         new_started_nodes.extend(records)

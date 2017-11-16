@@ -21,6 +21,26 @@ class FlowError(Exception):
     """An exception that is raised once there is an error in the flow on runtime - some nodes failed."""
 
 
+class DispatcherRetry(Exception):
+    """Force retry the whole flow - if flow arguments are provided, flow will continue where it was left."""
+
+    def __init__(self, keep_state=True, adjust_retry_count=True):
+        """Retry dispatcher causing flow state to be reinspected.
+
+        :param keep_state: the current state should be kept otherwise the whole flow will start from the beginning
+        :type keep_state: bool
+        :param adjust_retry_count: adjust flow retry count if needed, will cause flow failure once retry count reaches 0
+        :type adjust_retry_count: bool
+        """
+        super().__init__()
+        self.keep_state = keep_state
+        self.adjust_retry_count = adjust_retry_count
+
+
+class StorageError(Exception):
+    """Raised to notify about storage errors (e.g. storage goes down)."""
+
+
 class CacheMissError(Exception):
     """An error raised when there is requested an item from cache that is not stored in cache."""
 
