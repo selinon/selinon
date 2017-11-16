@@ -12,7 +12,7 @@ from selinonTestCase import SelinonTestCase
 from selinon.trace import Trace
 from selinon import run_flow
 from selinon.dispatcher import Dispatcher
-from selinon.retry import Retry
+from selinonlib import Retry
 from selinonlib import UnknownFlowError
 
 

@@ -12,8 +12,8 @@ import logging
 from celery.result import AsyncResult
 from selinonlib import NoParentNodeError
 from selinonlib import RequestError
+from selinonlib import Retry
 
-from .retry import Retry
 from .storagePool import StoragePool
 
 

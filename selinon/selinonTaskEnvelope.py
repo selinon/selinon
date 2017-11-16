@@ -13,10 +13,10 @@ import traceback
 import jsonschema
 
 from celery import Task
+from selinonlib import Retry
 
 from .config import Config
 from .errors import FatalTaskError
-from .retry import Retry
 from .storagePool import StoragePool
 from .trace import Trace
 
