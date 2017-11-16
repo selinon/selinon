@@ -26,13 +26,17 @@ Is this project helpful? [Send me a simple warm message](https://saythanks.io/to
 An advanced flow management above Celery (an asynchronous distributed task queue) written in Python3, that allows you to:
 
   - Dynamically schedule tasks based on results of previous tasks
-  - Group tasks to flows
+  - Group tasks into flows in simple YAML configuration files
   - Schedule flows from other flows (even recursively)
   - Store results of tasks in your storages and databases transparently, validate results against defined JSON schemas
+  - Do redeployment respecting changes in the YAML configuration files without purging queues (migrations)
   - Track flow progress via the build-in tracing mechanism
   - Complex per-task or per-flow failure handling with fallback tasks or fallback flows
-  - Make your flow orchestrated by orchestration tools such as [Kubernetes](https://kubernetes.io)
-  - And (of course) much more...
+  - No DAG limitation in your flows
+  - Selectively pick tasks in your flow graphs that should be executed respecting task dependencies
+  - Make your deployment easy to orchestrate using orchestration tools such as [Kubernetes](https://kubernetes.io)
+  - Highly scalable solution for big data processing pipelines
+  - And (of course) much more... check [docs](https://selinon.readthedocs.io)
 
 ## About
 
