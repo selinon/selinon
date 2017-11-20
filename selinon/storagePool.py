@@ -12,6 +12,7 @@ from selinonlib import UnknownStorageError
 
 from .config import Config
 from .errors import CacheMissError
+from .errors import StorageError
 from .lockPool import LockPool
 from .trace import Trace
 
@@ -108,18 +109,40 @@ class StoragePool(object):
 
         with cls._storage_pool_locks.get_lock(storage):
             cache = Config.storage2storage_cache[storage_name]
-            try:
-                Trace.log(Trace.TASK_RESULT_CACHE_GET, trace_msg)
-                result = cache.get(task_id, task_name=storage_task_name, flow_name=flow_name)
-                Trace.log(Trace.TASK_RESULT_CACHE_HIT, trace_msg)
-            except CacheMissError:
-                Trace.log(Trace.TASK_RESULT_CACHE_MISS, trace_msg)
-                Trace.log(Trace.STORAGE_RETRIEVE, trace_msg)
-                result = storage.retrieve(flow_name, task_name, task_id)
-                Trace.log(Trace.TASK_RESULT_CACHE_ADD, trace_msg)
-                cache.add(task_id, result)
 
-        return result
+            result = None
+            result_retrieved = False
+
+            # Actually it is OK if there are some issues with task result cache - if there is some issue, just
+            # report it in the tracing mechanism so users are aware of it and try to talk directly to storage
+            # instead.
+            Trace.log(Trace.TASK_RESULT_CACHE_GET, trace_msg)
+            try:
+                result = cache.get(task_id, task_name=storage_task_name, flow_name=flow_name)
+                result_retrieved = True
+            except CacheMissError:
+                Trace.log(Trace.TASK_RESULT_CACHE_MISS, trace_msg, what=traceback.format_exc())
+            except Exception:  # pylint: disable=broad-except
+                Trace.log(Trace.TASK_RESULT_CACHE_ISSUE, trace_msg, what=traceback.format_exc())
+            else:
+                Trace.log(Trace.TASK_RESULT_CACHE_HIT, trace_msg)
+
+            if not result_retrieved:
+                Trace.log(Trace.STORAGE_RETRIEVE, trace_msg)
+                try:
+                    result = storage.retrieve(flow_name, task_name, task_id)
+                except Exception as exc:
+                    error_msg = "Failed to retrieve result from storage after the result was not found in cache"
+                    Trace.log(Trace.STORAGE_ISSUE, trace_msg, what=traceback.format_exc())
+                    raise StorageError(error_msg) from exc
+
+            Trace.log(Trace.TASK_RESULT_CACHE_ADD, trace_msg)
+            try:
+                cache.add(task_id, result)
+            except Exception:  # pylint: disable=broad-except
+                Trace.log(Trace.TASK_RESULT_CACHE_ISSUE, trace_msg, what=traceback.format_exc())
+
+            return result
 
     @classmethod
     def set(cls, node_args, flow_name, task_name, task_id, result):

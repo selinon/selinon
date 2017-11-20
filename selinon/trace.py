@@ -227,7 +227,12 @@ class Trace(object):
         STORAGE_STORE_ERROR,\
         STORAGE_OMIT_STORE_ERROR,\
         FALLBACK_COND_FALSE,\
-        FALLBACK_COND_TRUE = range(40)
+        FALLBACK_COND_TRUE,\
+        NODE_STATE_CACHE_ISSUE,\
+        TASK_RESULT_CACHE_ISSUE,\
+        STORAGE_ISSUE,\
+        RESULT_BACKEND_ISSUE,\
+        FLOW_RETRY = range(45)
 
     WARN_EVENTS = (
         NODE_FAILURE,
@@ -235,7 +240,12 @@ class Trace(object):
         TASK_RETRY,
         TASK_FAILURE,
         FLOW_FAILURE,
-        STORAGE_OMIT_STORE_ERROR
+        STORAGE_OMIT_STORE_ERROR,
+        NODE_STATE_CACHE_ISSUE,
+        TASK_RESULT_CACHE_ISSUE,
+        STORAGE_ISSUE,
+        RESULT_BACKEND_ISSUE,
+        FLOW_RETRY
     )
 
     _event_strings = (
@@ -278,7 +288,12 @@ class Trace(object):
         'STORAGE_STORE_ERROR',
         'STORAGE_OMIT_STORE_ERROR',
         'FALLBACK_COND_FALSE',
-        'FALLBACK_COND_TRUE'
+        'FALLBACK_COND_TRUE',
+        'NODE_STATE_CACHE_ISSUE',
+        'TASK_RESULT_CACHE_ISSUE',
+        'STORAGE_ISSUE',
+        'RESULT_BACKEND_ISSUE',
+        'FLOW_RETRY'
     )
 
     def __init__(self):
@@ -320,11 +335,12 @@ class Trace(object):
         cls._trace_functions.append(func)
 
     @classmethod
-    def log(cls, event, *msg_dict):
+    def log(cls, event, *msg_dict, **msg_dict_kwargs):
         """Log an event.
 
         :param event: tracing event
         :param msg_dict: message to be printed
+        :param msg_dict_kwargs: kwargs like dictionary for traced details
         """
         if not cls._trace_functions:
             return
@@ -332,6 +348,8 @@ class Trace(object):
         to_report = {}
         for msg in msg_dict:
             to_report.update(msg)
+
+        to_report.update(msg_dict_kwargs)
 
         for trace_func in cls._trace_functions:
             trace_func(event, to_report)
