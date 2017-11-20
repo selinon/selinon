@@ -160,3 +160,8 @@ If you would like to request some storage from your configuration, you can reque
    mongo = StoragePool.get_connected_storage('MyMongoStorage')
 
 Selinon will transparently take care of instantiation, connection and sharing connection pool across the whole process. Check out other useful methods of :class:`StoragePool <selinon.storagePool>`.
+
+
+.. note::
+
+  If there is anything wrong with storage or storage adapters causing dispatcher failing to determine the next steps in the flow, dispatcher is retried respecting the flow's ``retry_countdown`` configuration option. This way you will not lose messages that cannot be consumed due to storage errors. However if a task cannot write or read from a storage, it is marked as failed.
