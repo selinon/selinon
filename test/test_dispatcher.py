@@ -101,7 +101,7 @@ class TestDispatcher(SelinonTestCase):
             assert 'parent' in kwargs
             assert 'selective' in kwargs
             assert 'state' in kwargs
-            assert max_retries == 1
+            assert max_retries is None
             assert countdown == 5
             assert queue == 'queue_flow1'
             assert exc is None

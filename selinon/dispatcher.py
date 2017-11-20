@@ -31,11 +31,12 @@ class Dispatcher(Task):
     def selinon_retry(self, flow_info, new_retried_count, flow_error):
         """Retry whole flow on failure if configured so, forget any progress done so far.
 
-        :param flow_name: name of the flow to be retried
-        :param node_args: flow arguments
-        :param parent: flow parents
-        :param selective: selective dictionary
-        :param retried_count: number of retries already done
+        :param flow_info: a dictionary holding all the information relevant to flow (dispatcher arguments)
+        :type flow_info: dict
+        :param new_retried_count: new value for retried count for to flow arguments
+        :type new_retried_count: int
+        :param flow_error: an error that caused flow to retry (can be None)
+        :type flow_error: Exception
         :raises celery.Retry: always
         """
         # pylint: disable=too-many-arguments
@@ -56,12 +57,12 @@ class Dispatcher(Task):
             # force max_retries to 0 so we are not scheduled and marked as FAILED
             raise self.retry(max_retries=0, exc=flow_error)
 
-        # we will force max retries to 1 so we are always retried by Celery
+        # we will force max retries to None so we are always retried by Celery
         queue = Config.dispatcher_queues[flow_info['flow_name']]
         # TODO: add exception here as well
         Trace.log(Trace.FLOW_RETRY, kwargs, countdown=countdown, queue=queue)
         raise self.retry(kwargs=kwargs,
-                         max_retries=1,
+                         max_retries=None,
                          countdown=countdown,
                          queue=queue)
 
