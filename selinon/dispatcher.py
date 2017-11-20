@@ -45,7 +45,6 @@ class Dispatcher(Task):
             'node_args': flow_info['node_args'],
             'parent': flow_info['parent'],
             'retried_count': new_retried_count,
-            # Set these to None so Selinon will properly start the flow again
             'selective': flow_info['selective'],
             'retry': flow_info['retry'],
             'state': flow_info['state']
