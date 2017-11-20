@@ -14,7 +14,7 @@ If you would like to create a virtual environment not to install (possibly) unwa
 
 .. code-block:: console
 
-  make vevn
+  make venv
 
 To enter the prepared virtual environment run:
 
