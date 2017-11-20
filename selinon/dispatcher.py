@@ -98,6 +98,8 @@ class Dispatcher(Task):
         except FlowError as exc:
             max_retry = Config.max_retry.get(flow_name, 0)
             Trace.log(Trace.FLOW_FAILURE, flow_info, state=json.loads(str(exc)), will_retry=retried_count < max_retry)
+            # Force state to None so dispatcher will run the whole flow again
+            flow_info['state'] = None
             raise self.selinon_retry(flow_info=flow_info, new_retried_count=retried_count+1, flow_error=exc)
         except DispatcherRetry as exc:
             if exc.adjust_retry_count:
@@ -119,6 +121,7 @@ class Dispatcher(Task):
                 'flow_name': flow_name,
                 'node_args': node_args,
                 'parent': parent,
+                'retried_count': retried_count,
                 'retry': retry,
                 'state': state_dict,
                 'selective': system_state.selective
