@@ -145,7 +145,7 @@ Results of your tasks can get cached. This is especially useful when you use pre
           host: 'mongo'
           port: 27017
 
-Results are added to cache only if dispatcher requests results from cache for predicates.
+Results are added to the cache only if dispatcher requests results from cache for predicates. Any error with user's cache is reported using the tracing mechanism (see the :class:`Trace module <selinon.trace.Trace>`). In case of cache failures, Selinon will continue using results directly from storage as cache failures are not fatal.
 
 .. note::
 
@@ -187,6 +187,8 @@ The ``RedisCache`` implementation has to derive from :class:`Cache <selinon.cach
 .. note::
 
   Due to results consistency information about task states are added to caches only if task (or flow) fails or finishes - there won't be any flow or task with the same id executed in the future.
+
+As in case of task result caches, if there is some issue with a cache, these errors are reported but they do not have fatal effect on the flow. If there is something wrong, Selinon will just use directly result backend.
 
 Prioritization of tasks and flows
 =================================

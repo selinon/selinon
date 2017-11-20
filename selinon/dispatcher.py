@@ -57,10 +57,13 @@ class Dispatcher(Task):
             raise self.retry(max_retries=0, exc=flow_error)
 
         # we will force max retries to 1 so we are always retried by Celery
+        queue = Config.dispatcher_queues[flow_info['flow_name']]
+        # TODO: add exception here as well
+        Trace.log(Trace.FLOW_RETRY, kwargs, countdown=countdown, queue=queue)
         raise self.retry(kwargs=kwargs,
                          max_retries=1,
                          countdown=countdown,
-                         queue=Config.dispatcher_queues[flow_info['flow_name']])
+                         queue=queue)
 
     def run(self, flow_name, node_args=None, parent=None, retried_count=None, retry=None, state=None, selective=False):
         # pylint: disable=too-many-arguments,arguments-differ

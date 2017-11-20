@@ -12,7 +12,6 @@ Submodules
    selinon.dispatcher
    selinon.errors
    selinon.lockPool
-   selinon.retry
    selinon.selective
    selinon.selinonTask
    selinon.selinonTaskEnvelope
