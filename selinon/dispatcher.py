@@ -10,10 +10,14 @@ import json
 import traceback
 
 from celery import Task
+# from selinonlib.migrations import Migrator
 
 from .config import Config
 from .errors import DispatcherRetry
 from .errors import FlowError
+# from .errors import MigrationSkew
+# from .errors import MigrationFlowError
+# from .errors import MigrationFlowRetry
 from .systemState import SystemState
 from .trace import Trace
 
@@ -65,17 +69,19 @@ class Dispatcher(Task):
                          countdown=countdown,
                          queue=queue)
 
-    def run(self, flow_name, node_args=None, parent=None, retried_count=None, retry=None, state=None, selective=False):
+    def run(self, flow_name, node_args=None, parent=None, retried_count=None, retry=None,
+            state=None, selective=False, migration_version=None):
         # pylint: disable=too-many-arguments,arguments-differ
         """Dispatcher entry-point - run each time a dispatcher is scheduled.
 
         :param flow_name: name of the flow
         :param parent: flow parent nodes
         :param node_args: arguments for workers
-        :param retried_count: number of @Selinon retries done (not Celery retries)
+        :param retried_count: number of Selinon retries done (not Celery retries)
         :param retry: last retry countdown
         :param state: the current system state
         :param selective: selective flow information if run in selective flow
+        :param migration_version: migration version that was used for the flow
         :raises: FlowError
         """
         retried_count = retried_count or 0
@@ -89,9 +95,22 @@ class Dispatcher(Task):
             'selective': selective,
             'retried_count': retried_count,
             'parent': parent,
+            'migration_version': migration_version
         }
 
         Trace.log(Trace.DISPATCHER_WAKEUP, flow_info)
+
+        # Perform migration of state first before proceeding
+        # if Config.migration_dir:
+        #     # TODO: report something like old_state, new_state here
+        #     migrator = Migrator(Config.migration_dir)
+        #     state = migrator.perform_migration(flow_name, state, migration_version)
+        #     Trace.log(Trace.FLOW_MIGRATION, flow_info)
+        # elif migration_version:
+        #     # Keep retrying so hopefully some node in the cluster is able to proceed with this message.
+        #     Trace.log(Trace.FLOW_MIGRATION_SKEW, flow_info)
+        #     raise self.retry(exc=MigrationSkew)
+
         try:
             system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent, selective)
             retry = system_state.update()
