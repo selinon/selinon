@@ -10,16 +10,17 @@ import json
 import traceback
 
 from celery import Task
-# from selinonlib.migrations import Migrator
 
-from .config import Config
-from .errors import DispatcherRetry
-from .errors import FlowError
 # from .errors import MigrationSkew
 # from .errors import MigrationFlowError
 # from .errors import MigrationFlowRetry
+from .config import Config
+from .errors import DispatcherRetry
+from .errors import FlowError
 from .systemState import SystemState
 from .trace import Trace
+
+# from selinonlib.migrations import Migrator
 
 
 class Dispatcher(Task):

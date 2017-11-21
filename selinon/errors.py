@@ -13,10 +13,6 @@ to be used in Selinon code tree.
 from selinonlib.errors import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
 
-class FatalTaskError(Exception):
-    """An exception that is raised by task on fatal error - task will be not retried."""
-
-
 class FlowError(Exception):
     """An exception that is raised once there is an error in the flow on runtime - some nodes failed."""
 
@@ -53,7 +49,8 @@ class MigrationException(Exception):
     """Base exception for migration related exceptions."""
 
     def __init__(self, *args, migration_version, latest_migration_version, tainting_nodes=None, tainted_edge=None):
-        """
+        """Instantiate base exception for migrations.
+
         :param args: additional arguments for base exception
         :param migration_version: the current migration version
         :param latest_migration_version: the latest migration version based on migration directory content
