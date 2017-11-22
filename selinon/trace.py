@@ -247,7 +247,8 @@ class Trace(object):
         FLOW_RETRY,\
         MIGRATION,\
         MIGRATION_SKEW,\
-        MIGRATION_TAINTED_FLOW = range(48)
+        MIGRATION_TAINTED_FLOW, \
+        MIGRATION_ERROR = range(49)
 
     WARN_EVENTS = (
         NODE_FAILURE,
@@ -261,7 +262,8 @@ class Trace(object):
         STORAGE_ISSUE,
         RESULT_BACKEND_ISSUE,
         FLOW_RETRY,
-        MIGRATION_SKEW
+        MIGRATION_SKEW,
+        MIGRATION_ERROR
     )
 
     _event_strings = (
@@ -312,7 +314,8 @@ class Trace(object):
         'FLOW_RETRY',
         'MIGRATION',
         'MIGRATION_SKEW',
-        'MIGRATION_TAINTED_FLOW'
+        'MIGRATION_TAINTED_FLOW',
+        'MIGRATION_ERROR'
     )
 
     def __init__(self):

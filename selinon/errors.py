@@ -10,11 +10,25 @@ Exceptions explicitly stated and not imported from Selinonlib shouldn't be direc
 to be used in Selinon code tree.
 """
 
+import json
+
 from selinonlib.errors import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
 
 class FlowError(Exception):
     """An exception that is raised once there is an error in the flow on runtime - some nodes failed."""
+
+    def __init__(self, state):
+        """Make sure flow errors capture final state of the flow.
+
+        :param state: final flow state
+        """
+        super().__init__(json.dumps(state))
+
+    @property
+    def state(self):
+        """Get structured flow state."""
+        return json.loads(str(self))
 
 
 class DispatcherRetry(Exception):
@@ -42,11 +56,21 @@ class MigrationNotNeeded(Exception):
 
 
 class MigrationSkew(Exception):
-    """Raised if desired migration does not exist - migration file not present (message from future migrations)."""
+    """Raised if worker hasn't needed migration files."""
+
+    def __init__(self, *args, available_migration_version):
+        """Instantiate and track info about migration skew.
+
+        :param available_migration_version:
+        """
+        self.available_migration_version = available_migration_version
+        super().__init__(*args)
 
 
 class MigrationException(Exception):
     """Base exception for migration related exceptions."""
+
+    TAINTED_FLOW_STRATEGY = 'UNKNOWN'
 
     def __init__(self, *args, migration_version, latest_migration_version, tainting_nodes=None, tainted_edge=None):
         """Instantiate base exception for migrations.
@@ -67,9 +91,13 @@ class MigrationException(Exception):
 class MigrationFlowFail(MigrationException):
     """An exception raised when a flow should fail - i.e. migration causing tainting of flow should fail flow."""
 
+    TAINTED_FLOW_STRATEGY = 'FAIL'
+
 
 class MigrationFlowRetry(MigrationException):
     """An exception raised when a flow should be retried - i.e. migration causing tainting of flow should retry flow."""
+
+    TAINTED_FLOW_STRATEGY = 'RETRY'
 
 
 class CacheMissError(Exception):

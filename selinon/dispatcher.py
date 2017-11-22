@@ -6,21 +6,20 @@
 # ######################################################################
 """Selinon Dispatcher task implementation."""
 
-import json
 import traceback
 
 from celery import Task
+from selinonlib.migrations import Migrator
 
-# from .errors import MigrationSkew
-# from .errors import MigrationFlowError
-# from .errors import MigrationFlowRetry
 from .config import Config
 from .errors import DispatcherRetry
 from .errors import FlowError
+from .errors import MigrationException
+from .errors import MigrationFlowFail
+from .errors import MigrationFlowRetry
+from .errors import MigrationSkew
 from .systemState import SystemState
 from .trace import Trace
-
-# from selinonlib.migrations import Migrator
 
 
 class Dispatcher(Task):
@@ -33,18 +32,40 @@ class Dispatcher(Task):
     max_retries = None
     name = "selinon.Dispatcher"
 
-    def selinon_retry(self, flow_info, new_retried_count, flow_error):
+    def flow_failure(self, state):
+        """Mark the whole flow as failed ignoring retry configuration.
+
+        :param state: flow state that should be captured
+        :raises celery.exceptions.Retry: Celery's retry exception, always
+        """
+        reported_state = {
+            'finished_nodes': (state or {}).get('finished_nodes', {}),
+            'failed_nodes': (state or {}).get('failed_nodes', {}),
+            'active_nodes': (state or {}).get('active_nodes', [])
+        }
+        exc = FlowError(reported_state)
+        raise self.retry(max_retries=0, exc=exc)
+
+    def selinon_retry(self, flow_info, adjust_retried_count=True, keep_state=True):
         """Retry whole flow on failure if configured so, forget any progress done so far.
 
         :param flow_info: a dictionary holding all the information relevant to flow (dispatcher arguments)
         :type flow_info: dict
-        :param new_retried_count: new value for retried count for to flow arguments
-        :type new_retried_count: int
-        :param flow_error: an error that caused flow to retry (can be None)
-        :type flow_error: Exception
+        :param adjust_retried_count: if true, retried count will be adjusted, could cause flow failure
+        :type adjust_retried_count: bool
+        :param keep_state: keep or discard the current progress of the flow
+        :type keep_state: bool
         :raises celery.Retry: always
         """
-        # pylint: disable=too-many-arguments
+        new_retried_count = flow_info.get('retried_count')
+        if adjust_retried_count:
+            new_retried_count += 1
+
+        if not keep_state:
+            flow_info['state'] = None
+            flow_info['retried_count'] = None
+            flow_info['retry'] = None
+
         kwargs = {
             'flow_name': flow_info['flow_name'],
             'node_args': flow_info['node_args'],
@@ -58,17 +79,76 @@ class Dispatcher(Task):
         max_retry = Config.max_retry.get(flow_info['flow_name'], 0)
 
         if new_retried_count > max_retry:
-            # force max_retries to 0 so we are not scheduled and marked as FAILED
-            raise self.retry(max_retries=0, exc=flow_error)
+            # Force max_retries to 0 so we are not scheduled and marked as FAILED
+            raise self.flow_failure(flow_info['state'])
 
-        # we will force max retries to None so we are always retried by Celery
+        # We will force max retries to None so we are always retried by Celery
         queue = Config.dispatcher_queues[flow_info['flow_name']]
         # TODO: add exception here as well
         Trace.log(Trace.FLOW_RETRY, kwargs, countdown=countdown, queue=queue)
-        raise self.retry(kwargs=kwargs,
-                         max_retries=None,
-                         countdown=countdown,
-                         queue=queue)
+        raise self.retry(
+            kwargs=kwargs,
+            max_retries=None,
+            countdown=countdown,
+            queue=queue
+        )
+
+    def migrate_message(self, flow_info):
+        """Perform migration of state first before proceeding.
+
+        :param flow_info: information about the current flow
+        """
+        if Config.migration_dir:
+            migrator = Migrator(Config.migration_dir)
+
+            try:
+                state, current_migration_version, tainted = migrator.perform_migration(
+                    flow_info['flow_name'],
+                    flow_info['state'],
+                    flow_info['migration_version']
+                )
+            except MigrationException as exc:
+                Trace.log(
+                    Trace.MIGRATION_TAINTED_FLOW,
+                    flow_info,
+                    migration_version=exc.migration_version,
+                    latest_migration_version=exc.latest_migration_version,
+                    tainting_nodes=exc.tainting_nodes,
+                    tainted_edge=exc.tainted_edge,
+                    tainted_flow_strategy=exc.TAINTED_FLOW_STRATEGY
+                )
+
+                if isinstance(exc, MigrationFlowRetry):
+                    raise self.selinon_retry(flow_info, adjust_retried_count=False, keep_state=False)
+                elif isinstance(exc, MigrationFlowFail):
+                    raise self.flow_failure(flow_info['state'])
+                else:
+                    raise self.flow_failure(flow_info['state'])
+            except MigrationSkew as exc:
+                Trace.log(Trace.MIGRATION_SKEW, flow_info, available_migration_version=exc.available_migration_version)
+                raise self.selinon_retry(flow_info, adjust_retried_count=False)
+            except Exception:
+                # If there is anything wrong with migrations, give it a try to be fixed, retry.
+                Trace.log(Trace.MIGRATION_ERROR, flow_info, what=traceback.format_exc())
+                raise self.selinon_retry(flow_info, adjust_retried_count=False, keep_state=True)
+
+            # Report success of migration
+            if current_migration_version != flow_info['migration_version']:
+                Trace.log(
+                    Trace.MIGRATION,
+                    flow_info,
+                    new_migration_version=current_migration_version,
+                    old_migration_version=flow_info['migration_version'],
+                    tainted=tainted
+                )
+                # Update flow info so we are up2date with migration performed
+                flow_info['migration_version'] = current_migration_version
+                flow_info['state'] = state
+
+        elif flow_info['migration_version']:
+            # Keep retrying so hopefully some node in the cluster is able to proceed with this message.
+            Trace.log(Trace.MIGRATION_SKEW, flow_info, available_migration_version=None)
+            raise self.selinon_retry(flow_info, adjust_retried_count=False)
 
     def run(self, flow_name, node_args=None, parent=None, retried_count=None, retry=None,
             state=None, selective=False, migration_version=None):
@@ -96,42 +176,30 @@ class Dispatcher(Task):
             'selective': selective,
             'retried_count': retried_count,
             'parent': parent,
-            'migration_version': migration_version
+            'migration_version': migration_version or 0
         }
 
         Trace.log(Trace.DISPATCHER_WAKEUP, flow_info)
 
-        # Perform migration of state first before proceeding
-        # if Config.migration_dir:
-        #     # TODO: report something like old_state, new_state here
-        #     migrator = Migrator(Config.migration_dir)
-        #     state = migrator.perform_migration(flow_name, state, migration_version)
-        #     Trace.log(Trace.FLOW_MIGRATION, flow_info)
-        # elif migration_version:
-        #     # Keep retrying so hopefully some node in the cluster is able to proceed with this message.
-        #     Trace.log(Trace.FLOW_MIGRATION_SKEW, flow_info)
-        #     raise self.retry(exc=MigrationSkew)
+        # Perform migrations at first place
+        self.migrate_message(flow_info)
 
         try:
             system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent, selective)
             retry = system_state.update()
         except FlowError as exc:
             max_retry = Config.max_retry.get(flow_name, 0)
-            Trace.log(Trace.FLOW_FAILURE, flow_info, state=json.loads(str(exc)), will_retry=retried_count < max_retry)
-            # Force state to None so dispatcher will run the whole flow again
-            flow_info['state'] = None
-            raise self.selinon_retry(flow_info=flow_info, new_retried_count=retried_count+1, flow_error=exc)
+            Trace.log(Trace.FLOW_FAILURE, flow_info, state=exc.state, will_retry=retried_count < max_retry)
+            raise self.selinon_retry(
+                flow_info=flow_info,
+                adjust_retried_count=True,
+                keep_state=False
+            )
         except DispatcherRetry as exc:
-            if exc.adjust_retry_count:
-                retried_count += 1
-
-            if not exc.keep_state:
-                flow_info['state'] = None
-
-            raise self.selinon_retry(flow_info, new_retried_count=retried_count, flow_error=exc)
-        except Exception as exc:
+            raise self.selinon_retry(flow_info, exc.adjust_retry_count, keep_state=exc.keep_state)
+        except Exception:
             Trace.log(Trace.DISPATCHER_FAILURE, flow_info, what=traceback.format_exc())
-            raise self.retry(max_retries=0, exc=exc)
+            raise self.flow_failure(state)
 
         state_dict = system_state.to_dict()
         node_args = system_state.node_args
@@ -144,7 +212,8 @@ class Dispatcher(Task):
                 'retried_count': retried_count,
                 'retry': retry,
                 'state': state_dict,
-                'selective': system_state.selective
+                'selective': system_state.selective,
+                'migration_version': flow_info['migration_version']
             }
             Trace.log(Trace.DISPATCHER_RETRY, flow_info, kwargs)
             raise self.retry(args=[], kwargs=kwargs, countdown=retry, queue=Config.dispatcher_queues[flow_name])
@@ -152,6 +221,8 @@ class Dispatcher(Task):
             Trace.log(Trace.FLOW_END, flow_info, state=state_dict)
             return {
                 'finished_nodes': state_dict['finished_nodes'],
-                # this is always {} since we have finished, but leave it here because of failure tracking
-                'failed_nodes': state_dict['failed_nodes']
+                # This is always {} since we have finished, but leave it here because of failure tracking.
+                'failed_nodes': state_dict['failed_nodes'],
+                # Always an empty array.
+                'active_nodes': state_dict.get('active_nodes', [])
             }

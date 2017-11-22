@@ -5,6 +5,8 @@
 # This file is part of Selinon project.
 # ######################################################################
 
+from selinon import Config
+from selinon import Dispatcher
 from selinonTestCase import SelinonTestCase
 
 
@@ -16,5 +18,13 @@ class TestMigrations(SelinonTestCase):
         pass
 
     def test_migration_skew(self):
+        # TODO: implement
+        pass
+
+    def test_migration_flow_retry(self):
+        # TODO: implement
+        pass
+
+    def test_migration_flow_fail(self):
         # TODO: implement
         pass
