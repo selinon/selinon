@@ -11,7 +11,6 @@ import copy
 import datetime
 from functools import reduce
 import itertools
-import json
 import traceback
 
 from celery.result import AsyncResult
@@ -802,7 +801,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                         'finished_nodes': state_dict['finished_nodes'],
                         'failed_nodes': state_dict['failed_nodes']
                     }
-                    raise FlowError(json.dumps(state_info))
+                    raise FlowError(state_info)
 
         return new_started_nodes, selective_reuse, fallback_started
 
