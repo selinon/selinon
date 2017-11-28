@@ -31,7 +31,7 @@ pytest:
 	@# We have to adjust PYTHONPATH so we use our own Celery and modified Selinon Dispatcher for testing
 	@# Make sure we have -p no:celery otherwise py.test is trying to do dirty stuff with loading celery.contrib
 	@echo ">>> Executing testsuite"
-	PYTHONPATH="test/:${PYTHONPATH}" python3 -m pytest -s --cov=./selinon -vvl --nocapturelog --timeout=2 -p no:celery test/*.py
+	PYTHONPATH="test/:${PYTHONPATH}" python3 -m pytest -s --cov=./selinon -vvl --timeout=2 -p no:celery test/*.py
 
 pylint:
 	@echo ">>> Running pylint"

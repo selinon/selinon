@@ -4,7 +4,7 @@ pytest-timeout
 pytest-cov
 flexmock
 pylint
-pytest-capturelog
+pytest-catchlog
 pydocstyle
 raven
 
