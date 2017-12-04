@@ -61,6 +61,62 @@ As flows and dependencies between tasks might get pretty complex, Selinon offers
 
 All the flow graphs available in this documentation were plotted using the ``plot`` sub-command.
 
+You can also adjust style of the resulting image by supplying a YAML-based configuration that states style information. As Selinon uses `graphviz <https://pypi.python.org/pypi/graphviz>`_ under the hood to plot flow graphs, all options that are supported by graphviz are applicable to nodes, edges, storages and arrows. In the example bellow, you can see how to adjust style configuration of different components that occur in the resulting flow plot (this is default configuration).
+
+.. code-block:: yaml
+
+    # A task node.
+    task:
+        style: filled
+        color: black
+        fillcolor: '#66cfa7'
+        shape: ellipse
+    # A flow node (a sub-flow in a flow).
+    flow:
+        style: filled
+        color: black
+        fillcolor: '#197a9f'
+        shape: box3d
+    # A condition on a simple edge.
+    condition:
+        style: filled
+        color: gray
+        fillcolor: '#e8e3c8'
+        shape: octagon
+    # A condition on foreach edge.
+    condition_foreach:
+        style: filled
+        color: gray
+        fillcolor: '#e8e3c8'
+        shape: doubleoctagon
+    # A storage node.
+    storage:
+        style: filled
+        color: black
+        fillcolor: '#894830'
+        shape: cylinder
+    # A simple edge.
+    edge:
+        arrowtype: open
+        color: black
+    # An edge from a task to storage that was assigned to the task.
+    store_edge:
+        arrowtype: open
+        color: '#894830'
+        style: dashed
+    # An edge that leads to a fallback node.
+    fallback_edge:
+        arrowtype: open
+        color': '#cc1010'
+    # A special mark signalizing to always recover from a failure (fallback set to true).
+    fallback_true:
+        style: filled
+        color: black
+        fillcolor: '#5af47b'
+        shape: plain
+
+You can find more configuration options in the `graphviz library documentation <https://pypi.python.org/pypi/graphviz>`_.
+
 Simulating flow execution
 =========================
 
