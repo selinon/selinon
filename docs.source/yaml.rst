@@ -691,6 +691,8 @@ default_task_queue
 
 Default queue for tasks. This queue will be used for all tasks (overrides default Celery queue), unless you specify ``queue`` in the task definition, which has the highest priority.
 
+The queue name can be parametrized using environment variables - see `queue`_ configuration for more info.
+
   * **Possible values:**
 
     * string - a queue name for tasks
@@ -704,6 +706,8 @@ default_dispatcher_queue
 ########################
 
 Queue for dispatcher task. This queue will be used for all dispatcher tasks (overrides default Celery queue), unless you specify ``queue`` in the flow definition, which has the highest priority.
+
+The queue name can be parametrized using environment variables - see `queue`_ configuration for more info.
 
   * **Possible values:**
 
@@ -748,6 +752,8 @@ migration_dir
 #############
 
 A path to directory containing generated migrations. See :ref:`migrations` for more info.
+
+A name of migration directory can be parametrized using environment variables - see `queue`_ configuration for more info on how to reference environment variables.
 
   * **Possible values:**
 
