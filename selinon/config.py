@@ -11,9 +11,9 @@ import os
 import runpy
 import tempfile
 
-from selinonlib import ConfigurationError
 from selinonlib import System
 from selinonlib import UnknownStorageError
+from selinonlib.errors import ConfigurationError
 
 from .errors import ConfigNotInitializedError
 from .trace import Trace
