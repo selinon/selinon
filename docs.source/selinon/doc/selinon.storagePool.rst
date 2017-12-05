@@ -1,7 +1,7 @@
-selinon.storagePool module
+selinon.storage_pool module
 ==========================
 
-.. automodule:: selinon.storagePool
+.. automodule:: selinon.storage_pool
     :members:
     :undoc-members:
     :show-inheritance:

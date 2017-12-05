@@ -91,7 +91,7 @@ Currently, there are available prepared database adapters, see `Selinonlib <http
 Using a custom storage adapter
 ##############################
 
-You can define your own storage by inheriting from :class:`DataStorage <selinon.dataStorage.DataStorage>` abstract class:
+You can define your own storage by inheriting from :class:`DataStorage <selinon.data_storage.DataStorage>` abstract class:
 
 ::
 
@@ -143,14 +143,14 @@ If you create an adapter for some well known storage and you feel that your adap
 Database connection pool
 ########################
 
-Each worker is trying to be efficient when it comes to number of connections to a database. There is held only one instance of :class:`DataStorage <selinon.dataStorage.DataStorage>` class per whole worker. Selinon transparently takes care of concurrent-safety when calling methods of :class:`DataStorage <selinon.dataStorage.DataStorage>` if you plan to run your worker with concurrency level higher than one.
+Each worker is trying to be efficient when it comes to number of connections to a database. There is held only one instance of :class:`DataStorage <selinon.data_storage.DataStorage>` class per whole worker. Selinon transparently takes care of concurrent-safety when calling methods of :class:`DataStorage <selinon.data_storage.DataStorage>` if you plan to run your worker with concurrency level higher than one.
 
 
 .. note::
 
-  You can also simply share connection across multiple :class:`DataStorage <selinon.dataStorage.DataStorage>` classes in inheritance hierarchy and reuse already defined connections. You can also do storage aliasing as described in :ref:`practices`.
+  You can also simply share connection across multiple :class:`DataStorage <selinon.data_storage.DataStorage>` classes in inheritance hierarchy and reuse already defined connections. You can also do storage aliasing as described in :ref:`practices`.
 
-If you would like to request some storage from your configuration, you can request storage adapter from Selinon :class:`StoragePool <selinon.storagePool>`:
+If you would like to request some storage from your configuration, you can request storage adapter from Selinon :class:`StoragePool <selinon.storage_pool>`:
 
 .. code-block:: python
 
@@ -159,7 +159,7 @@ If you would like to request some storage from your configuration, you can reque
    # Name of storage was set to MyMongoStorage in nodes.yaml configuration file (section storages).
    mongo = StoragePool.get_connected_storage('MyMongoStorage')
 
-Selinon will transparently take care of instantiation, connection and sharing connection pool across the whole process. Check out other useful methods of :class:`StoragePool <selinon.storagePool>`.
+Selinon will transparently take care of instantiation, connection and sharing connection pool across the whole process. Check out other useful methods of :class:`StoragePool <selinon.storage_pool>`.
 
 
 .. note::

@@ -1,7 +1,7 @@
-selinon.selinonTask module
+selinon.selinon_task module
 ==========================
 
-.. automodule:: selinon.selinonTask
+.. automodule:: selinon.selinon_task
     :members:
     :undoc-members:
     :show-inheritance:

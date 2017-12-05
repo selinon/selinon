@@ -22,7 +22,7 @@ The full list of all events with corresponding details that are captured are ava
 
 .. note::
 
-  All tasks have instantiated logger instance under ``self.log`` (see :class:`SelinonTask <selinon.selinonTask.SelinonTask>`). Feel free to use this logger to do logging.
+  All tasks have instantiated logger instance under ``self.log`` (see :class:`SelinonTask <selinon.selinon_task.SelinonTask>`). Feel free to use this logger to do logging.
 
 If you would like to create your own trace logger, you can do so by registering your custom tracing function in the YAML configuration in the ``global`` section:
 

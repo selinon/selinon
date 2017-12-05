@@ -1,7 +1,7 @@
-selinon.dataStorage module
+selinon.data_storage module
 ==========================
 
-.. automodule:: selinon.dataStorage
+.. automodule:: selinon.data_storage
     :members:
     :undoc-members:
     :show-inheritance:

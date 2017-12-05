@@ -1,7 +1,7 @@
-selinon.lockPool module
+selinon.lock_pool module
 =======================
 
-.. automodule:: selinon.lockPool
+.. automodule:: selinon.lock_pool
     :members:
     :undoc-members:
     :show-inheritance:

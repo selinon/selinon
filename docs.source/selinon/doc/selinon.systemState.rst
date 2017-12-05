@@ -1,7 +1,7 @@
-selinon.systemState module
+selinon.system_state module
 ==========================
 
-.. automodule:: selinon.systemState
+.. automodule:: selinon.system_state
     :members:
     :undoc-members:
     :show-inheritance:

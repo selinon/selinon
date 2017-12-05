@@ -63,7 +63,7 @@ The return value for foreach function should be an iterable (see bellow why) whi
 
 Arguments for the foreach function are:
 
-* **storage_pool** - instantiated :class:`StoragePool <selinon.storagePool.StoragePool>` that can be used to query parent task results
+* **storage_pool** - instantiated :class:`StoragePool <selinon.storage_pool.StoragePool>` that can be used to query parent task results
 * **node_args** - arguments of the current flow
 
 .. note::

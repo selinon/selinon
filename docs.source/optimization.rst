@@ -178,7 +178,7 @@ You can also introduce caching mechanism for task states. Note that task states 
 
 As you can see, caches are per-flow specific and configurable. This way you can easily use caches only for flows that you consider critical for caching mechanism.
 
-The ``RedisCache`` implementation has to derive from :class:`Cache <selinon.cache.Cache>` as well and implement required methods. Note that the configuration is passed to cache constructor similarly as in :class:`DataStorage <selinon.dataStorage.DataStorage>` case - as keyword arguments (see :ref:`storage`).
+The ``RedisCache`` implementation has to derive from :class:`Cache <selinon.cache.Cache>` as well and implement required methods. Note that the configuration is passed to cache constructor similarly as in :class:`DataStorage <selinon.data_storage.DataStorage>` case - as keyword arguments (see :ref:`storage`).
 
 .. note::
 

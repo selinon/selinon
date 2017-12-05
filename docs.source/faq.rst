@@ -132,7 +132,7 @@ Currently there is no such mechanism. Celery has time limit configuration option
 Why there is no support for older Celery versions?
 **************************************************
 
-One of the requirements of Selinon is, that it defines tasks (:class:`Dispatcher <selinon.dispatcher.Dispatcher>` and :class:`SelinonTaskEnvelope <selinon.selinonTaskEnvelope.SelinonTaskEnvelope>`) before the Celery's application gets instantiated. Older versions of Celery requested tasks to be registered after the Celery's application was created. This makes it chicken-egg problem.
+One of the requirements of Selinon is, that it defines tasks (:class:`Dispatcher <selinon.dispatcher.Dispatcher>` and :class:`SelinonTaskEnvelope <selinon.selinon_taskEnvelope.SelinonTaskEnvelope>`) before the Celery's application gets instantiated. Older versions of Celery requested tasks to be registered after the Celery's application was created. This makes it chicken-egg problem.
 
 What broker type do I need?
 ***************************
