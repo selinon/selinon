@@ -1,0 +1,28 @@
+tasks:
+  - name: Task1
+    import: myapp.tasks
+  - name: Task2
+    import: myapp.tasks
+  - name: Task3
+    import: myapp.tasks
+  - name: Task4
+    import: myapp.tasks
+
+flows:
+  - internals_flow1
+
+flow-definitions:
+  - name: internals_flow1
+    queue: flow1_queue
+    edges:
+      - from:
+        to: Task1
+      - from:
+        to: Task2
+      - from: Task1
+        to: Task3
+      - from:
+          - Task2
+          - Task3
+        to: Task4
+

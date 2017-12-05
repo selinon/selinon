@@ -1,0 +1,61 @@
+tasks:
+  - name: Task1
+    import: myapp.tasks
+  - name: Task2
+    import: myapp.tasks
+  - name: Task3
+    import: myapp.tasks
+  - name: Task4
+    import: myapp.tasks
+
+flows:
+  - patterns_foreach_flow1
+  - patterns_diamond_flow1
+  - patterns_diamond2_flow1
+  - patterns_diamond2_flow2
+
+flow-definitions:
+  - name: patterns_foreach_flow1
+    edges:
+      - from:
+        to: Task1
+      - from: Task1
+        to: Task2
+        foreach:
+          # from myapp.foreach import my_foreach_function
+          function: my_foreach_function
+          import: myapp.foreach
+
+  - name: patterns_diamond_flow1
+    edges:
+      - from:
+        to: Task1
+      - from: Task1
+        to:
+          - Task2
+          - Task3
+      - from:
+          - Task2
+          - Task3
+        to: Task4
+      - from: Task4
+        to: Task1
+
+  - name: patterns_diamond2_flow1
+    edges:
+      - from:
+        to: Task1
+      - from: Task1
+        to: patterns_diamond2_flow2
+      - from: patterns_diamond2_flow2
+        to: Task4
+      - from: Task4
+        to: Task1
+
+  - name: patterns_diamond2_flow2
+    edges:
+     - from:
+       to: Task2
+     - from:
+       to: Task3
+
