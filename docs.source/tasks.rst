@@ -48,5 +48,5 @@ Some implementation details
 Here are some implementation details that are not necessary helpful for you:
 
 * :obj:`SelinonTask <selinon.selinon_task>` is not Celery task
-* the constructor of the task is transparently called by :obj:`SelinonTaskEnvelope <selinon.selinon_taskEnvelope>`, which handles flow details propagation and also :ref:`Selinon tracepoints <trace>`
-* :obj:`SelinonTaskEnvelope <selinon.selinon_taskEnvelope>` is of type `Celery task <http://docs.celeryproject.org/en/latest/userguide/tasks.html#custom-task-classes>`_
+* the constructor of the task is transparently called by :obj:`SelinonTaskEnvelope <selinon.selinon_task_envelope>`, which handles flow details propagation and also :ref:`Selinon tracepoints <trace>`
+* :obj:`SelinonTaskEnvelope <selinon.selinon_task_envelope>` is of type `Celery task <http://docs.celeryproject.org/en/latest/userguide/tasks.html#custom-task-classes>`_

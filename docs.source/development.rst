@@ -58,7 +58,7 @@ Documentation for Developers
   selinon.errors
   selinon.lock_pool
   selinon.selective
-  selinon.selinon_taskEnvelope
+  selinon.selinon_task_envelope
   selinon.selinon_task
   selinon.storage_pool
   selinon.system_state
