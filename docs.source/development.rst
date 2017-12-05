@@ -57,7 +57,6 @@ Documentation for Developers
   selinon.dispatcher
   selinon.errors
   selinon.lockPool
-  selinon.retry
   selinon.selective
   selinon.selinonTaskEnvelope
   selinon.selinonTask
