@@ -14,7 +14,7 @@ Submodules
    selinon.lock_pool
    selinon.selective
    selinon.selinon_task
-   selinon.selinon_taskEnvelope
+   selinon.selinon_task_envelope
    selinon.storage_pool
    selinon.system_state
    selinon.trace

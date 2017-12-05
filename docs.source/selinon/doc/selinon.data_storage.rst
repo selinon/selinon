@@ -1,5 +1,5 @@
 selinon.data_storage module
-==========================
+===========================
 
 .. automodule:: selinon.data_storage
     :members:
