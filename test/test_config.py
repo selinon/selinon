@@ -7,7 +7,7 @@
 
 import os
 from selinon import Config
-from selinonTestCase import SelinonTestCase
+from selinon_test_case import SelinonTestCase
 
 
 class TestConfig(SelinonTestCase):

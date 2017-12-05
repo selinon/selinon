@@ -7,7 +7,7 @@
 
 from selinon import SystemState
 from selinon import DataStorage
-from selinonTestCase import SelinonTestCase
+from selinon_test_case import SelinonTestCase
 
 
 class _MyStorage(DataStorage):

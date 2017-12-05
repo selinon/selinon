@@ -6,15 +6,15 @@
 # ######################################################################
 
 import os
-from getTaskInstance import GetTaskInstance
-from queueMock import QueueMock
-from strategyMock import strategy_function
-from storageTaskNameMock import StorageTaskNameMock
+from get_task_instance import GetTaskInstance
+from queue_mock import QueueMock
+from strategy_mock import strategy_function
+from storage_task_name_mock import StorageTaskNameMock
 
 from celery.result import AsyncResult
 from selinonlib.caches import LRU
 from selinon.config import Config
-from selinon.systemState import SystemState
+from selinon.system_state import SystemState
 from selinon.trace import Trace
 
 

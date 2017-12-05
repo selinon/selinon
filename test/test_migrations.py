@@ -7,7 +7,7 @@
 
 from selinon import Config
 from selinon import Dispatcher
-from selinonTestCase import SelinonTestCase
+from selinon_test_case import SelinonTestCase
 
 
 class TestMigrations(SelinonTestCase):

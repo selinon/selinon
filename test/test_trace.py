@@ -9,7 +9,7 @@ import os
 import pytest
 from selinon import Config
 from selinon import Trace
-from selinonTestCase import SelinonTestCase
+from selinon_test_case import SelinonTestCase
 
 
 class TestTrace(SelinonTestCase):

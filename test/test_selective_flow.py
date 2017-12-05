@@ -7,7 +7,7 @@
 
 from selinon import SystemState
 from selinon.selective import compute_selective_run
-from selinonTestCase import SelinonTestCase
+from selinon_test_case import SelinonTestCase
 
 
 class TestSelectiveFlow(SelinonTestCase):

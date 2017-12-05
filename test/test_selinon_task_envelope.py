@@ -9,9 +9,9 @@ import os
 import pytest
 from flexmock import flexmock
 from jsonschema import ValidationError
-from selinonTestCase import SelinonTestCase
-from selinon.selinonTaskEnvelope import SelinonTaskEnvelope
-from requestMock import RequestMock
+from selinon_test_case import SelinonTestCase
+from selinon.selinon_task_envelope import SelinonTaskEnvelope
+from request_mock import RequestMock
 
 
 class TestSelinonTaskEnvelope(SelinonTestCase):

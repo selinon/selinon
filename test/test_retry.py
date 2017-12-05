@@ -7,7 +7,7 @@
 
 import pytest
 import flexmock
-from selinonTestCase import SelinonTestCase
+from selinon_test_case import SelinonTestCase
 from selinon import SystemState
 from selinon.errors import DispatcherRetry
 from selinon import DataStorage
