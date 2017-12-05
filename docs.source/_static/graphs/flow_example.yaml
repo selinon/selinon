@@ -1,0 +1,56 @@
+tasks:
+  - name: Task1
+    import: myapp.tasks
+    storage: PostgreSQL
+  - name: Task2
+    import: myapp.tasks
+    storage: Redis
+  - name: Task3
+    import: myapp.tasks
+  - name: Fallback1
+    import: myapp.tasks
+  - name: Fallback2
+    import: myapp.tasks
+
+storages:
+  - name: PostgreSQL
+    import: myapp.storages
+    configuration:
+      foo: bar
+
+  - name: Redis
+    import: myapp.storages
+    configuration:
+      foo: bar
+
+flows:
+  - flow_example
+
+flow-definitions:
+  - name: flow_example
+    edges:
+      - from:
+        to: Task1
+      - from: Task1
+        to:
+          - Task2
+          - Task3
+        condition:
+          or:
+            - name: fieldEqual
+              args:
+                 key: proceed
+                 value: 'yes'
+            - name: envExist
+              args:
+                 env: TESTING
+    failures:
+      - nodes:
+          - Task2
+          - Task3
+        fallback:
+          - Fallback1
+      - nodes:
+          - Task2
+        fallback:
+          - Fallback2

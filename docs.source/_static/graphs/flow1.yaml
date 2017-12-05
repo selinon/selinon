@@ -1,0 +1,74 @@
+tasks:
+  - name: Task1
+    import: myapp.tasks
+    storage: Storage1
+  - name: Task2
+    import: myapp.tasks
+    storage: Storage1
+  - name: Task3
+    import: myapp.tasks
+    storage: Storage1
+  - name: Task4
+    import: myapp.tasks
+    storage: Storage2
+  - name: Task5
+    import: myapp.tasks
+    storage: Storage2
+
+storages:
+  - name: Storage1
+    import: myapp.storages
+    configuration:
+      foo: bar
+
+  - name: Storage2
+    import: myapp.storages
+    configuration:
+      foo: bar
+
+flows:
+  - flow1
+  - flow2
+
+flow-definitions:
+  - name: flow1
+    edges:
+      - from:
+        to:
+          - Task1
+      - from:
+          - Task1
+        to:
+          - Task2
+          - flow2
+        condition:
+            name: fieldEqual
+            node: Task1
+            args:
+                key: foo
+                value: bar
+      - from:
+          - Task2
+          - flow2
+        to:
+          - Task3
+      - from:
+          - Task3
+        to:
+          - Task1
+        condition:
+            name: argsFieldEqual
+            node: Task3
+            args:
+                key: foo
+                value: bar
+  - name: flow2
+    edges:
+      - from:
+        to:
+          - Task4
+      - from:
+          - Task4
+        to:
+          - Task5
+

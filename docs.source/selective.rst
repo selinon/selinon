@@ -12,13 +12,13 @@ Now let's assume that you defined the following flow:
 .. image:: _static/selective_flow1.png
   :align: center
 
-Now let's assume that you want to run only `Task2`. The only thing you need to do is to run flow `flow1` with the following code snippet:
+Now let's assume that you want to run only `Task2`. The only thing you need to do is to run flow `selective_flow1` with the following code snippet:
 
 .. code-block:: python
 
    from selinon import run_flow_selective
 
-   run_flow_selective('flow1', ['Task2'], node_args={'foo': 'bar'})
+   run_flow_selective('selective_flow1', ['Task2'], node_args={'foo': 'bar'})
 
 Refer to :func:`run_flow_selective() <selinon.utils.run_flow_selective>` for more information about this function.
 
@@ -106,21 +106,21 @@ Now let's consider that you defined a flow in our YAML configuration file and yo
 
   ---
     flow-definitions:
-      - name: 'flow2'
+      - name: 'selective_flow2'
         edges:
           - from:
             to: 'Task4'
           - from: 'Task4'
-            to: 'flow1'
+            to: 'selective_flow1'
             selective:
               tasks:
                 - 'Task2'
               follow_subflows: false
               run_subsequent: false
 
-The configuration stated above will define selective sub-flow, that basically runs only `Task2` from our previous flow `flow1`. Semantics of keys in the YAML configuration conform to arguments that are passed to the selective run function.
+The configuration stated above will define selective sub-flow, that basically runs only `Task2` from our previous flow `selective_flow1`. Semantics of keys in the YAML configuration conform to arguments that are passed to the selective run function.
 
-For better understanding, here is your ``flow2`` visualization:
+For better understanding, here is your ``selective_flow2`` visualization:
 
 .. image:: _static/selective_flow2.png
   :align: center
@@ -131,11 +131,11 @@ Note that in this particular scenario you can also do:
 
    from selinon import run_flow_selective
 
-   # requesting to run Task2 (stated in flow1), but flow1 is a sub-flow of flow2
+   # requesting to run Task2 (stated in selective_flow1), but selective_flow1 is a sub-flow of selective_flow2
    # note follow_subflows!
-   run_flow_selective('flow2', ['Task2'], node_args={'foo': 'bar'}, follow_subflows=True)
+   run_flow_selective('selective_flow2', ['Task2'], node_args={'foo': 'bar'}, follow_subflows=True)
 
-Without the ``selective`` part in your `flow2` configuration. Using ``selective`` in your YAML configuration is highly dependent on your use-case (and the selective run function implementation).
+Without the ``selective`` part in your `selective_flow2` configuration. Using ``selective`` in your YAML configuration is highly dependent on your use-case (and the selective run function implementation).
 
 
 YAML configuration used in examples
@@ -156,11 +156,11 @@ YAML configuration used in examples
         import: 'myproject.tasks'
 
     flows:
-      - 'flow1'
-      - 'flow2'
+      - 'selective_flow1'
+      - 'selective_flow2'
 
     flow-definitions:
-      - name: 'flow1'
+      - name: 'selective_flow1'
         edges:
           - from:
             to: 'Task1'
@@ -168,12 +168,12 @@ YAML configuration used in examples
             to:
               - 'Task2'
               - 'Task3'
-      - name: 'flow2'
+      - name: 'selective_flow2'
         edges:
           - from:
             to: 'Task4'
           - from: 'Task4'
-            to: 'flow1'
+            to: 'selective_flow1'
             selective:
               tasks:
                 - 'Task2'

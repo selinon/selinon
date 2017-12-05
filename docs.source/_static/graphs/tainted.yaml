@@ -1,0 +1,28 @@
+tasks:
+  - name: Task1
+    import: myapp.tasks
+  - name: Task2
+    import: myapp.tasks
+  - name: Task3
+    import: myapp.tasks
+
+flows:
+  - flow1_tainted
+  - flow2_tainted
+
+flow-definitions:
+  - name: flow1_tainted
+    edges:
+      - from:
+        to: Task1
+      - from: Task1
+        to: Task2
+      - from: Task1
+        to: Task3
+
+  - name: flow2_tainted
+    edges:
+      - from:
+        to: Task1
+      - from: Task1
+        to: Task2

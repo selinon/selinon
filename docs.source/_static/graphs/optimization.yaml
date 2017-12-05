@@ -1,0 +1,17 @@
+tasks:
+  - name: Task1
+    import: myapp.tasks
+  - name: Task2
+    import: myapp.tasks
+
+flows:
+  - optimization_flow1
+
+flow-definitions:
+  - name: optimization_flow1
+    edges:
+      - from:
+        to: Task1
+      - from: Task1
+        to: Task2
+

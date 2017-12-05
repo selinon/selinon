@@ -1,0 +1,30 @@
+tasks:
+  - name: Task1
+    import: myapp.tasks
+  - name: Task2
+    import: myapp.tasks
+  - name: Task3
+    import: myapp.tasks
+  - name: Task4
+    import: myapp.tasks
+
+flows:
+  - selective_flow1
+  - selective_flow2
+
+flow-definitions:
+  - name: selective_flow1
+    edges:
+      - from:
+        to: Task1
+      - from: Task1
+        to:
+          - Task2
+          - Task3
+
+  - name: selective_flow2
+    edges:
+      - from:
+        to: Task4
+      - from: Task4
+        to: selective_flow1

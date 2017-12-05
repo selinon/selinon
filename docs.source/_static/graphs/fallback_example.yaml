@@ -1,0 +1,31 @@
+tasks:
+  - name: Task1
+    import: myapp.tasks
+  - name: Task2
+    import: myapp.tasks
+  - name: Fallback1
+    import: myapp.tasks
+  - name: Fallback2
+    import: myapp.tasks
+
+flows:
+  - fallback_example
+
+flow-definitions:
+  - name: fallback_example
+    edges:
+      - from:
+        to: Task1
+      - from:
+        to: Task2
+    failures:
+      - nodes:
+          - Task1
+          - Task2
+        fallback:
+          - Fallback1
+      - nodes:
+          - Task1
+        fallback:
+          - Fallback2
+
