@@ -17,7 +17,7 @@ from selinonlib import Retry
 
 from .config import Config
 from .errors import FatalTaskError
-from .storagePool import StoragePool
+from .storage_pool import StoragePool
 from .trace import Trace
 
 

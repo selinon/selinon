@@ -367,7 +367,7 @@ A name of the flow. This name is used to reference the flow.
 propagate_parent
 ################
 
-Propagate parent nodes to sub-flow or sub-flows. Parent nodes will be available in the ``self.parent`` property of the :class:`SelinonTask <selinon.selinonTask.SelinonTask>` class and it will be possible to transparently transparently query results using :class:`SelinonTask <selinon.selinonTask.SelinonTask>` methods.
+Propagate parent nodes to sub-flow or sub-flows. Parent nodes will be available in the ``self.parent`` property of the :class:`SelinonTask <selinon.selinon_task.SelinonTask>` class and it will be possible to transparently transparently query results using :class:`SelinonTask <selinon.selinon_task.SelinonTask>` methods.
 
  * **Possible values:**
 
@@ -382,7 +382,7 @@ Propagate parent nodes to sub-flow or sub-flows. Parent nodes will be available 
 propagate_finished
 ##################
 
-Propagate finished nodes from sub-flows. Finished nodes from sub-flows will be available in the ``self.parent`` of the :class:`SelinonTask <selinon.selinonTask.SelinonTask>` class property as a dictionary and it will be possible to transparently query results using :class:`SelinonTask <selinon.selinonTask.SelinonTask>` methods. All tasks will be recursively received from all sub-flows of the inspected flow.
+Propagate finished nodes from sub-flows. Finished nodes from sub-flows will be available in the ``self.parent`` of the :class:`SelinonTask <selinon.selinon_task.SelinonTask>` class property as a dictionary and it will be possible to transparently query results using :class:`SelinonTask <selinon.selinon_task.SelinonTask>` methods. All tasks will be recursively received from all sub-flows of the inspected flow.
 
  * **Possible values:**
 
@@ -397,7 +397,7 @@ Propagate finished nodes from sub-flows. Finished nodes from sub-flows will be a
 propagate_compound_finished
 ###########################
 
-Propagate finished nodes from sub-flows in a compound (flattened) form - see :ref:`patterns` for more info. Finished nodes from sub-flows will be available in the ``self.parent`` of the :class:`SelinonTask <selinon.selinonTask.SelinonTask>` class property as a dictionary and it will be possible to transparently query results using :class:`SelinonTask <selinon.selinonTask.SelinonTask>` methods. All tasks will be recursively received from all sub-flows of the inspected flow.
+Propagate finished nodes from sub-flows in a compound (flattened) form - see :ref:`patterns` for more info. Finished nodes from sub-flows will be available in the ``self.parent`` of the :class:`SelinonTask <selinon.selinon_task.SelinonTask>` class property as a dictionary and it will be possible to transparently query results using :class:`SelinonTask <selinon.selinon_task.SelinonTask>` methods. All tasks will be recursively received from all sub-flows of the inspected flow.
 
  * **Possible values:**
 

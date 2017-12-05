@@ -66,7 +66,7 @@ Arguments passed to this function:
 * **node_name** - name of the node in the flow for which the ``selective_run_function`` was called
 * **node_args** - arguments supplied to the flow
 * **task_names** - tasks that were requested to start in the selective flow run (same as passed to ``run_flow_selective``)
-* **storage_pool** - instantiated :class:`StoragePool <selinon.storagePool.StoragePool>` with appropriate mapping (so you can use this storage pool for querying parent tasks results)
+* **storage_pool** - instantiated :class:`StoragePool <selinon.storage_pool.StoragePool>` with appropriate mapping (so you can use this storage pool for querying parent tasks results)
 
 
 The result of ``selective_run_function`` should be ``None`` if the node should be run (to be more precise scheduled) or id of task which result should be reused.

@@ -183,7 +183,7 @@ class Config(object):
         """
         # Avoid circular imports
         from .dispatcher import Dispatcher
-        from .selinonTaskEnvelope import SelinonTaskEnvelope
+        from .selinon_task_envelope import SelinonTaskEnvelope
 
         cls._logger.debug("Registering Selinon to Celery context")
 

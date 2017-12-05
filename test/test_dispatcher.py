@@ -8,11 +8,11 @@
 import json
 import pytest
 from flexmock import flexmock
-from selinonTestCase import SelinonTestCase
+from selinon_test_case import SelinonTestCase
 from selinon import Dispatcher
-from selinon.systemState import SystemState
+from selinon.system_state import SystemState
 from selinon.errors import FlowError
-from requestMock import RequestMock
+from request_mock import RequestMock
 
 
 class TestDispatcher(SelinonTestCase):

@@ -20,10 +20,10 @@ from .errors import CacheMissError
 from .errors import DispatcherRetry
 from .errors import FlowError
 from .errors import StorageError
-from .lockPool import LockPool
+from .lock_pool import LockPool
 from .selective import compute_selective_run
-from .selinonTaskEnvelope import SelinonTaskEnvelope
-from .storagePool import StoragePool
+from .selinon_task_envelope import SelinonTaskEnvelope
+from .storage_pool import StoragePool
 from .trace import Trace
 
 

@@ -7,7 +7,7 @@
 
 import pytest
 from flexmock import flexmock
-from selinonTestCase import SelinonTestCase
+from selinon_test_case import SelinonTestCase
 
 from selinon.trace import Trace
 from selinon import run_flow

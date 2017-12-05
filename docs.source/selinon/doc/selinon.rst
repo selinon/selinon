@@ -8,15 +8,15 @@ Submodules
 
    selinon.cache
    selinon.config
-   selinon.dataStorage
+   selinon.data_storage
    selinon.dispatcher
    selinon.errors
-   selinon.lockPool
+   selinon.lock_pool
    selinon.selective
-   selinon.selinonTask
-   selinon.selinonTaskEnvelope
-   selinon.storagePool
-   selinon.systemState
+   selinon.selinon_task
+   selinon.selinon_task_envelope
+   selinon.storage_pool
+   selinon.system_state
    selinon.trace
    selinon.utils
    selinon.version

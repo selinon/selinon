@@ -14,7 +14,7 @@ from selinonlib import NoParentNodeError
 from selinonlib import RequestError
 from selinonlib import Retry
 
-from .storagePool import StoragePool
+from .storage_pool import StoragePool
 
 
 class SelinonTask(metaclass=abc.ABCMeta):

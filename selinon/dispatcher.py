@@ -18,7 +18,7 @@ from .errors import MigrationException
 from .errors import MigrationFlowFail
 from .errors import MigrationFlowRetry
 from .errors import MigrationSkew
-from .systemState import SystemState
+from .system_state import SystemState
 from .trace import Trace
 
 

@@ -6,7 +6,7 @@
 # ######################################################################
 
 import pytest
-from selinonTestCase import SelinonTestCase
+from selinon_test_case import SelinonTestCase
 
 from selinon.errors import FlowError
 from selinon import SystemState

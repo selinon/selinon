@@ -13,7 +13,7 @@ from selinonlib import UnknownStorageError
 from .config import Config
 from .errors import CacheMissError
 from .errors import StorageError
-from .lockPool import LockPool
+from .lock_pool import LockPool
 from .trace import Trace
 
 

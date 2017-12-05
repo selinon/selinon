@@ -51,7 +51,7 @@ class Task(object):
 
     def get_initial_system_state(self):
         """ Get initial SystemState as would Dispatcher run it inside run() method """
-        from selinon.systemState import SystemState
+        from selinon.system_state import SystemState
         return SystemState(id(self), self.flow_name, node_args=self.node_args, retry=None, state=None,
                            parent=self.parent, selective=self.selective)
 
