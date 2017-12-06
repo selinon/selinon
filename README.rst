@@ -100,10 +100,9 @@ are represented in hexagons (see bellow). Black arrows represent time or
 data dependencies between our nodes, grey arrows pinpoint where results
 of tasks are stored.
 
-.. figure:: /example/graph/dinnerFlow.png?raw=true
+.. figure:: https://raw.githubusercontent.com/selinon/selinon/master/example/graph/dinnerFlow.png
    :alt: Main dinner flow
-
-   Main dinner flow
+   :align: center
 
 For our dinner we need eggs, flour and some additional ingredients.
 Moreover, we conditionally buy a flower based on our condition. Our task
@@ -114,7 +113,11 @@ predicates if you want (default are available in
 ``selinonlib.predicates``). Everything that is bought is stored in
 ``Basket`` storage transparently.
 
-Let's visualise our ``buyIngredientsFlow``: |Buy ingredients flow|
+Let's visualise our ``buyIngredientsFlow``:
+
+.. figure:: https://raw.githubusercontent.com/selinon/selinon/master/example/graph/buyIngredientsFlow.png
+   :alt: Buy ingredients flow
+   :align: center
 
 As stated in our main flow after buying ingredients, we proceed to
 dinner preparation but first we need to check our recipe that is hosted
@@ -125,14 +128,21 @@ and once the temperature is reached and we have finished with dough, we
 can proceed to baking.
 
 Based on the description above, our ``prepareFlow`` will look like the
-following graph: |Preparation|
+following graph:
+
+.. figure:: https://raw.githubusercontent.com/selinon/selinon/master/example/graph/prepareFlow.png
+   :alt: Prepare flow
+   :align: center
 
 Once everything is done we serve plates. As we want to serve plates for
 all guests we need to make sure we schedule N tasks of type
 ``ServePlateTask``. Each time we run our whole dinner flow, number of
 guests may vary so make sure no guest stays hungry. Our
-``serveDinnerFlow`` would look like the following graph: |Serving
-plates|
+``serveDinnerFlow`` would look like the following graph:
+
+.. figure:: https://raw.githubusercontent.com/selinon/selinon/master/example/graph/serveDinnerFlow.png
+   :alt: Serve dinner flow
+   :align: center
 
 This example demonstrates very simple flows. The whole configuration can
 be found `here </example/dinner.yaml>`__. Just check it out how you can
@@ -171,7 +181,4 @@ Installation
 .. |GitHub stars| image:: https://img.shields.io/github/stars/selinon/selinon.svg
 .. |GitHub license| image:: https://img.shields.io/badge/license-BSD-blue.svg
 .. |Twitter| image:: https://img.shields.io/twitter/url/http/github.com/selinon/selinon.svg?style=social
-.. |Buy ingredients flow| image:: /example/graph/buyIngredientsFlow.png?raw=true
-.. |Preparation| image:: /example/graph/prepareFlow.png?raw=true
-.. |Serving plates| image:: /example/graph/serveDinnerFlow.png?raw=true
 
