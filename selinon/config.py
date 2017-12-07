@@ -6,6 +6,7 @@
 # ######################################################################
 """All user configurations generated from YAML file."""
 
+import io
 import logging
 import os
 import runpy
@@ -157,6 +158,23 @@ class Config(object):
             os.unlink(config_py)
 
     @classmethod
+    def set_config_dict(cls, nodes_definition, flow_definitions):
+        """Set configuration using dictionaries, no files are written to filesystem.
+
+        :param nodes_definition: definition of nodes in the system
+        :type nodes_definition: dict
+        :param flow_definitions: a list with flow defintions
+        :type flow_definitions: list
+        """
+        system = System.from_dict(nodes_definition, flow_definitions)
+        dump = io.StringIO()
+        system.dump2stream(dump)
+        conf = {}
+        # Ignore B102
+        exec(dump.getvalue(), conf)  # pylint: disable=exec-used
+        cls._set_config(conf)
+
+    @classmethod
     def trace_by_func(cls, trace_func):
         """Set tracing function for Dispatcher.
 
@@ -195,7 +213,7 @@ class Config(object):
 
     @classmethod
     def init(cls, celery_app, nodes_definition_file, flow_definition_files, config_py=None, keep_config_py=False):
-        """Initialize Selinon configuration.
+        """Initialize Selinon configuration with Celery application.
 
         :param celery_app: celery application to be used
         :param nodes_definition_file: definition of system nodes - YAML configuration

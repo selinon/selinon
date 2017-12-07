@@ -44,3 +44,42 @@ class TestConfig(SelinonTestCase):
         assert 'flow1' in Config.failures
         assert {'task1'} == set(Config.nowait_nodes.get('flow1'))
         assert 'schema.json' == Config.output_schemas.get('task1')
+
+    def test_set_config_dict_simple(self):
+        nodes = {
+            'tasks': [
+                {
+                    'name': 'Task1',
+                    'import': 'testapp.tasks'
+                },
+                {
+                    'name': 'task2',
+                    'import': 'testapp.tasks'
+                }
+            ],
+            'flows': [
+                'flow1'
+            ]
+        }
+
+        flows = [
+            {
+                'flow-definitions': [
+                    {
+                        'name': 'flow1',
+                        'edges': [
+                            {
+                                'from': None,
+                                'to': 'Task1'
+                            },
+                            {
+                                'from': 'Task1',
+                                'to': 'task2'
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+
+        Config.set_config_dict(nodes, [flows])
