@@ -1,4 +1,2 @@
 selinonlib
-celery>=4
 jsonschema
-redis

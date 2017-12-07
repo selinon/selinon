@@ -42,6 +42,9 @@ setup(
     url='https://github.com/selinon/selinon',
     license='BSD',
     keywords='celery selinonlib yaml condition flow',
+    extras_require={
+        'celery': ['celery>=4']
+    },
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3",
