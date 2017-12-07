@@ -9,12 +9,17 @@
 import abc
 import logging
 
-from celery.result import AsyncResult
 from selinonlib import NoParentNodeError
 from selinonlib import RequestError
 from selinonlib import Retry
 
 from .storage_pool import StoragePool
+
+try:
+    from celery.result import AsyncResult
+except ImportError as exception:
+    raise ImportError("Celery not installed, if you plan to use Selinon "
+                      "with Celery install Celery using pip3 install selinon[celery]") from exception
 
 
 class SelinonTask(metaclass=abc.ABCMeta):

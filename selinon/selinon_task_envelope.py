@@ -12,13 +12,19 @@ import traceback
 
 import jsonschema
 
-from celery import Task
 from selinonlib import Retry
 
 from .config import Config
 from .errors import FatalTaskError
 from .storage_pool import StoragePool
 from .trace import Trace
+
+try:
+    from celery import Task
+except ImportError as exception:
+    raise ImportError("Celery not installed, if you plan to use Selinon with Celery "
+                      "install Celery using pip3 install selinon[celery]")\
+        from exception  # pylint: disable=duplicate-code
 
 
 class SelinonTaskEnvelope(Task):
