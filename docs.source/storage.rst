@@ -3,90 +3,113 @@
 Storage adapter implementation
 ------------------------------
 
-Currently, there are available prepared database adapters, see `Selinonlib <https://github.com/selinon/selinonlib>`_ module. In order to use these storages, you have to manually install database adapters as they are not explicitly included by requirements.
+Currently, there are available prepared database adapters, see `Selinonlib <https://github.com/selinon/selinonlib>`_ module. In order to use these storages, you have to manually install database adapters using extras as they are not explicitly included by requirements.
 
-  * `SqlStorage` - SQLAlchemy adapter for SQL databases
+`SqlStorage` - SQLAlchemy adapter for SQL databases
+===================================================
 
-    * necessary dependencies for this storage adapter:
+.. code-block:: console
 
-      `pip3 install SQLAlchemy SQLAlchemy-Utils`
+  pip3 install selinonlib[postgresql]
 
-    * configuration example:
+A configuration example:
 
-      .. code-block:: yaml
+.. code-block:: yaml
 
-        storages:
-          - name: 'MySqlStorage'
-            classname: 'SqlStorage'
-            import: 'selinon.storage'
-            configuration:
-              connection_string: 'postgres://postgres:postgres@postgres:5432/postgres'
-              encoding: 'utf-8'
-            echo: false
+  storages:
+    - name: 'MySqlStorage'
+      classname: 'SqlStorage'
+      import: 'selinon.storage.sql_storage'
+      configuration:
+        connection_string: 'postgres://postgres:postgres@postgres:5432/postgres'
+        encoding: 'utf-8'
+      echo: false
 
-  * `RedisStorage` - Redis database adapter
+The implementation is available in ``selinonlib.storages.sql_storage``, see `Selinonlib <https://selinonlib.readthedocs.io>`_ docs.
 
-    * necessary dependencies for this storage adapter:
+`RedisStorage` - Redis database adapter
+=======================================
 
-      `pip3 install redis`
+.. code-block:: console
 
-    * configuration example:
+  pip3 install selinonlib[redis]
 
-      .. code-block:: yaml
+A configuration example:
 
-        storages:
-          - name: 'MyRedisStorage'
-            classname: 'RedisStorage'
-            import: 'selinon.storage'
-            configuration:
-              host: 'redishost'
-              port: 6379
-              db: 0
-              password: 'secretpassword'
-              charset: 'utf-8'
-              host: 'mongohost'
-            port: 27017
+.. code-block:: yaml
 
-  * `MongoStorage` - MongoDB database adapter
+  storages:
+    - name: 'MyRedisStorage'
+      classname: 'RedisStorage'
+      import: 'selinon.storage.redis'
+      configuration:
+        host: 'redishost'
+        port: 6379
+        db: 0
+        password: 'secretpassword'
+        charset: 'utf-8'
+        host: 'mongohost'
+      port: 27017
 
-    * necessary dependencies for this storage adapter:
+The implementation is available in ``selinonlib.storages.redis``, see `Selinonlib <https://selinonlib.readthedocs.io>`_ docs.
 
-      `pip3 install pymongo`
+`MongoStorage` - MongoDB database adapter
+=========================================
 
-    * configuration example:
+.. code-block:: console
 
-      .. code-block:: yaml
+  pip3 install selinonlib[mongodb]
 
-        storages:
-          - name: 'MyMongoStorage'
-            classname: 'MongoStorage'
-            import: 'selinon.storage'
-            configuration:
-              db_name: 'database_name'
-              collection_name: 'collection_name'
-              host: 'mongohost'
-            port: 27017
+A configuration example:
 
-  * `S3` - AWS S3 database adapter
+.. code-block:: yaml
 
-    * necessary dependencies for this storage adapter:
+  storages:
+    - name: 'MyMongoStorage'
+      classname: 'MongoStorage'
+      import: 'selinon.storage.mongo'
+      configuration:
+        db_name: 'database_name'
+        collection_name: 'collection_name'
+        host: 'mongohost'
+      port: 27017
 
-      `pip3 install boto3`
+The implementation is available in ``selinonlib.storages.mongo``, see `Selinonlib <https://selinonlib.readthedocs.io>`_ docs.
 
-    * configuration example:
 
-    .. code-block:: yaml
+`S3` - AWS S3 database adapter
+==============================
 
-      storages:
-        - name: 'MyS3Storage'
-          classname: 'S3Storage'
-          import: 'selinon.storage'
-          configuration:
-            bucket: 'my-bucket-name'
-            aws_access_key_id: 'AAAAAAAAAAAAAAAAAAAA'
-            aws_secret_access_key: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'
-            region_name: 'us-east-1'
+.. code-block:: console
 
+      `pip3 install selinonlib[s3]`
+
+A configuration example:
+
+.. code-block:: yaml
+
+  storages:
+    - name: 'MyS3Storage'
+      classname: 'S3Storage'
+      import: 'selinon.storage.s3'
+      configuration:
+        bucket: 'my-bucket-name'
+        aws_access_key_id: 'AAAAAAAAAAAAAAAAAAAA'
+        aws_secret_access_key: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'
+        region_name: 'us-east-1'
+
+The implementation is available in ``selinonlib.storages.s3``, see `Selinonlib <https://selinonlib.readthedocs.io>`_ docs.
+
+Few notes on using adapters
+===========================
+
+If you want to you multiple adapters, you can specify multiple adapters in extras when installing:
+
+.. code-block:: console
+
+  pip3 install selinonlib[mongodb,postgresql,s3]
+
+Note that spaces are not allowed in extras (also escape brackets when using zsh).
 
 Using a custom storage adapter
 ##############################
