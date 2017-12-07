@@ -42,6 +42,7 @@ class Config(object):
     task_classes = None
     edge_table = None
     nowait_nodes = None
+    eager_failures = None
     max_retry = None
     retry_countdown = None
     storage2storage_cache = None
@@ -74,6 +75,7 @@ class Config(object):
         cls.edge_table = config_module['edge_table']
         cls.failures = config_module['failures']
         cls.nowait_nodes = config_module['nowait_nodes']
+        cls.eager_failures = config_module['eager_failures']
         cls.flows = list(cls.edge_table.keys())
 
         # misc

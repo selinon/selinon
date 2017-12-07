@@ -228,26 +228,43 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         ret_successful = reused
         ret_failed = []
 
+        trace_msg = {
+            'flow_name': self._flow_name,
+            'dispatcher_id': self._dispatcher_id,
+            'selective': self._selective
+        }
+
         new_active_nodes = []
         for node in self._active_nodes:
             if node['result'].successful():
-                Trace.log(Trace.NODE_SUCCESSFUL, {'flow_name': self._flow_name,
-                                                  'dispatcher_id': self._dispatcher_id,
-                                                  'node_name': node['name'],
-                                                  'node_id': node['id'],
-                                                  'selective': self._selective})
+                Trace.log(Trace.NODE_SUCCESSFUL, trace_msg, node_name=node['name'], node_id=node['id'])
                 ret_successful.append(node)
             elif node['result'].failed():
-                Trace.log(Trace.NODE_FAILURE, {'flow_name': self._flow_name,
-                                               'dispatcher_id': self._dispatcher_id,
-                                               'node_name': node['name'],
-                                               'node_id': node['id'],
-                                               'what': node['result'].traceback,
-                                               'selective': self._selective})
+                Trace.log(
+                    Trace.NODE_FAILURE,
+                    trace_msg,
+                    node_name=node['name'],
+                    node_id=node['id'],
+                    what=node['result'].traceback
+                )
                 # We keep track of failed nodes to handle failures once all nodes finish
                 if node['name'] not in self._failed_nodes:
                     self._failed_nodes[node['name']] = []
                 self._failed_nodes[node['name']].append(node['id'])
+
+                # Retry/Fail if this node was marked as eager failure node
+                eager = Config.eager_failures.get(self._flow_name, False)
+                if eager is True or (isinstance(eager, list) and node['name'] in eager):
+                    Trace.log(
+                        Trace.EAGER_FAILURE,
+                        trace_msg,
+                        node_name=node['name'],
+                        node_id=node['id'],
+                        what=node['result'].traceback
+                    )
+                    self._active_nodes.remove(node)
+                    raise FlowError(self.to_dict())
+
                 ret_failed.append(node['id'])
             else:
                 new_active_nodes.append(node)
