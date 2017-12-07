@@ -187,7 +187,8 @@ class Dispatcher(Task):
         Trace.log(Trace.DISPATCHER_WAKEUP, flow_info)
 
         # Perform migrations at first place
-        self.migrate_message(flow_info)
+        if state is not None:
+            self.migrate_message(flow_info)
 
         try:
             system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent, selective)
