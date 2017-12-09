@@ -307,6 +307,8 @@ A flow definition is placed into a list of flow definitions in the YAML configur
         - 'flow2'
       nowait:
        - 'Task1'
+      eager_failures:
+       - 'Task2'
       cache:
         name: 'Cache1'
         import: 'myapp.caches'
@@ -452,6 +454,23 @@ This option is an optimization - if all tasks that are not stated in `nowait` fi
  * **Required:** false
   
  * **Default:** an empty list - wait for all nodes to complete in order to end flow
+
+eager_failures
+##############
+
+If a node stated in `eager_failures` fails, dispatcher will immediately stop scheduling new nodes and marks flow as failed without checking results of other nodes inside flow.
+
+In case there is configure `max_retry` configuration option, flow will be restarted respecting `max_retry` configuration option.
+
+  * **Possible values:**
+
+   * string - a node that failure can cause the whole flow eager failure
+   * list of strings - a list of nodes that can cause eager flow failure (if any node from the list fails)
+   * bool - if set to true any node failure inside a flow will cause eager flow failure
+
+  * **Required:** false
+
+ * **Default:** an empty list (or false) - do not stop scheduling eagerly on any failure
 
 max_retry
 #########
