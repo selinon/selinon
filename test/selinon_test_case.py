@@ -86,6 +86,7 @@ class SelinonTestCase(object):
 
         Config.flows = kwargs.pop('flows', flows)
         Config.nowait_nodes = kwargs.pop('nowait_nodes', dict.fromkeys(flows, []))
+        Config.eager_failures = kwargs.pop('eager_failures', dict.fromkeys(flows, []))
         Config.get_task_instance = kwargs.pop('get_task_instance', GetTaskInstance())
         Config.failures = kwargs.pop('failures', {})
         Config.propagate_node_args = kwargs.pop('propagate_node_args', dict.fromkeys(flows, False))

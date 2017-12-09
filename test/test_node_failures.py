@@ -982,3 +982,60 @@ class TestNodeFailures(SelinonTestCase):
 
         assert retry is None
 
+    def test_eager_failures(self):
+        #
+        # flow1:
+        #    Task1 ------
+        #      |         |
+        #    Task2 x    Task3
+        #      |
+        #    Task4
+        #
+        # Note:
+        #  Task2 marked as eager failure node in the flow, dispatcher will not wait for Task3 to finish
+        edge_table = {'flow1': [
+            {'from': [], 'to': ['Task1'], 'condition': self.cond_true},
+            {'from': ['Task1'], 'to': ['Task2'], 'condition': self.cond_true},
+            {'from': ['Task1'], 'to': ['Task3'], 'condition': self.cond_true},
+            {'from': ['Task2'], 'to': ['Task4'], 'condition': self.cond_true}
+        ]}
+        self.init(edge_table, eager_failures=({'flow1': ['Task2']}))
+
+        system_state = SystemState(id(self), 'flow1')
+        retry = system_state.update()
+        state_dict = system_state.to_dict()
+
+        assert 'Task1' in self.instantiated_tasks
+        assert retry is not None
+        assert system_state.node_args is None
+
+        task1 = self.get_task('Task1')
+        self.set_finished(task1)
+
+        system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
+        retry = system_state.update()
+        state_dict = system_state.to_dict()
+
+        assert 'Task1' in self.instantiated_tasks
+        assert 'Task2' in self.instantiated_tasks
+        assert 'Task3' in self.instantiated_tasks
+        assert retry is not None
+        assert system_state.node_args is None
+
+        # Manually append new Task1 instance to simplify this test
+        task2 = self.get_task('Task2')
+        self.set_failed(task2, ValueError("Some exception raised"))
+
+        system_state = SystemState(id(self), 'flow1', state=state_dict, node_args=system_state.node_args)
+
+        with pytest.raises(FlowError) as flow_error:
+            system_state.update()
+
+        reported_state = flow_error.value.state
+        assert 'active_nodes' in reported_state.keys()
+        assert 'finished_nodes' in reported_state.keys()
+        assert 'failed_nodes' in reported_state.keys()
+
+        assert {node['name'] for node in reported_state['active_nodes']} == {'Task3'}
+        assert set(reported_state['finished_nodes'].keys()) == {'Task1'}
+        assert set(reported_state['failed_nodes'].keys()) == {'Task2'}
