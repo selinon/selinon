@@ -1,0 +1,12 @@
+---
+  tasks:
+    - name: Task1
+      import: myapp.tasks
+    - name: Task2
+      import: myapp.tasks
+
+  flows:
+    - flow1
+
+  global:
+    migration_dir: path/to/migration_dir/

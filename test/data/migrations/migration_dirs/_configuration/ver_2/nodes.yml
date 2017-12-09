@@ -1,0 +1,16 @@
+
+---
+  tasks:
+    - name: 'Task1'
+      import: 'f8a_worker.workers'
+    - name: 'Task2'
+      import: 'f8a_worker.workers'
+    - name: 'Task3'
+      import: 'f8a_worker.workers'
+    - name: 'Task4'
+      import: 'f8a_worker.workers'
+
+  flows:
+    - 'flow1'
+    - 'flow2'
+

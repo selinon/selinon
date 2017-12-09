@@ -23,18 +23,18 @@ See `Selinon demo <https://github.com/selinon/demo>`_ or `fabric8-analytics proj
 Can I simulate Selinon run without deploying huge infrastructure?
 *****************************************************************
 
-Yes, you can. Just use shipped simulator:
+Yes, you can. Just use shipped executor:
 
 .. code-block:: console
 
-  selinonlib-cli simulate --nodes-definition nodes.yml --flow-definitions flow1.yml flow2.yml --help
+  selinon-cli execute --nodes-definition nodes.yml --flow-definitions flow1.yml flow2.yml --help
 
 This way you can also use Selinon to run your flows from a CLI. You can also explore prepared `containerized demo <http://github.com/selinon/demo>`_.
 
 I'm getting Python related errors!
 **********************************
 
-Check your Python version. Selinon and Selinonlib currently support only Pyhon3+ as Celery project is about to `drop Python2 support <http://docs.celeryproject.org/en/master/whatsnew-4.0.html#last-major-version-to-support-python-2>`_.
+Check your Python version. Selinon currently support only Pyhon3+ as Celery project is about to `drop Python2 support <http://docs.celeryproject.org/en/master/whatsnew-4.0.html#last-major-version-to-support-python-2>`_.
 
 Should I replace Celery with Selinon?
 *************************************
@@ -49,7 +49,7 @@ You should use names that can became part of function name (or Python3 identifie
 How can I access nested keys in a dict in default predicates?
 *************************************************************
 
-Assuming you are using predicates from `Selinonlib <https://github.com/selinon/selinonlib>`_. What you want is (in Python3):
+Assuming you are using predicates from :mod:`selinon.predicates`. What you want is (in Python3):
 
 .. code-block:: python
 
@@ -70,7 +70,7 @@ Predicates were designed to deal with this - just provide list of keys, where po
 I need a custom predicate, how to write it?
 *******************************************
 
-If `Selinonlib <https://github.com/selinon/selinonlib>`_ predicates are not suitable for you or you miss a specific predicate, you can define your own module in the ``global`` configuration. See :ref:`YAML configuration section <yaml>` for details.
+If :mod:`selinon.predicates` predicates are not suitable for you or you miss a specific predicate, you can define your own module in the ``global`` configuration. See :ref:`YAML configuration section <yaml>` for details.
 
 What exceptions can predicates raise?
 *************************************
@@ -88,8 +88,8 @@ Or more precisely: Do I need a result backend even when I am using my custom dat
 
 Yes, you do. The result backend is used by Celery to store information about tasks (their status, errors). Without result backend, Selinon is not capable to get information about tasks as it uses Celery. Do not use `rpc` backend as there were noted issues.
 
-Why there is used generated code by Selinonlib?
-***********************************************
+Why there is used generated code by Selinon?
+********************************************
 
 Since YAML config files cover some logic (such as conditions), this needs to be evaluated somehow. We could simply interpret YAML file each time, but it was easier to generate directly Python code from YAML configuration files and let Python interpreter interpret it for us. Other parts from YAML file could be directly used, but mostly because of consistency and debugging the whole YAML file is used for code generation.
 
@@ -97,7 +97,7 @@ You can easily check how YAML files is transformed to Python code simply by runn
 
 .. code-block:: console
 
-  selinonlib-cli inspect --nodes-definition nodes.yml --flow-definitions flow1.yml flow2.yml --dump outputfile.py
+  selinon-cli inspect --nodes-definition nodes.yml --flow-definitions flow1.yml flow2.yml --dump outputfile.py
 
 How to write conditions for sub-flows?
 **************************************

@@ -1,0 +1,231 @@
+{
+  "migration": {
+    "flow1": {
+      "tainted_edges": {
+        "0": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [],
+          "to": [
+            "Task1"
+          ]
+        },
+        "1": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [
+            "Task1"
+          ],
+          "to": [
+            "Task2"
+          ]
+        }
+      },
+      "tainting_nodes": {},
+      "translation": {
+        "0": null,
+        "1": null,
+        "2": 1
+      }
+    },
+    "flow2": {
+      "tainted_edges": {
+        "1": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [
+            "Task3"
+          ],
+          "to": [
+            "Task4"
+          ]
+        }
+      },
+      "tainting_nodes": {},
+      "translation": {
+        "1": null
+      }
+    },
+    "flow3": {
+      "tainted_edges": {
+        "0": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [],
+          "to": [
+            "Task1"
+          ]
+        },
+        "1": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [
+            "Task1"
+          ],
+          "to": [
+            "Task2"
+          ]
+        }
+      },
+      "tainting_nodes": {},
+      "translation": {
+        "0": null,
+        "1": null,
+        "2": 1
+      }
+    },
+    "flow4": {
+      "tainted_edges": {
+        "0": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [],
+          "to": [
+            "Task1"
+          ]
+        },
+        "1": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [
+            "Task1"
+          ],
+          "to": [
+            "Task2"
+          ]
+        },
+        "2": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [
+            "Task2"
+          ],
+          "to": [
+            "Task3"
+          ]
+        },
+        "3": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [
+            "Task3"
+          ],
+          "to": [
+            "Task4"
+          ]
+        }
+      },
+      "tainting_nodes": {
+        "1": [
+          "Task3"
+        ]
+      },
+      "translation": {
+        "0": null,
+        "1": null,
+        "2": null,
+        "3": null
+      }
+    },
+    "flow5": {
+      "tainted_edges": {
+        "1": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [
+            "Task1"
+          ],
+          "to": [
+            "Task2"
+          ]
+        },
+        "2": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [
+            "Task2"
+          ],
+          "to": [
+            "Task3"
+          ]
+        }
+      },
+      "tainting_nodes": {
+        "1": [
+          "Task1"
+        ]
+      },
+      "translation": {
+        "1": null,
+        "2": null,
+        "3": 2
+      }
+    },
+    "flow6": {
+      "tainted_edges": {
+        "1": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [],
+          "to": [
+            "Task2"
+          ]
+        },
+        "2": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [
+            "Task1",
+            "Task2"
+          ],
+          "to": [
+            "Task3"
+          ]
+        }
+      },
+      "tainting_nodes": {
+        "1": [
+          "Task1"
+        ]
+      },
+      "translation": {
+        "1": null,
+        "2": null
+      }
+    },
+    "flow7": {
+      "tainted_edges": {
+        "2": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [
+            "Task1",
+            "Task2"
+          ],
+          "to": [
+            "Task3"
+          ]
+        }
+      },
+      "tainting_nodes": {},
+      "translation": {
+        "2": null
+      }
+    }
+  },
+  "tainted_flow_strategy": "RETRY"
+}

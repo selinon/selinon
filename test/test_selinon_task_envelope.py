@@ -10,7 +10,7 @@ import pytest
 from flexmock import flexmock
 from jsonschema import ValidationError
 from selinon_test_case import SelinonTestCase
-from selinon.selinon_task_envelope import SelinonTaskEnvelope
+from selinon.task_envelope import SelinonTaskEnvelope
 from request_mock import RequestMock
 
 

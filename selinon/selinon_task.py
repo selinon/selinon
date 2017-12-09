@@ -9,17 +9,11 @@
 import abc
 import logging
 
-from selinonlib import NoParentNodeError
-from selinonlib import RequestError
-from selinonlib import Retry
-
+from .celery import AsyncResult
+from .errors import NoParentNodeError
+from .errors import RequestError
+from .errors import Retry
 from .storage_pool import StoragePool
-
-try:
-    from celery.result import AsyncResult
-except ImportError as exception:
-    raise ImportError("Celery not installed, if you plan to use Selinon "
-                      "with Celery install Celery using pip3 install selinon[celery]") from exception
 
 
 class SelinonTask(metaclass=abc.ABCMeta):
@@ -115,7 +109,7 @@ class SelinonTask(metaclass=abc.ABCMeta):
         """Retrieve parent task exception. You have to call this from a fallback (direct or transitive).
 
         :param parent_name: name of task that failed (ancestor of calling task)
-        :return exception that was raised in the ancestor
+        :return: exception that was raised in the ancestor
         """
         try:
             parent_task_id = self.parent[parent_name]
@@ -136,7 +130,7 @@ class SelinonTask(metaclass=abc.ABCMeta):
         :param flow_names: name of parent flow or list of flow names in case of nested flows
         :param task_name: name of task that failed (ancestor of calling task)
         :param index: index of result if more than one subflow was run
-        :return exception that was raised in the ancestor
+        :return: exception that was raised in the ancestor
         """
         index = -1 if index is None else index
         task_id = self._selinon_dereference_task_id(flow_names, task_name, index)

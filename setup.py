@@ -2,7 +2,7 @@
 
 import sys
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 NAME = 'selinon'
@@ -31,7 +31,8 @@ with open('README.rst', 'r') as f:
 setup(
     name=NAME,
     version=get_version(),
-    packages=[NAME],
+    scripts=['selinon-cli'],
+    packages=find_packages(),
     install_requires=get_requirements(),
     author='Fridolin Pokorny',
     author_email='fpokorny@redhat.com',
@@ -41,9 +42,14 @@ setup(
     long_description=long_description,
     url='https://github.com/selinon/selinon',
     license='BSD',
-    keywords='celery selinonlib yaml condition flow',
+    keywords='celery selinon yaml condition flow',
     extras_require={
-        'celery': ['celery>=4']
+        'celery': ['celery>=4'],
+        'mongodb': ['pymongo'],
+        'postgresql': ['SQLAlchemy' 'SQLAlchemy-Utils'],
+        'redis': ['redis'],
+        's3': ['boto3'],
+        'sentry': ['raven']
     },
     classifiers=[
         "Development Status :: 4 - Beta",

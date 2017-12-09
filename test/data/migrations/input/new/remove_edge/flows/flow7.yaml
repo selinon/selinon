@@ -1,0 +1,12 @@
+#
+#    |     |
+#  Task1  Task2
+
+---
+  flow-definitions:
+    - name: flow7
+      edges:
+        - from:
+          to: Task1
+        - from:
+          to: Task2

@@ -12,7 +12,7 @@ from strategy_mock import strategy_function
 from storage_task_name_mock import StorageTaskNameMock
 
 from celery.result import AsyncResult
-from selinonlib.caches import LRU
+from selinon.caches import LRU
 from selinon.config import Config
 from selinon.system_state import SystemState
 from selinon.trace import Trace

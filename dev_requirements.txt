@@ -2,9 +2,14 @@
 pytest>=3
 pytest-timeout
 pytest-cov
-flexmock
-pylint
-pytest-catchlog
 pydocstyle
+pylint
+#coala-bears
+# Storage implementations requirements
+pymongo
+SQLAlchemy
+SQLAlchemy-Utils
+boto3
+redis
+celery
 raven
-

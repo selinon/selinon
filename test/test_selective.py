@@ -8,7 +8,7 @@
 import pytest
 from selinon.selective import compute_selective_run
 from selinon_test_case import SelinonTestCase
-from selinonlib import SelectiveNoPathError
+from selinon import SelectiveNoPathError
 
 
 class TestSelective(SelinonTestCase):

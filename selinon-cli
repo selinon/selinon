@@ -1,0 +1,447 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# ######################################################################
+# Copyright (C) 2016-2017  Fridolin Pokorny, fridolin.pokorny@gmail.com
+# This file is part of Selinon project.
+# ######################################################################
+"""Selinon command line interface."""
+# pylint: disable=invalid-name
+
+import argparse
+from functools import partial
+import json
+import logging
+import os
+import sys
+
+import argcomplete
+from rainbow_logging_handler import RainbowLoggingHandler
+from selinon import selinon_version
+from selinon import selinon_version_codename
+from selinon.user_config import UserConfig
+from selinon.system import System
+from selinon import RequestError
+from selinon.helpers import git_previous_version
+from selinon.helpers import git_previous_version_file
+from selinon.migrations import Migrator
+from selinon.migrations import TaintedFlowStrategy
+from selinon.executor import Executor
+
+_logger = logging.getLogger(os.path.basename(__file__))
+
+
+class Command(object):
+    """Selinon CLI entrypoint."""
+    DESCRIPTION = 'developer interaction tool for Selinon config files'
+    DEFAULT_PLOT_GRAPH_FORMAT = 'svg'
+    DEFAULT_PLOT_OUTPUT_DIR = '.'
+    DEFAULT_EXECUTE_NODE_ARGS = None
+    DEFAULT_EXECUTE_SLEEP_TIME = 0.5
+    DEFAULT_EXECUTE_CONCURRENCY = 1
+
+    @staticmethod
+    def _require_yaml_configs(parser):
+        """Add arguments for nodes and flows to a command parser.
+
+        :param parser: a command parser that should be enriched with nodes and flows config files
+        """
+        parser.add_argument('--nodes-definition', '-n', dest='nodes_definition',
+                            action='store', metavar='NODES.yml',
+                            help='path to tasks definition file', required=True)
+        parser.add_argument('--flow-definitions', '-f', dest='flow_definitions',
+                            action='store', metavar='FLOW.yml',
+                            help='path to flow definition file', required=True, nargs='+')
+
+    @classmethod
+    def _get_inspect_args_parser(cls):
+        """Get parser for inspect command.
+
+        :return: inspect command parser
+        """
+        parser = argparse.ArgumentParser(add_help=False)
+
+        cls._require_yaml_configs(parser)
+
+        parser.add_argument('--dump', '-d', dest='dump', action='store', metavar='DUMP.py',
+                            help='generate Python code of the system')
+        parser.add_argument('--no-check', dest='no_check', action='store_true',
+                            help='do not check system for errors')
+        parser.add_argument('--list-task-queues', dest='list_task_queues', action='store_true',
+                            help='list all task queues to stdout')
+        parser.add_argument('--list-dispatcher-queues', dest='list_dispatcher_queue', action='store_true',
+                            help='list dispatcher queue to stdout')
+
+        return parser
+
+    @classmethod
+    def _get_plot_args_parser(cls):
+        """Get parser for plot command.
+
+        :return: plot command parser
+        """
+        parser = argparse.ArgumentParser(add_help=False)
+
+        cls._require_yaml_configs(parser)
+
+        parser.add_argument('--config', '-c', dest='config', action='store', metavar='CONFIG.yml',
+                            help='path to configuration file')
+        parser.add_argument('--output-dir', '-o', dest='output_dir', action='store', metavar='OUTPUT_DIR',
+                            default=cls.DEFAULT_PLOT_OUTPUT_DIR,
+                            help='specify output dir where plotted graphs should be placed (default: current dir)')
+        parser.add_argument('--format', dest='graph_format', action='store', metavar='FORMAT',
+                            default=cls.DEFAULT_PLOT_GRAPH_FORMAT,
+                            help='format of the output image (default: %s)' % cls.DEFAULT_PLOT_GRAPH_FORMAT)
+
+        return parser
+
+    @classmethod
+    def _get_execute_args_parser(cls):
+        """Get parser for execute command.
+
+        :return: execute command parser
+        """
+        parser = argparse.ArgumentParser(add_help=False)
+
+        cls._require_yaml_configs(parser)
+
+        parser.add_argument('--flow-name', required=True, action='store', dest='flow_name', metavar='FLOW_NAME',
+                            help='specify flow that should be run by its name')
+
+        parser.add_argument('--node-args', '-a', action='store', dest='node_args', metavar='NODE_ARGS',
+                            default=cls.DEFAULT_EXECUTE_NODE_ARGS,
+                            help='specify arguments that should be passed to a flow '
+                                 '(default: %s)' % cls.DEFAULT_EXECUTE_NODE_ARGS)
+        parser.add_argument('--node-args-file', action='store', dest='node_args_file', metavar='FILE',
+                            help='specify arguments that should be passed to a flow by a file')
+        parser.add_argument('--node-args-json', '-j', action='store_true', dest='node_args_json',
+                            help='node args are defined by a JSON that should be parsed')
+
+        parser.add_argument('--concurrency', '-c', action='store', dest='concurrency', type=int,
+                            default=cls.DEFAULT_EXECUTE_CONCURRENCY,
+                            help='concurrency for the worker - number of threads that serve tasks in parallel '
+                                 '(default: %s)' % cls.DEFAULT_EXECUTE_CONCURRENCY)
+        parser.add_argument('--sleep-time', '-s', action='store', dest='sleep_time', type=float,
+                            default=cls.DEFAULT_EXECUTE_SLEEP_TIME,
+                            help='accuracy for worker sleeping when a task is scheduled to future '
+                                 '(default: %s)' % cls.DEFAULT_EXECUTE_SLEEP_TIME)
+
+        parser.add_argument('--config-py', action='store', dest='config_py',
+                            help='path to file where should be generated config.py placed')
+        parser.add_argument('--keep-config-py', action='store_true', dest='keep_config_py',
+                            help='do not remove config.py file after run')
+
+        parser.add_argument('--selective-task-names', action='store', dest='selective_task_names', type=str, nargs='+',
+                            help='a list of tasks that should be run when run a selective flow')
+        parser.add_argument('--selective-follow-subflows', action='store_true', dest='selective_follow_subflows',
+                            help='follow subflows in a selective flow')
+        parser.add_argument('--selective-run-subsequent', action='store_true', dest='selective_run_subsequent',
+                            help='run subsequent tasks affected by selective flow run')
+
+        return parser
+
+    @classmethod
+    def _get_migrate_args_parser(cls):
+        """Get parser for the migrate command.
+
+        :return: migrate command parser
+        """
+        parser = argparse.ArgumentParser(add_help=False)
+        default_tainted_strategy = TaintedFlowStrategy.get_default_option()
+
+        cls._require_yaml_configs(parser)
+
+        parser.add_argument('--old-nodes-definition', '-N', dest='old_nodes_definition',
+                            action='store', metavar='NODES.yml',
+                            help='path to old tasks definition file')
+        parser.add_argument('--old-flow-definitions', '-F', dest='old_flow_definitions',
+                            action='store', metavar='FLOW.yml',
+                            help='path to old flow definition file', nargs='+')
+
+        parser.add_argument('--no-meta', dest='no_meta', action='store_true',
+                            help='do not add metadata information to generated migration files')
+        parser.add_argument('--migration-dir', '-m', action='store', dest='migration_dir',
+                            help='path to a directory containing generated migrations')
+        parser.add_argument('--git', '-g', action='store_true', dest='use_git',
+                            help='use Git VCS for obtaining old flow configuration')
+        parser.add_argument('--no-check', dest='no_check', action='store_true',
+                            help='do not check system for errors')
+        parser.add_argument('--tainted-flows', '-t', action='store', dest='tainted_flows',
+                            choices=TaintedFlowStrategy.get_option_names(), default=default_tainted_strategy,
+                            help='define strategy for tainted flows (default: %s)' % default_tainted_strategy)
+
+        return parser
+
+    @classmethod
+    def _get_version_args_parser(cls):
+        """Get parser for version command.
+
+        :return: version command parser
+        """
+        parser = argparse.ArgumentParser(add_help=False)
+
+        parser.add_argument('--codename', action='store_true', dest='codename',
+                            help='get release codename')
+
+        return parser
+
+    @classmethod
+    def _get_args_parser(cls, prog_name):
+        """Get parser that parses commands and their arguments.
+
+        :param prog_name: application name based on invocation
+        :return: top level parser
+        """
+        parser = argparse.ArgumentParser(prog_name, description=cls.DESCRIPTION)
+
+        # Global configuration for logging
+        parser.add_argument('--verbose', '-v', dest='verbose', action='count', default=0,
+                            help='be verbose about what\'s going on (can be supplied multiple times)')
+        parser.add_argument('--no-color', '-n', dest='no_color', action='store_true',
+                            help='suppress colorized logging output')
+
+        subparsers = parser.add_subparsers(title='sub-commands', dest='subcommand')
+
+        subparsers.add_parser('execute', parents=[cls._get_execute_args_parser()],
+                              help='execute flow locally without Celery')
+        subparsers.add_parser('migrate', parents=[cls._get_migrate_args_parser()],
+                              help='generate config file migration')
+        subparsers.add_parser('plot', parents=[cls._get_plot_args_parser()],
+                              help='plot graphs from configuration files')
+        subparsers.add_parser('inspect', parents=[cls._get_inspect_args_parser()],
+                              help='collect useful information from configuration files')
+        subparsers.add_parser('version', parents=[cls._get_version_args_parser()],
+                              help='get version info and exit')
+
+        return parser
+
+    @staticmethod
+    def plot(args):
+        """Plot flows based on YAML configuration - plot command.
+
+        :param args: arguments for plot command
+        """
+        UserConfig.set_config(args.config)
+        system = System.from_files(args.nodes_definition, args.flow_definitions)
+        system.plot_graph(args.output_dir, args.graph_format)
+        return 0
+
+    @staticmethod
+    def migrate(args):
+        """Perform migrations on old and new YAML configuration files in flow changes.
+
+        :param args: arguments for migrate command
+        """
+        # pylint: disable=too-many-branches
+        if int(args.old_flow_definitions is not None) + int(args.old_nodes_definition is not None) == 1:
+            raise RequestError("Please provide all flow and nodes configuration files or use --git")
+
+        use_old_files = args.old_flow_definitions is not None
+        usage_clash = int(use_old_files) + int(args.use_git)
+        if usage_clash == 2:
+            raise RequestError("Option --git is disjoint with explicit configuration file specification")
+
+        if usage_clash == 0:
+            raise RequestError("Use --git or explicit old configuration file specification in order "
+                               "to access old config files")
+
+        if args.use_git:
+            # Compute version that directly precedes the current master - there is relevant change
+            # in any of config files.
+            git_hash, depth = git_previous_version(args.nodes_definition)
+            for new_flow_definition_file in args.flow_definitions:
+                new_git_hash, new_depth = git_previous_version(new_flow_definition_file)
+                if new_depth < depth:
+                    git_hash = new_git_hash
+                    depth = new_depth
+
+            _logger.debug("Using Git hash %r for old config files", git_hash)
+            old_nodes_definition = git_previous_version_file(git_hash, args.nodes_definition)
+            old_flow_definitions = list(map(partial(git_previous_version_file, git_hash), args.flow_definitions))
+        else:
+            old_nodes_definition = args.old_nodes_definition
+            old_flow_definitions = args.old_flow_definitions
+
+        try:
+            if not args.no_check:
+                try:
+                    System.from_files(args.nodes_definition, args.flow_definitions)
+                except Exception as e:
+                    raise RequestError("There is an error in your new configuration files: {}".format(str(e))) from e
+
+                try:
+                    System.from_files(old_nodes_definition, old_flow_definitions)
+                except Exception as e:
+                    raise RequestError("There is an error in your old configuration files: {}".format(str(e))) from e
+
+            migrator = Migrator(args.migration_dir)
+            new_migration_file = migrator.create_migration_file(
+                old_nodes_definition,
+                old_flow_definitions,
+                args.nodes_definition,
+                args.flow_definitions,
+                TaintedFlowStrategy.get_option_by_name(args.tainted_flows),
+                not args.no_meta
+            )
+        finally:
+            if args.use_git:
+                _logger.debug("Removing temporary files")
+                # Clean up temporary files produced by git_previous_version()
+                os.remove(old_nodes_definition)
+                for old_flow_definition_file in old_flow_definitions:
+                    os.remove(old_flow_definition_file)
+
+        _logger.info("New migration file placed in %r", new_migration_file)
+        return 0
+
+    @staticmethod
+    def execute(args):
+        """Simulate flows based on YAML configuration - execute command.
+
+        :param args: arguments for execute command
+        """
+        if args.node_args and args.node_args_file:
+            raise RequestError("Node arguments could be specified by command line argument or a file, but not from both")
+
+        node_args = args.node_args
+        if args.node_args_file:
+            with open(args.node_args_file, 'r') as f:
+                node_args = f.read()
+
+        if args.node_args_json:
+            try:
+                node_args = json.loads(node_args)
+            except Exception as e:
+                raise RequestError("Unable to parse JSON arguments: %s" % str(e)) from e
+
+        if args.concurrency <= 0:
+            raise RequestError("Concurrency has to be positive number")
+
+        if args.concurrency != 1:
+            raise NotImplementedError("Concurrency is currently not implemented")
+
+        opts = {
+            'concurrency': args.concurrency,
+            'sleep_time': args.sleep_time,
+            'config_py': args.config_py,
+            'keep_config_py': args.keep_config_py,
+        }
+
+        if args.selective_task_names:
+            opts['selective'] = {
+                'task_names': args.selective_task_names,
+                'follow_subflows': args.selective_follow_subflows,
+                'run_subsequent': args.selective_run_subsequent
+            }
+        else:
+            if args.selective_follow_subflows:
+                raise RequestError("Option --selective-follow-subflows requires --selective-task-names set")
+            if args.selective_run_subsequent:
+                raise RequestError("Option --selective-run-subsequent requires --selective-task-names set")
+
+        executor = Executor(args.nodes_definition, args.flow_definitions, **opts)
+        executor.run(args.flow_name, node_args)
+
+        return 0
+
+    @classmethod
+    def inspect(cls, args):
+        """Inspect configuration - inspect command.
+
+        :param args: arguments for inspect command
+        """
+        system = System.from_files(args.nodes_definition, args.flow_definitions, args.no_check)
+        some_work = False
+
+        if args.list_task_queues:
+            for task_name, queue_name in system.task_queue_names().items():
+                print('%s:%s' % (task_name, queue_name))
+            some_work = True
+
+        if args.list_dispatcher_queue:
+            for flow_name, queue_name in system.dispatcher_queue_names().items():
+                print('%s:%s' % (flow_name, queue_name))
+            some_work = True
+
+        if args.dump:
+            system.dump2file(args.dump)
+            some_work = True
+
+        if not some_work:
+            _logger.error('Nothing to do')
+            cls._get_inspect_args_parser().print_usage()
+            return 2
+
+        return 0
+
+    @classmethod
+    def version(cls, args):
+        """Get version information - version command.
+
+        :param args: arguments for version command
+        """
+        try:
+            from celery import __version__ as celery_version
+        except ImportError:
+            celery_version = 'Not Installed'
+
+        if args.codename:
+            print(selinon_version_codename)
+        else:
+            print('Selinon version: %s' % selinon_version)
+            print('Celery version: %s' % celery_version)
+        return 0
+
+    @classmethod
+    def _setup_logging(cls, verbose, no_color):
+        """Set up Python logging based.
+
+        :param verbose: verbosity level
+        :param no_color: do not use colorized output
+        """
+        level = logging.WARNING
+        if verbose == 0:
+            level = logging.WARNING
+        elif verbose == 1:
+            level = logging.INFO
+        elif verbose > 1:
+            level = logging.DEBUG
+
+        logger = logging.getLogger()
+        logger.setLevel(level)
+
+        if not no_color:
+            formatter = logging.Formatter("%(process)d: [%(asctime)s] %(name)s %(funcName)s:%(lineno)d: %(message)s")
+            # setup RainbowLoggingHandler
+            handler = RainbowLoggingHandler(sys.stderr)
+            handler.setFormatter(formatter)
+            logger.addHandler(handler)
+
+    @classmethod
+    def main(cls):
+        """
+        :return: nonzero for an error
+        """
+        parser = cls._get_args_parser(os.path.basename(sys.argv[0]))
+        argcomplete.autocomplete(parser)
+        args = parser.parse_args()
+
+        cls._setup_logging(args.verbose, args.no_color)
+
+        if args.subcommand is None:
+            parser.print_usage(file=sys.stderr)
+            return 1
+
+        _logger.debug("Arguments supplied: %s", str(args))
+        command = getattr(cls, args.subcommand, None)
+        if command is None:
+            raise RequestError('Unhandled sub-command provided: %s' % str(args))
+
+        return command(args)
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(Command.main())
+    except Exception as exc:  # pylint: disable=broad-except
+        _logger.exception(exc)
+        sys.exit(3)

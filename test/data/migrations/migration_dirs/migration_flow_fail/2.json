@@ -1,0 +1,27 @@
+{
+  "_meta": {
+    "datetime": "2017-11-21 08:42:18.000744",
+    "host": "localhost.localdomain",
+    "selinon_version": "0.1.0rc6",
+    "user": "fpokorny"
+  },
+  "migration": {
+    "flow1": {
+      "tainted_edges": {},
+      "tainting_nodes": {
+        "2": [
+          "Task2"
+        ]
+      },
+      "translation": {
+        "2": 3
+      }
+    },
+    "flow2": {
+      "tainted_edges": [],
+      "tainting_nodes": {},
+      "translation": {}
+    }
+  },
+  "tainted_flow_strategy": "FAIL"
+}

@@ -1,0 +1,15 @@
+#
+#    |
+#  Task2
+#    |
+#  Task3
+#
+---
+  flow-definitions:
+    - name: flow3
+      edges:
+        - from:
+          to: Task2
+
+        - from: Task2
+          to: Task3

@@ -196,7 +196,7 @@ Selective run function that should be applied on :ref:`selective task runs <sele
 
  * **Required:** false
 
- * **Default:** `Selinonlib's default selective run function <https://selinonlib.readthedocs.io>`_ - a task will be always forced to run on selective task runs
+ * **Default:** :func:`selinon.routines.always_run` - a task will be always forced to run on selective task runs
 
 throttling
 ##########
@@ -511,7 +511,7 @@ Define a custom module where dispatcher sampling strategy function (see :ref:`op
 
     * ``import`` - a module name from which the sampling strategy function should be imported
 
-        **Default:** ``selinonlib.strategies``
+        **Default:** ``selinon.strategies``
 
     * ``args`` - additional sampling strategy configuration options passed as keyword arguments to the sampling strategy
 
@@ -525,7 +525,7 @@ Define a custom module where dispatcher sampling strategy function (see :ref:`op
 
   * **Defaults:** as listed in each configuration key
 
-Refer to `Selinonlib documentation <http://selinonlib.readthedocs.io>`_ for additional info.
+Refer to :mod:`selinon.strategies` for additional info.
 
 throttling
 ##########
@@ -599,7 +599,7 @@ A condition made of predicates that determines whether the edge should be fired 
    * ``name`` - a reference to a leaf predicate to be used, this predicate is imported from predicates module defined in the ``global`` section
   
  * **Required:** false
- * **Default:** ``alwaysTrue()`` predicate defined in `Selinonlib <https://selinonlib.readthedocs.io>`_ which always evaluates to true
+ * **Default:** ``alwaysTrue()`` predicate defined in :mod:`selinon.predicates.alwaysTrue` which always evaluates to true
 
 If ``name`` is used, there are possible following configuration options:
 
@@ -625,7 +625,7 @@ An example of a condition definition:
             key: 'baz'
             value: 42
 
-Please refer to the ``predicates`` module available in `Selinonlib <https://selinonlib.readthedocs.io>`_. This module states default predicates that could be immediately used. You can also provide your own predicates by configuring used module in the global_ configuration section.
+Please refer to the ``predicates`` module available in :mod:`selinon.predicates`. This module states default predicates that could be immediately used. You can also provide your own predicates by configuring used module in the global_ configuration section.
 
 foreach
 #######
@@ -703,7 +703,7 @@ Define a custom predicate module. There will be imported predicates from this mo
 
  * **Required:** false
 
- * **Default:** ``selinonlib.predicates`` - see `Selinonlib documentation <https://selinonlib.readthedocs.io>`_ for more info.
+ * **Default:** :mod:`selinon.predicates`
 
 default_task_queue
 ##################

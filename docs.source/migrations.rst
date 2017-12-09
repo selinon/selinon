@@ -32,7 +32,7 @@ Another approach is to change flow behaviour on runtime - that means you have me
 
   Do not perform flow changes in the YAML configuration file without generating migrations. It will mostly resolve in fatal and unrecoverable failures in dispatcher task causing it to fail or infinite rescheduling. In general, **changes in the flow structure without performing migrations lead to undefined behaviour**.
 
-For this reason migration of messages comes in handy. Selinonlib CLI offers you a way how to generate a migration that affects flow execution and lets you decide what to do in case your change affects flow execution based on the current state - tainted flows.
+For this reason migration of messages comes in handy. Selinon CLI offers you a way how to generate a migration that affects flow execution and lets you decide what to do in case your change affects flow execution based on the current state - tainted flows.
 
 .. note::
 
@@ -122,19 +122,19 @@ If you would like to perform more changes that should trigger different migratio
 Generating migrations
 =====================
 
-Migrations can be generated using the Selinonlib CLI. It operates either on explicitly supplied old and new configuration files on which the migration is computed or you can use the built in support for Git VCS. Selinonlib in that case checks Git history for older versions of configuration files supplied.
+Migrations can be generated using the Selinon CLI. It operates either on explicitly supplied old and new configuration files on which the migration is computed or you can use the built in support for Git VCS. Selinon in that case checks Git history for older versions of configuration files supplied.
 
 .. code-block:: console
 
   $ # Add --verbose parameters for noisy output, use git to retrieve old configuration files. Path to migration_dir will be taken from nodes.yaml.
-  $ selinonlib-cli -vvv migrate --flow-definitions myapp/flows/*.yaml --nodes-definition myapp/nodes.yaml --git
+  $ selinon-cli -vvv migrate --flow-definitions myapp/flows/*.yaml --nodes-definition myapp/nodes.yaml --git
 
-You can also explicitly adjust migration directory. Implicitly Selinonlib will take into account ``migration_dir`` stated in the global section of ``nodes.yaml`` file. Also make sure you are pointing to the right directory as migrations files are numbered incrementally so Selinonlib needs to know the previous migration version that is distinguished based on presence of migration files in the ``migration_dir`` directory.
+You can also explicitly adjust migration directory. Implicitly Selinon will take into account ``migration_dir`` stated in the global section of ``nodes.yaml`` file. Also make sure you are pointing to the right directory as migrations files are numbered incrementally so Selinon needs to know the previous migration version that is distinguished based on presence of migration files in the ``migration_dir`` directory.
 
 .. code-block:: console
 
   $ # Explicitly point to old configuration files and the migration directory, set tainted flow strategy as FAILED.
-  $ selinonlib-cli -vvv migrate --flow-definitions myapp/flows/*.yaml --nodes-definition myapp/nodes.yaml --old-flow-definitions myapp/old_1/flows/*.yaml --nodes-definition myapp/old_1/nodes.yaml --migration-dir myapp/migration_dir/ --tainted-flow-strategy FAIL
+  $ selinon-cli -vvv migrate --flow-definitions myapp/flows/*.yaml --nodes-definition myapp/nodes.yaml --old-flow-definitions myapp/old_1/flows/*.yaml --nodes-definition myapp/old_1/nodes.yaml --migration-dir myapp/migration_dir/ --tainted-flow-strategy FAIL
 
 Generated migrations are JSON files with computed tainting nodes, tainted edges and edge translation (renumbering and edge dropping if needed). These JSON files also carry some metadata such as where, when and by who the given migration was created. You can suppress capturing metadata by generating migrations with the ``--no-meta`` option.
 

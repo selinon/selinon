@@ -1,0 +1,19 @@
+---
+  tasks:
+    - name: Task1
+      import: myapp.tasks
+    - name: Task2
+      import: myapp.tasks
+    - name: Task3
+      import: myapp.tasks
+    - name: Task4
+      import: myapp.tasks
+    - name: Task5
+      import: myapp.tasks
+
+  flows:
+    - flow1
+    - flow2
+
+  global:
+    migration_dir: path/to/migration_dir/

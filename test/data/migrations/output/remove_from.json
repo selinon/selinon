@@ -1,0 +1,29 @@
+{
+  "migration": {
+    "flow1": {
+      "tainted_edges": {
+        "1": {
+          "condition_str": {
+            "name": "alwaysTrue"
+          },
+          "from": [
+            "Task2",
+            "Task1"
+          ],
+          "to": [
+            "Task2"
+          ]
+        }
+      },
+      "tainting_nodes": {
+        "1": [
+          "Task1"
+        ]
+      },
+      "translation": {
+        "1": null
+      }
+    }
+  },
+  "tainted_flow_strategy": "IGNORE"
+}

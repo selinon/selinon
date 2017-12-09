@@ -8,11 +8,10 @@
 
 import traceback
 
-from selinonlib import UnknownStorageError
-
 from .config import Config
 from .errors import CacheMissError
 from .errors import StorageError
+from .errors import UnknownStorageError
 from .lock_pool import LockPool
 from .trace import Trace
 
@@ -67,8 +66,8 @@ class StoragePool(object):
         :param storage_name: name of storage
         :return: connected storage
         """
-        # if this raises UnknownStorageError exception it means that the flow was not configured properly - should
-        # be handled by Selinonlib
+        # if this raises UnknownStorageError exception it means that the flow was not configured properly, should
+        # be handled during Python code generation.
         storage = Config.storage_mapping[storage_name]
 
         if not storage.is_connected():

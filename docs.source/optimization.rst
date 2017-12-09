@@ -18,7 +18,7 @@ A sampling strategy basically gives information on when the dispatcher should be
 
 By default dispatcher is rescheduled every 2 seconds. Note that it means "give dispatcher *at least* 2 seconds to retry". If you have full queues (and busy workers) your dispatcher can be rescheduled even after days.
 
-Selinonlib offers you couple of predefined sampling strategies (refer to `Selinonlib documentation <https://selinonlib.readthedocs.io>`_ for more info):
+Selinon offers you couple of predefined sampling strategies (refer to :mod:`selinon.strategies` for more info):
 
 .. code-block:: yaml
 
@@ -115,7 +115,7 @@ In the latter one there are two main approaches how to tackle such bottleneck. Y
 
 If the above solution is not suitable for you or you want to optimize even more, Selinon offers you an optimization that introduces distributed caches. These caches are distributed across nodes (workers) in your cluster and act like a caching mechanism to reduce number of requests to storages/databases and keep data more close to execution nodes.
 
-Selinon by default uses cache of size 0 (no items are added to the cache). There are prepared in-memory caches like FIFO (First-In-First-Out cache), LIFO (Last-In-First-Out cache), LRU (Least-Recently-Used cache), MRU (Most-Recently-Used cache), RR (Random-Replacement cache). See `Selinonlib documentation <https://selinonlib.readthedocs.io>`_ for more info.
+Selinon by default uses cache of size 0 (no items are added to the cache). There are prepared in-memory caches like FIFO (First-In-First-Out cache), LIFO (Last-In-First-Out cache), LRU (Least-Recently-Used cache), MRU (Most-Recently-Used cache), RR (Random-Replacement cache). See :mod:`selinon.caches` for more info.
 
 
 .. note::

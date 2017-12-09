@@ -3,20 +3,14 @@
 Command line interface
 ----------------------
 
-Selinon is shipped with a library called `Selinonlib <https://selinonlib.readthedocs.io>`_. This library does more or less all the pre-processing logic needed for Selinon and also offers some nice features for user interaction.
+Selinon is shipped with a CLI (Command Line Interface) that offers you interaction with Selinon code and perform various actions like plotting flow graphs, executing a flow via a command line executor or inspect provided configuration via sub-commands.
 
-To install Selinonlib, just run:
-
-.. code-block:: bash
-
-  $ pip3 install selinonlib
-
-Most of the sub-commands accept configuration files you use with Selinon so to use Selinonlib CLI you need to pass ``nodes.yaml`` file as well as all your flow configuration files (if you split configuration files into multiple YAML files).
+Most of the sub-commands accept configuration files you use with Selinon so to use Selinon CLI you need to pass ``nodes.yaml`` file as well as all your flow configuration files (if you split configuration files into multiple YAML files).
 
 .. code-block:: bash
 
-  usage: selinonlib-cli [-h] [--verbose] [--no-color]
-                        {simulate,migrate,plot,inspect,version} ...
+  usage: selinon-cli [-h] [--verbose] [--no-color]
+                        {execute,migrate,plot,inspect,version} ...
 
   developer interaction tool for Selinon config files
 
@@ -27,8 +21,8 @@ Most of the sub-commands accept configuration files you use with Selinon so to u
     --no-color, -n        suppress colorized logging output
 
   sub-commands:
-    {simulate,migrate,plot,inspect,version}
-      simulate            simulate flow locally without Celery
+    {execute,migrate,plot,inspect,version}
+      execute             execute flow locally without Celery
       migrate             generate config file migration
       plot                plot graphs from configuration files
       inspect             collect useful information from configuration files
@@ -47,7 +41,7 @@ Most of the sub-commands accept configuration files you use with Selinon so to u
 Inspecting configuration
 ========================
 
-Selinonlib offers you the ``inspect`` sub-command. This sub-command parses all the config files and outputs requested results.
+Selinon CLI offers you the ``inspect`` sub-command. This sub-command parses all the config files and outputs requested results.
 
 You can use the ``inspect`` sub-command for example to list all queues stated in your YAML files or do other stuff for querying parsed and checked configuration files.
 
@@ -57,7 +51,7 @@ One of the interesting options worth to state is the ``--dump`` command. As Seli
 Plotting flow graphs
 ====================
 
-As flows and dependencies between tasks might get pretty complex, Selinon offers you a way to visualize flows. For this purpose the ``plot`` sub-command is available in Selinonlib CLI. It can plot flow graphs for you in any format that is supported by `graphviz <https://pypi.python.org/pypi/graphviz>`_.
+As flows and dependencies between tasks might get pretty complex, Selinon offers you a way to visualize flows. For this purpose the ``plot`` sub-command is available in Selinon CLI. It can plot flow graphs for you in any format that is supported by `graphviz <https://pypi.python.org/pypi/graphviz>`_.
 
 All the flow graphs available in this documentation were plotted using the ``plot`` sub-command.
 
@@ -120,15 +114,15 @@ You can find more configuration options in the `graphviz library documentation <
 Simulating flow execution
 =========================
 
-To debug, explore, play or interact with task flow execution anyhow, Selinonlib CLI offers you a built in simulator. This simulator tries to simulate message queueing and message consuming so no broker (and Celery's result backend) is involved.
+To debug, explore, play or interact with task flow execution anyhow, Selinon CLI offers you a built in executor. This executor tries to simulate message queueing and message consuming so no broker (and Celery's result backend) is involved.
 
 .. note::
 
   Note that the execution can vary from real broker interaction as there are involved other parameters as well (e.g. prefetch multiplier configuration, concurrent broker message publishing, etc.).
 
-Simulator currently supports only single-process, single threaded simulation - one worker serving tasks. Worker accepts messages in a round-robin fashion based on message availability in queues.
+Executor currently supports only single-process, single threaded executor - one worker serving tasks. Worker accepts messages in a round-robin fashion based on message availability in queues.
 
-In order to see what is happening during simulator run, you can run simulator in a verbose mode. Simulator in that case prints all the execution actions. It can help you when you want to experiment with your flow configuration or you would like to debug strange flow behaviour.
+In order to see what is happening during executor run, you can run executor in a verbose mode. Executor in that case prints all the execution actions. It can help you when you want to experiment with your flow configuration or you would like to debug strange flow behaviour.
 
 Generating migrations of configuration files
 ============================================

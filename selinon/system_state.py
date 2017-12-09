@@ -13,6 +13,7 @@ from functools import reduce
 import itertools
 import traceback
 
+from .celery import AsyncResult
 from .config import Config
 from .errors import CacheMissError
 from .errors import DispatcherRetry
@@ -20,15 +21,9 @@ from .errors import FlowError
 from .errors import StorageError
 from .lock_pool import LockPool
 from .selective import compute_selective_run
-from .selinon_task_envelope import SelinonTaskEnvelope
 from .storage_pool import StoragePool
+from .task_envelope import SelinonTaskEnvelope
 from .trace import Trace
-
-try:
-    from celery.result import AsyncResult
-except ImportError as exception:
-    raise ImportError("Celery not installed, if you plan to use Selinon with Celery "
-                      "install Celery using pip3 install selinon[celery]") from exception
 
 
 class SystemState(object):  # pylint: disable=too-many-instance-attributes

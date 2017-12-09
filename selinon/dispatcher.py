@@ -8,8 +8,7 @@
 
 import traceback
 
-from selinonlib.migrations import Migrator
-
+from .celery import Task
 from .config import Config
 from .errors import DispatcherRetry
 from .errors import FlowError
@@ -17,14 +16,9 @@ from .errors import MigrationException
 from .errors import MigrationFlowFail
 from .errors import MigrationFlowRetry
 from .errors import MigrationSkew
+from .migrations import Migrator
 from .system_state import SystemState
 from .trace import Trace
-
-try:
-    from celery import Task
-except ImportError as exception:
-    raise ImportError("Celery not installed, if you plan to use Selinon with Celery install Celery "
-                      "using pip3 install selinon[celery]") from exception
 
 
 class Dispatcher(Task):

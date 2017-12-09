@@ -12,8 +12,8 @@ from selinon_test_case import SelinonTestCase
 from selinon.trace import Trace
 from selinon import run_flow
 from selinon.dispatcher import Dispatcher
-from selinonlib import Retry
-from selinonlib import UnknownFlowError
+from selinon import Retry
+from selinon import UnknownFlowError
 
 
 class TestOthers(SelinonTestCase):
