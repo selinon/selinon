@@ -129,6 +129,8 @@ class Command(object):
                             help='path to file where should be generated config.py placed')
         parser.add_argument('--keep-config-py', action='store_true', dest='keep_config_py',
                             help='do not remove config.py file after run')
+        parser.add_argument('--hide-progressbar', action='store_true', dest='hide_progressbar', default=False,
+                            help='hide progressbar during execution')
 
         parser.add_argument('--selective-task-names', action='store', dest='selective_task_names', type=str, nargs='+',
                             help='a list of tasks that should be run when run a selective flow')
@@ -319,27 +321,26 @@ class Command(object):
         if args.concurrency != 1:
             raise NotImplementedError("Concurrency is currently not implemented")
 
-        opts = {
-            'concurrency': args.concurrency,
-            'sleep_time': args.sleep_time,
-            'config_py': args.config_py,
-            'keep_config_py': args.keep_config_py,
-        }
+        executor = Executor(args.nodes_definition, args.flow_definitions,
+                            concurrency=args.concurrency, sleep_time=args.sleep_time,
+                            config_py=args.config_py, keep_config_py=args.keep_config_py,
+                            show_progressbar=not args.hide_progressbar)
 
         if args.selective_task_names:
-            opts['selective'] = {
-                'task_names': args.selective_task_names,
-                'follow_subflows': args.selective_follow_subflows,
-                'run_subsequent': args.selective_run_subsequent
-            }
+            executor.run_flow_selective(
+                args.flow_name,
+                args.selective_task_names,
+                node_args,
+                follow_subflows=args.selective_follow_subflows,
+                run_subsequent=args.selective_run_subsequent
+            )
         else:
             if args.selective_follow_subflows:
                 raise RequestError("Option --selective-follow-subflows requires --selective-task-names set")
             if args.selective_run_subsequent:
                 raise RequestError("Option --selective-run-subsequent requires --selective-task-names set")
 
-        executor = Executor(args.nodes_definition, args.flow_definitions, **opts)
-        executor.run(args.flow_name, node_args)
+            executor.run(args.flow_name, node_args)
 
         return 0
 
