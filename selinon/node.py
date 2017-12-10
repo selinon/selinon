@@ -6,16 +6,16 @@
 # ######################################################################
 """Abstract representation of nodes in task/flow dependencies - a node is either a task or a flow."""
 
-import abc
 import datetime
 import os
 import re
 
 from .errors import ConfigurationError
 from .global_config import GlobalConfig
+from .helpers import ABC
 
 
-class Node(metaclass=abc.ABCMeta):
+class Node(ABC):
     """An abstract class for node representation."""
 
     _NAME_RE = r"^[_a-zA-Z][_a-zA-Z0-9]*$"

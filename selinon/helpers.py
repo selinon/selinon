@@ -6,6 +6,7 @@
 # ######################################################################
 """Selinon library helpers."""
 
+import abc
 from contextlib import contextmanager
 import json
 import logging
@@ -16,6 +17,10 @@ import tempfile
 from .errors import RequestError
 
 _logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+
+# No need to add six as a dependency, should be compatible with Python2.7 and Python3.4+
+ABC = abc.ABCMeta('ABC', (object,), {'__slots__': ()})
 
 
 def dict2strkwargs(dict_):
