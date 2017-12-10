@@ -279,7 +279,7 @@ class TestPropagate(SelinonTestCase):
             'flow3': []
         }
         # Make sure propagate_finished is set to False as they are disjoint with propagate_compound_finished;
-        # this is checked in selinonlib
+        # this is checked in selinon
         self.init(edge_table, propagate_parent=dict.fromkeys(edge_table.keys(), True),
                   propagate_finished={'flow1': False},
                   propagate_compound_finished={'flow1': True})
@@ -384,7 +384,7 @@ class TestPropagate(SelinonTestCase):
             'flow4': []
         }
         # Make sure propagate_finished is negated propagate_compound_finished
-        # this is checked in selinonlib
+        # this is checked in selinon
         self.init(edge_table,
                   propagate_finished={'flow1': ['flow2']},
                   propagate_compound_finished={'flow1': ['flow3']})

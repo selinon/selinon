@@ -51,7 +51,7 @@ This function gets called by dispatcher in order to decide whether the desired t
 
 .. note::
 
-  Refer to `Selinonlib <https://selinonlib.readthedocs.io/>`_ for default selective run function definition.
+  Refer to :func:`selinon.routines.always_run` for default selective run function definition.
 
 The selective run function signature is:
 

@@ -34,8 +34,6 @@ If you are looking for a workflow solution, take a look at existing solutions, s
 
 Even if you do not plan to run Selinon in a distributed environment, you could still find Selinon useful. Selinon offers you a CLI executor that, based on your YAML configuration, executes tasks based on their dependencies and conditions.
 
-Take a look at `Selinonlib <https://github.com/selinon/selinonlib>`_ as well. Besides providing utilies for Selinon (such as prepared database and storage adapters) it also gives you a power to simulate, inspect, visualize or do high-level operations on your configuration and system implementation. Also all the pre-processing for task flows is done in Selinonlib.
-
 .. image:: _static/flow_example.png
   :align: center
 
@@ -64,15 +62,14 @@ How does it work? - a high level overview
 
 The key idea lies in Dispatcher - there is created a :obj:`Dispatcher <selinon.dispatcher>` task for each flow. Dispatcher takes care of starting new tasks and sub-flows, checking their results and scheduling new tasks based on your configuration. Dispatcher is transparently scheduled and periodically samples flow status and makes decissions what tasks and flows should be scheduled.
 
-The only thing that needs to be provided by you is a YAML configuration file that specifies dependencies of your tasks and where results of tasks should be stored (if you want persistence). This configuration file is parsed by `Selinonlib <https://github.com/selinon/selinonlib>`_ and automatically transformed to a Python3 code which is then used by Selinon.
+The only thing that needs to be provided by you is a YAML configuration file that specifies dependencies of your tasks and where results of tasks should be stored (if you want persistence). This configuration file is parsed by `Selinon <https://github.com/selinon/selinon>`_ and automatically transformed to a Python3 code which is then used by Selinon.
 
 See also
 ********
 
 * `Selinon on GitHub <https://github.com/selinon/selinon/>`_
-* `Selinonlib on GitHub <https://github.com/selinon/selinonlib>`_
-* `Selinonlib documentation <https://selinonlib.readthedocs.io/>`_
 * `Selinon organization with various repos on GitHub <https://github.com/selinon>`_
+* `Selinon demo on GitHub <https://github.com/selinon/demo>`_
 * `Celery configuration <http://docs.celeryproject.org/en/latest/userguide/configuration.html>`_
 
 Indices and tables

@@ -1,2 +1,2 @@
-selinonlib
+selinon
 jsonschema

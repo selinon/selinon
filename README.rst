@@ -110,7 +110,7 @@ Moreover, we conditionally buy a flower based on our condition. Our task
 is ``False``. Conditions are made of predicates and these predicates can
 be grouped as desired with logical operators. You can define your own
 predicates if you want (default are available in
-``selinonlib.predicates``). Everything that is bought is stored in
+``selinon.predicates``). Everything that is bought is stored in
 ``Basket`` storage transparently.
 
 Let's visualise our ``buyIngredientsFlow``:

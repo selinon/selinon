@@ -3,14 +3,14 @@
 Storage adapter implementation
 ------------------------------
 
-Currently, there are available prepared database adapters, see `Selinonlib <https://github.com/selinon/selinonlib>`_ module. In order to use these storages, you have to manually install database adapters using extras as they are not explicitly included by requirements.
+Currently, there are available prepared database adapters, see `Selinonlib <https://github.com/selinon/selinon>`_ module. In order to use these storages, you have to manually install database adapters using extras as they are not explicitly included by requirements.
 
 `SqlStorage` - SQLAlchemy adapter for SQL databases
 ===================================================
 
 .. code-block:: console
 
-  pip3 install selinonlib[postgresql]
+  pip3 install selinon[postgresql]
 
 A configuration example:
 
@@ -25,14 +25,14 @@ A configuration example:
         encoding: 'utf-8'
       echo: false
 
-The implementation is available in ``selinonlib.storages.sql_storage``, see `Selinonlib <https://selinonlib.readthedocs.io>`_ docs.
+The implementation is available in ``selinon.storages.sql_storage``, see `Selinonlib <https://selinon.readthedocs.io>`_ docs.
 
 `RedisStorage` - Redis database adapter
 =======================================
 
 .. code-block:: console
 
-  pip3 install selinonlib[redis]
+  pip3 install selinon[redis]
 
 A configuration example:
 
@@ -51,14 +51,14 @@ A configuration example:
         host: 'mongohost'
       port: 27017
 
-The implementation is available in ``selinonlib.storages.redis``, see `Selinonlib <https://selinonlib.readthedocs.io>`_ docs.
+The implementation is available in ``selinon.storages.redis``, see `Selinonlib <https://selinon.readthedocs.io>`_ docs.
 
 `MongoStorage` - MongoDB database adapter
 =========================================
 
 .. code-block:: console
 
-  pip3 install selinonlib[mongodb]
+  pip3 install selinon[mongodb]
 
 A configuration example:
 
@@ -74,7 +74,7 @@ A configuration example:
         host: 'mongohost'
       port: 27017
 
-The implementation is available in ``selinonlib.storages.mongo``, see `Selinonlib <https://selinonlib.readthedocs.io>`_ docs.
+The implementation is available in ``selinon.storages.mongo``, see `Selinonlib <https://selinon.readthedocs.io>`_ docs.
 
 
 `S3` - AWS S3 database adapter
@@ -82,7 +82,7 @@ The implementation is available in ``selinonlib.storages.mongo``, see `Selinonli
 
 .. code-block:: console
 
-      `pip3 install selinonlib[s3]`
+      `pip3 install selinon[s3]`
 
 A configuration example:
 
@@ -98,7 +98,7 @@ A configuration example:
         aws_secret_access_key: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'
         region_name: 'us-east-1'
 
-The implementation is available in ``selinonlib.storages.s3``, see `Selinonlib <https://selinonlib.readthedocs.io>`_ docs.
+The implementation is available in ``selinon.storages.s3``, see `Selinonlib <https://selinon.readthedocs.io>`_ docs.
 
 Few notes on using adapters
 ===========================
@@ -107,7 +107,7 @@ If you want to you multiple adapters, you can specify multiple adapters in extra
 
 .. code-block:: console
 
-  pip3 install selinonlib[mongodb,postgresql,s3]
+  pip3 install selinon[mongodb,postgresql,s3]
 
 Note that spaces are not allowed in extras (also escape brackets when using zsh).
 

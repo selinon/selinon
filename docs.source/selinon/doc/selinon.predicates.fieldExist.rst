@@ -1,7 +1,7 @@
-selinon.selinon_task_envelope module
+selinon.predicates.fieldExist module
 ====================================
 
-.. automodule:: selinon.selinon_task_envelope
+.. automodule:: selinon.predicates.fieldExist
     :members:
     :undoc-members:
     :show-inheritance:

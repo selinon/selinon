@@ -12,11 +12,10 @@ import os
 import runpy
 import tempfile
 
-from selinonlib import System
-from selinonlib import UnknownStorageError
-from selinonlib.errors import ConfigurationError
-
 from .errors import ConfigNotInitializedError
+from .errors import ConfigurationError
+from .errors import UnknownStorageError
+from .system import System
 from .trace import Trace
 
 
@@ -203,7 +202,7 @@ class Config(object):
         """
         # Avoid circular imports
         from .dispatcher import Dispatcher
-        from .selinon_task_envelope import SelinonTaskEnvelope
+        from .task_envelope import SelinonTaskEnvelope
 
         cls._logger.debug("Registering Selinon to Celery context")
 
@@ -371,7 +370,7 @@ class Config(object):
 
         start_edges = [(i, edge) for i, edge in enumerate(Config.edge_table[flow_name]) if len(edge['from']) == 0]
         if not start_edges:
-            # This should not occur since selinonlib raises exception if such occurs, but just to be sure...
+            # This should not occur since selinon raises exception if such occurs, but just to be sure...
             raise ConfigurationError("No starting node found for flow '%s'!" % flow_name)
 
         return start_edges

@@ -1,0 +1,11 @@
+---
+  flow-definitions:
+    - name: 'flow1'
+      queue: 'flow1_v0'
+      edges:
+        - from:
+          to: 'Task1'
+        - from: 'Task1'
+          to: 'Task2'
+        - from: 'Task2'
+          to: 'Task4'

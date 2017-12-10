@@ -8,10 +8,9 @@
 
 import logging
 
-from selinonlib import UnknownFlowError
-
 from .config import Config
 from .dispatcher import Dispatcher
+from .errors import UnknownFlowError
 from .selective import compute_selective_run
 
 _logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -43,7 +42,7 @@ def run_flow_selective(flow_name, task_names, node_args, follow_subflows=False, 
     :param follow_subflows: if True, subflows will be followed and checked for nodes to be run
     :param run_subsequent: trigger run of all tasks that depend on the desired task
     :return: dispatcher id that is scheduled to run desired selective task flow
-    :raises selinonlib.errors.SelectiveNoPathError: there was no way found to the desired task in the flow
+    :raises selinon.errors.SelectiveNoPathError: there was no way found to the desired task in the flow
     """
     selective = compute_selective_run(flow_name, task_names, follow_subflows, run_subsequent)
     queue = Config.dispatcher_queues[flow_name]

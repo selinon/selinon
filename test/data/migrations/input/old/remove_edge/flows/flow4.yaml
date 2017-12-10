@@ -1,0 +1,22 @@
+#
+#    |
+#  Task1
+#    |
+#  Task2
+#    |
+#  Task3
+#    |
+#  Task4
+#
+---
+  flow-definitions:
+    - name: flow4
+      edges:
+        - from:
+          to: Task1
+        - from: Task1
+          to: Task2
+        - from: Task2
+          to: Task3
+        - from: Task3
+          to: Task4

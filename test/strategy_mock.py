@@ -8,7 +8,7 @@
 
 def strategy_function(status):
     """
-    Strategy function for system state sampling - simplified version, more robust solutions tested in selinonlib
+    Strategy function for system state sampling - simplified version, more robust solutions tested in selinon
     """
     if len(status['active_nodes']) > 0 or len(status['new_started_nodes']) > 0:
         return 2

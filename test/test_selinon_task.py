@@ -8,10 +8,10 @@
 import pytest
 from flexmock import flexmock
 from selinon import SelinonTask
-from selinon.storage_pool import StoragePool
+from selinon import StoragePool
 from selinon_test_case import SelinonTestCase
-from selinonlib import NoParentNodeError
-from selinonlib import Retry
+from selinon import NoParentNodeError
+from selinon import Retry
 
 
 class _MyTask(SelinonTask):

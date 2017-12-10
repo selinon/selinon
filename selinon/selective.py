@@ -10,9 +10,8 @@ from collections import deque
 import copy
 from itertools import chain
 
-from selinonlib import SelectiveNoPathError
-
 from .config import Config
+from .errors import SelectiveNoPathError
 
 
 def _get_all_subflows_dict(flow_name):

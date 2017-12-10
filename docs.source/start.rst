@@ -55,15 +55,13 @@ The second flow is slightly more complex. We (always) start with `Task1`. `Task1
 
 Note that `Task2` and the whole `flow2` could be executed in parallel as there are no data nor time dependencies between these two nodes. Selinon runs as many nodes as possible in parallel. This makes it really easy to scale your system - the only bottleneck you can get is number of computational nodes in your cluster or limitations on storage/database side.
 
-Refer to `Selinonlib <http://selinonlib.readthedocs.io/>`_ for plotting flow graphs. The YAML configuration that was used to plot examples is shown bellow.
-
 Flow definitions
 ################
 
 Conditions
 **********
 
-Conditions are made of predicates that can be nested as desired using logical operators - `and`, `or` and `not`. There are predefined predicates available in `Selinonlib <https://selinonlib.readthedocs.io/>`_. However you can define your own predicates based on your requirements.
+Conditions are made of predicates that can be nested as desired using logical operators - `and`, `or` and `not`. There are predefined predicates available in :mod:`selinon.predicates`. However you can define your own predicates based on your requirements.
 
 These conditions are evaluated by dispatcher and if a condition is met, desired node or nodes are scheduled. If the condition is evaluated as false, destination nodes on the given edge are not run. Note that conditions are run only once only if all source nodes successfully finish.
 

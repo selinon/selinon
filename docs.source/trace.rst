@@ -83,8 +83,8 @@ If you would like to use `Sentry <https://sentry.io>`_ for monitoring, you can u
 
 You need to adjust the `Sentry DSN <https://docs.sentry.io/quickstart/#configure-the-dsn>`_ configuration so it points to correctly set up Sentry instance. You can browse `Selinon demo <https://github.com/selinon/demo>`_ to see Sentry integration in action.
 
-Also don't forget to install raven dependency explicitly so Sentry integration works:
+Also don't forget to install extras providing Sentry integration:
 
 .. code-block:: console
 
-  $ pip3 install raven
+  $ pip3 install selinon[sentry]
