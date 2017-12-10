@@ -20,10 +20,6 @@ def get_version():
     return version.split(' = ')[1][1:-2]
 
 
-if sys.version_info[0] != 3:
-    sys.exit("Python3 is required in order to install selinon")
-
-
 with open('README.rst', 'r') as f:
     long_description = f.read()
 
