@@ -28,3 +28,10 @@ from .trace import Trace
 from .utils import run_flow
 from .utils import run_flow_selective
 from .version import selinon_version
+
+__version__ = selinon_version
+__version_info__ = __version__.split('.')
+__title__ = 'selinon'
+__author__ = 'Fridolin Pokorny'
+__license__ = 'BSD License 2.0'
+__copyright__ = 'Copyright 2017 Fridolin Pokorny'
