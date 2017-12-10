@@ -56,23 +56,48 @@ class Executor(object):
     executor_queues = QueuePool()
     _logger = logging.getLogger(__name__)
 
-    def __init__(self, nodes_definition, flow_definitions, **opts):
+    DEFAULT_SLEEP_TIME = 1
+    DEFAULT_CONCURRENCY = 1
+
+    def __init__(self, nodes_definition, flow_definitions,
+                 concurrency=DEFAULT_CONCURRENCY, sleep_time=DEFAULT_SLEEP_TIME,
+                 config_py=None, keep_config_py=False, show_progressbar=True):
         """Instantiate execute.
 
         :param nodes_definition: path to nodes.yaml file
+        :type nodes_definition: str
         :param flow_definitions: a list of YAML files describing flows
-        :param opts: additional executor options, supported: concurrency, config_py path, sleep_time, keep_config_py
+        :type flow_definitions: list
+        :param concurrency: executor concurrency
+        :type concurrency: int
+        :param sleep_time: number of seconds to wait before querying queue
+        :type sleep_time: float
+        :param config_py: a path to file where Python code configuration should be generated
+        :type config_py: str
+        :param keep_config_py: if true, do not delete generated config.py
+        :type keep_config_py: bool
+        :param show_progressbar: show progressbar on executor run
+        :type show_progressbar: bool
         """
         Config.set_config_yaml(nodes_definition, flow_definitions,
-                               config_py=opts.pop('config_py', None),
-                               keep_config_py=opts.pop('keep_config_py', False))
+                               config_py=config_py,
+                               keep_config_py=keep_config_py)
 
-        self.concurrency = opts.pop('concurrency', 1)
-        self.sleep_time = opts.pop('sleep_time', 1)
-        self.selective = opts.pop('selective', None)
+        self.concurrency = concurrency
+        self.sleep_time = sleep_time
+        self.show_progressbar = show_progressbar
 
-        if opts:
-            raise UnknownError("Unknown options supplied: %s" % opts)
+        if concurrency != 1:
+            raise NotImplementedError("Concurrency is now unsupported")
+
+    @staticmethod
+    def _prepare():
+        """Prepare Selinon for executor run."""
+        # We need to assign a custom async result as we are not running Celery but our mocks instead
+        flexmock(SystemState, _get_async_result=SimulateAsyncResult)
+        # Overwrite used Celery functions so we do not rely on Celery logic at all
+        CeleryTask.apply_async = simulate_apply_async
+        CeleryTask.retry = simulate_retry
 
     def run(self, flow_name, node_args=None):
         """Run executor.
@@ -80,24 +105,33 @@ class Executor(object):
         :param flow_name: a flow name that should be run
         :param node_args: arguments for the flow
         """
-        # We need to assign a custom async result as we are not running Celery but our mocks instead
-        flexmock(SystemState, _get_async_result=SimulateAsyncResult)
-        # Overwrite used Celery functions so we do not rely on Celery logic at all
-        CeleryTask.apply_async = simulate_apply_async
-        CeleryTask.retry = simulate_retry
+        self._prepare()
+        run_flow(flow_name, node_args)
+        self._executor_run()
 
-        # Let's schedule the flow - our first starting task - task will be placed onto queue - see simulate_apply_async
-        if self.selective:
-            run_flow_selective(
-                flow_name,
-                self.selective['task_names'],
-                node_args,
-                self.selective['follow_subflows'],
-                self.selective['run_subsequent']
-            )
-        else:
-            run_flow(flow_name, node_args)
+    def run_flow_selective(self, flow_name, task_names, node_args=None, follow_subflows=False, run_subsequent=False):
+        """Run only desired tasks in a flow.
 
+        :param flow_name: name of the flow that should be run
+        :param task_names: name of the tasks that should be run
+        :param node_args: arguments that should be supplied to flow
+        :param follow_subflows: if True, subflows will be followed and checked for nodes to be run
+        :param run_subsequent: trigger run of all tasks that depend on the desired task
+        :return: dispatcher id that is scheduled to run desired selective task flow
+        :raises selinon.errors.SelectiveNoPathError: there was no way found to the desired task in the flow
+        """
+        self._prepare()
+        run_flow_selective(
+            flow_name,
+            task_names,
+            node_args,
+            follow_subflows,
+            run_subsequent
+        )
+        self._executor_run()
+
+    def _executor_run(self):
+        """Perform task execution based on published message on queue."""
         while not self.executor_queues.is_empty():
             # TODO: concurrency
             self._logger.debug("new executor run")
@@ -111,7 +145,7 @@ class Executor(object):
             Progress.sleep(wait_time=wait_time,
                            sleep_time=self.sleep_time,
                            info_text='Waiting for next task to process (%s seconds)... ' % round(wait_time, 3),
-                           show_progressbar=self.concurrency == 1)
+                           show_progressbar=self.show_progressbar and self.concurrency == 1)
             try:
                 kwargs = celery_kwargs.get('kwargs')
                 # remove additional metadata placed by Selinon when doing tracing
