@@ -14,7 +14,7 @@ except ImportError as exc:
 from selinon import DataStorage
 
 
-class MongoStorage(DataStorage):
+class MongoDB(DataStorage):
     """MongoDB database adapter."""
 
     def __init__(self, db_name, collection_name, host="localhost", port=27017):
@@ -25,7 +25,7 @@ class MongoStorage(DataStorage):
         :param host: MongoDB host
         :param port: MongoDB port
         """
-        super(MongoStorage, self).__init__()
+        super().__init__()
         self.client = None
         self.collection = None
         self.db = None  # pylint: disable=invalid-name

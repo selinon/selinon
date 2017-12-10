@@ -6,11 +6,11 @@ Submodules
 
 .. toctree::
 
-   selinon.storages.in_memory_storage
-   selinon.storages.mongo
+   selinon.storages.memory
+   selinon.storages.mongodb
+   selinon.storages.postgresql
    selinon.storages.redis
    selinon.storages.s3
-   selinon.storages.sql_storage
 
 Module contents
 ---------------
