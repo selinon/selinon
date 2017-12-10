@@ -41,7 +41,7 @@ class Result(_Base):
         self.node_args = node_args
 
 
-class SqlStorage(DataStorage):
+class PostgreSQL(DataStorage):
     """Selinon SQL Database adapter - PostgreSQL."""
 
     def __init__(self, connection_string, encoding='utf-8', echo=False):
@@ -51,7 +51,7 @@ class SqlStorage(DataStorage):
         :param encoding:
         :param echo:
         """
-        super(SqlStorage, self).__init__()
+        super().__init__()
 
         self.engine = create_engine(connection_string, encoding=encoding, echo=echo)
         self.session = None

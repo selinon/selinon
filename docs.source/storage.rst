@@ -18,16 +18,16 @@ A configuration example:
 
   storages:
     - name: 'MySqlStorage'
-      classname: 'SqlStorage'
-      import: 'selinon.storage.sql_storage'
+      classname: 'PostgreSQL'
+      import: 'selinon.storage.postgresql'
       configuration:
         connection_string: 'postgres://postgres:postgres@postgres:5432/postgres'
         encoding: 'utf-8'
       echo: false
 
-The implementation is available in ``selinon.storages.sql_storage``, see `Selinonlib <https://selinon.readthedocs.io>`_ docs.
+The implementation is available in :mod:`selinon.storages.postgresql`.
 
-`RedisStorage` - Redis database adapter
+`Redis` - Redis database adapter
 =======================================
 
 .. code-block:: console
@@ -40,7 +40,7 @@ A configuration example:
 
   storages:
     - name: 'MyRedisStorage'
-      classname: 'RedisStorage'
+      classname: 'Redis'
       import: 'selinon.storage.redis'
       configuration:
         host: 'redishost'
@@ -51,9 +51,9 @@ A configuration example:
         host: 'mongohost'
       port: 27017
 
-The implementation is available in ``selinon.storages.redis``, see `Selinonlib <https://selinon.readthedocs.io>`_ docs.
+The implementation is available in :mod:`selinon.storages.redis`.
 
-`MongoStorage` - MongoDB database adapter
+`MongoDB` - MongoDB database adapter
 =========================================
 
 .. code-block:: console
@@ -66,15 +66,15 @@ A configuration example:
 
   storages:
     - name: 'MyMongoStorage'
-      classname: 'MongoStorage'
-      import: 'selinon.storage.mongo'
+      classname: 'MongoDB'
+      import: 'selinon.storage.mongodb'
       configuration:
         db_name: 'database_name'
         collection_name: 'collection_name'
         host: 'mongohost'
       port: 27017
 
-The implementation is available in ``selinon.storages.mongo``, see `Selinonlib <https://selinon.readthedocs.io>`_ docs.
+The implementation is available in :mod:`selinon.storages.mongodb`.
 
 
 `S3` - AWS S3 database adapter
@@ -98,7 +98,25 @@ A configuration example:
         aws_secret_access_key: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'
         region_name: 'us-east-1'
 
-The implementation is available in ``selinon.storages.s3``, see `Selinonlib <https://selinon.readthedocs.io>`_ docs.
+The implementation is available in :mod:`selinon.storages.s3`.
+
+In memory storage
+=================
+
+A configuration example:
+
+.. code-block:: yaml
+
+  storages:
+    - name: 'Memory'
+      classname: 'InMemoryStorage'
+      import: 'selinon.storage.memory'
+      configuration:
+        echo: false
+
+No additional requirements are necessary to be installed. This storage adapter stores results in memory. It is suitable for use with Selinon CLI and executor where you just want to run a flow and check results. As results are stored in memory, it is not possible to scale number of workers in many cases as results are stored in memory of a node.
+
+The implementation is available in :mod:`selinon.storages.memory`.
 
 Few notes on using adapters
 ===========================

@@ -17,7 +17,7 @@ except ImportError as exc:
                       "in order to use RedisStorage") from exc
 
 
-class RedisStorage(DataStorage):  # pylint: disable=too-many-instance-attributes
+class Redis(DataStorage):  # pylint: disable=too-many-instance-attributes
     """Selinon adapter for Redis database."""
 
     def __init__(self, host="localhost", port=6379, db=0, password=None, socket_timeout=None, connection_pool=None,
