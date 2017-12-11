@@ -397,22 +397,30 @@ class Migrator:
             return state, False
 
         waiting_edges = state.get('waiting_edges', [])
-        if not waiting_edges:
-            # Flow not run yet, no waiting edges
+        triggered_edges = state.get('triggered_edges', [])
+
+        if not waiting_edges and not triggered_edges:
             return state, False
 
         tainted_flow_strategy = TaintedFlowStrategy.get_option_by_name(migration_spec['tainted_flow_strategy'])
         tainted = False
-        for idx, waiting_edge in enumerate(waiting_edges):
-            if str(waiting_edge) in flow_migration['tainted_edges'].keys():
+        for idx, triggered_edge in enumerate(triggered_edges):
+            if str(triggered_edge) in flow_migration['tainted_edges'].keys():
                 tainted = True
-                raise_on_tainted_state(tainted_edge=flow_migration['tainted_edges'][str(waiting_edge)])
+                raise_on_tainted_state(tainted_edge=flow_migration['tainted_edges'][str(triggered_edge)])
 
+            # Make sure we track triggered edges with their new transcription based on migration
+            if str(triggered_edge) in flow_migration['translation']:
+                state['triggered_edge'][idx] = flow_migration['translation'][str(triggered_edge)]
+
+        # Transcript also waiting edges so they are triggered correctly based on new configuration
+        for idx, waiting_edge in enumerate(waiting_edges):
             if str(waiting_edge) in flow_migration['translation']:
                 state['waiting_edges'][idx] = flow_migration['translation'][str(waiting_edge)]
 
         # Remove edges that should be discarded (mapped to None)
         state['waiting_edges'] = list(edge for edge in state['waiting_edges'] if edge is not None)
+        state['triggered_edges'] = list(edge for edge in state['triggered_edges'] if edge is not None)
 
         finished_and_active_nodes = set(node_name for node_name in state['finished_nodes'].keys())
         for tainting_nodes in flow_migration['tainting_nodes'].values():

@@ -22,6 +22,9 @@ def state_dict(**state_kwargs):
         if 'waiting_edges' not in state_kwargs:
             state_kwargs['waiting_edges'] = []
 
+        if 'triggered_edges' not in state_kwargs:
+            state_kwargs['triggered_edges'] = []
+
         if 'active_nodes' not in state_kwargs:
             state_kwargs['active_nodes'] = []
 
@@ -31,7 +34,13 @@ def state_dict(**state_kwargs):
         if 'failed_nodes' not in state_kwargs:
             state_kwargs['failed_nodes'] = {}
 
-        unknown = set(state_kwargs.keys()) ^ {'active_nodes', 'finished_nodes', 'waiting_edges', 'failed_nodes'}
+        unknown = set(state_kwargs.keys()) ^ {
+            'active_nodes',
+            'finished_nodes',
+            'waiting_edges',
+            'failed_nodes',
+            'triggered_edges'
+        }
         if unknown:
             raise ValueError("Unknown state dictionary configuration provided: %s" % unknown)
 
@@ -105,7 +114,7 @@ class TestPerformMigration(SelinonTestCase):
         assert new_migration_version == 0
         assert tainted is False
 
-    @migrate_message_test('flow1', 0, state_dict(waiting_edges=[1],
+    @migrate_message_test('flow1', 0, state_dict(waiting_edges=[1], triggered_edges=[0],
                                                  active_nodes=[{"name": "Task1", "id": "id1"}]))
     def test_one_migration(self, original_state, migrated_state, new_migration_version, tainted):
         """Test one single migration from version 0 to version 1."""
@@ -113,7 +122,7 @@ class TestPerformMigration(SelinonTestCase):
         assert migrated_state.pop('waiting_edges') == [2]
         assert migrated_state == original_state
         assert new_migration_version == 1
-        assert tainted is True
+        assert tainted is False
 
     @migrate_message_test('flow1', None, None)
     def test_start_latest_migration(self, original_state, migrated_state, new_migration_version, tainted):

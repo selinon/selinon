@@ -80,12 +80,19 @@ class TestDispatcher(SelinonTestCase):
             assert countdown == 2
             assert queue == 'queue_flow1'
             state = kwargs.pop('state')
-            assert set(state.keys()) == {'active_nodes', 'failed_nodes', 'finished_nodes', 'waiting_edges'}
+            assert set(state.keys()) == {
+                'active_nodes',
+                'failed_nodes',
+                'finished_nodes',
+                'waiting_edges',
+                'triggered_edges'
+            }
             assert len(state['active_nodes']) == 1
             assert set(state['active_nodes'][0].keys()) == {'id', 'name'}
             assert not state['failed_nodes']
             assert not state['finished_nodes']
             assert not state['waiting_edges']
+            assert len(state['triggered_edges']) == 1
             assert kwargs == {
                 'flow_name': 'flow1',
                 'migration_version': 0,
