@@ -158,6 +158,7 @@ class SystemState:  # pylint: disable=too-many-instance-attributes
         self._finished_nodes = state_dict.get('finished_nodes', {})
         self._failed_nodes = state_dict.get('failed_nodes', {})
         self._waiting_edges_idx = state_dict.get('waiting_edges', [])
+        self._triggered_edges_idx = set(state_dict.get('triggered_edges', {}))
         # Instantiate lazily later if we will know that there is something to process
         self._waiting_edges = []
         self._retry = retry
@@ -177,7 +178,9 @@ class SystemState:  # pylint: disable=too-many-instance-attributes
             'active_nodes': self._deinstantiate_active_nodes(self._active_nodes),
             'finished_nodes': self._finished_nodes,
             'failed_nodes': self._failed_nodes,
-            'waiting_edges': self._waiting_edges_idx
+            'waiting_edges': self._waiting_edges_idx,
+            # Convert to a list due to JSON serialization
+            'triggered_edges': list(self._triggered_edges_idx)
         }
 
     @property
@@ -732,6 +735,7 @@ class SystemState:  # pylint: disable=too-many-instance-attributes
                         records, reused = self._fire_edge(i, edge, storage_pool,
                                                           parent=parent, node_args=self._node_args)
                         new_started_nodes.extend(records)
+                        self._triggered_edges_idx.add(i)
                         selective_reuse.extend(reused)
                     else:
                         Trace.log(Trace.EDGE_COND_FALSE, {
@@ -771,7 +775,7 @@ class SystemState:  # pylint: disable=too-many-instance-attributes
             if start_edge['condition'](storage_pool, self._node_args):
                 records, reused = self._fire_edge(i, start_edge, storage_pool,
                                                   node_args=self._node_args, parent=self._parent)
-
+                self._triggered_edges_idx.add(i)
                 new_started_nodes.extend(records)
                 selective_reuse.extend(reused)
             else:
