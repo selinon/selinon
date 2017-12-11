@@ -195,6 +195,11 @@ class Config(object):
         Trace.trace_by_sentry(dsn)
 
     @classmethod
+    def trace_by_json(cls):
+        """Trace directly JSON output."""
+        Trace.trace_by_json()
+
+    @classmethod
     def set_celery_app(cls, celery_app):
         """Set celery application that should be used.
 

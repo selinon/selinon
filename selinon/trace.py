@@ -192,6 +192,7 @@ import functools
 import json
 import logging
 import platform
+import sys
 
 
 class Trace(object):
@@ -338,6 +339,11 @@ class Trace(object):
         cls._trace_functions.append(cls.logging_trace_func)
 
     @classmethod
+    def trace_by_json(cls):
+        """Trace by writing directly JSON trace points."""
+        cls._trace_functions.append(cls.json_trace_func)
+
+    @classmethod
     def trace_by_sentry(cls, dsn=None):
         """Trace using Sentry (see https://sentry.io).
 
@@ -411,6 +417,25 @@ class Trace(object):
             logger.warning(message)
         else:
             logger.info(message)
+
+    @classmethod
+    def json_trace_func(cls, event, msg_dict):
+        """Trace by directly printing JSONs to stdout or stderr.
+
+        :param event: event that triggered trace point
+        :param msg_dict: a dict holding additional trace information for event
+        """
+        report_dict = {
+            'event': cls.event2str(event),
+            'time': str(datetime.datetime.utcnow()),
+            'details': msg_dict,
+            'node': platform.node()
+        }
+        # We could use simplejson here so this will be faster
+        if event in cls.WARN_EVENTS:
+            print(json.dumps(report_dict, sort_keys=True), file=sys.stderr)
+        else:
+            print(json.dumps(report_dict, sort_keys=True))
 
     @classmethod
     def sentry_trace_func(cls, raven_client, event, msg_dict):

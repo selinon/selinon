@@ -763,6 +763,10 @@ Keep track of actions that are done in flow. See :ref:`trace` for more info with
         * ``name`` - name of storage to be used
         * ``method`` - name of method to call on storage adapter instance
 
+      * ``json`` - trace directly to a JSON
+
+        * not parameterizable - accepts only a boolean - e.g. ``json: true`` to turn JSON tracing on, all tracepoints are one-liners so they are consumable to ELK (Elastic Seach+Logstash+Kibana) of (Elastic Search+Fluentd+Kibana) stack for later log inspection
+
   * **Required:** false
 
   * **Default:** do not trace flow actions

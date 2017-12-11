@@ -26,6 +26,7 @@ class GlobalConfig(object):
     _trace_function = []
     _trace_storage = []
     _trace_sentry = []
+    _trace_json = None
 
     def __init__(self):
         """Placeholder."""
@@ -55,6 +56,9 @@ class GlobalConfig(object):
         for entry in cls._trace_sentry:
             output.write("%s%s.trace_by_sentry(dsn=%s)\n"
                          % (indent, config_name, "'%s'" % entry if entry is not True else None))
+
+        if cls._trace_json is True:
+            output.write("%s%s.trace_by_json()\n" % (indent, config_name))
 
     @classmethod
     def _parse_trace_storage(cls, trace_def, system):
@@ -129,6 +133,20 @@ class GlobalConfig(object):
         cls._trace_sentry.append(trace_def.get('dsn', True))
 
     @classmethod
+    def _parse_trace_json(cls, trace_def):
+        """Parse tracing directly to JSON.
+
+        :param trace_def: definition of tracing as supplied in the YAML file
+        """
+        if not isinstance(trace_def, bool):
+            raise ConfigurationError("Configuration of JSON tracing expects bool, got '%s' instead (type: %s)"
+                                     % (trace_def, type(trace_def)))
+        if cls._trace_json is not None:
+            raise ConfigurationError("Configuration of JSON tracing supplied multiple times")
+
+        cls._trace_json = trace_def
+
+    @classmethod
     def _parse_trace(cls, system, trace_record):
         """Parse trace configuration entry.
 
@@ -156,6 +174,9 @@ class GlobalConfig(object):
 
             if 'sentry' in entry:
                 cls._parse_trace_sentry(entry['sentry'])
+
+            if 'json' in entry:
+                cls._parse_trace_json(entry['json'])
 
     @classmethod
     def from_dict(cls, system, dict_):
