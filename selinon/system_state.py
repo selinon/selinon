@@ -387,7 +387,7 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
         :param node_args: node arguments
         :return: list of nodes that were scheduled
         """
-        # pylint: disable=too-many-arguments,too-many-branches
+        # pylint: disable=too-many-arguments,too-many-branches,too-many-locals
         started = []
         selective_reuse = []
         trace_msg = {
