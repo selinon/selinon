@@ -151,7 +151,7 @@ class Dispatcher(Task):
 
     def run(self, flow_name, node_args=None, parent=None, retried_count=None, retry=None,
             state=None, selective=False, migration_version=None):
-        # pylint: disable=too-many-arguments,arguments-differ
+        # pylint: disable=too-many-arguments,arguments-differ,too-many-locals
         """Dispatcher entry-point - run each time a dispatcher is scheduled.
 
         :param flow_name: name of the flow
@@ -216,12 +216,12 @@ class Dispatcher(Task):
             }
             Trace.log(Trace.DISPATCHER_RETRY, flow_info, kwargs)
             raise self.retry(args=[], kwargs=kwargs, countdown=retry, queue=Config.dispatcher_queues[flow_name])
-        else:
-            Trace.log(Trace.FLOW_END, flow_info, state=state_dict)
-            return {
-                'finished_nodes': state_dict['finished_nodes'],
-                # This is always {} since we have finished, but leave it here because of failure tracking.
-                'failed_nodes': state_dict['failed_nodes'],
-                # Always an empty array.
-                'active_nodes': state_dict.get('active_nodes', [])
-            }
+
+        Trace.log(Trace.FLOW_END, flow_info, state=state_dict)
+        return {
+            'finished_nodes': state_dict['finished_nodes'],
+            # This is always {} since we have finished, but leave it here because of failure tracking.
+            'failed_nodes': state_dict['failed_nodes'],
+            # Always an empty array.
+            'active_nodes': state_dict.get('active_nodes', [])
+        }
