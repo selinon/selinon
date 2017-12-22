@@ -9,36 +9,14 @@
 from selinon import DataStorage
 
 try:
-    from sqlalchemy import (create_engine, Column, Integer, Sequence, String)
-    from sqlalchemy.dialects.postgresql import JSONB
-    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
-    from sqlalchemy_utils import create_database, database_exists
+    from sqlalchemy_utils import create_database
+    from sqlalchemy_utils import database_exists
 except ImportError as exc:
     raise ImportError("Please install dependencies using `pip3 install selinon[postgresql]`") from exc
 
-_Base = declarative_base()  # pylint: disable=invalid-name
-
-
-class Result(_Base):
-    """Record for a task result."""
-
-    __tablename__ = 'result'
-
-    id = Column(Integer, Sequence('result_id'), primary_key=True)  # pylint: disable=invalid-name
-    flow_name = Column(String(128))
-    task_name = Column(String(128))
-    task_id = Column(String(255), unique=True)
-    # We are using JSONB for postgres, if you want to use other database, change column type
-    result = Column(JSONB)
-    node_args = Column(JSONB)
-
-    def __init__(self, node_args, flow_name, task_name, task_id, result):  # noqa
-        self.flow_name = flow_name
-        self.task_name = task_name
-        self.task_id = task_id
-        self.result = result
-        self.node_args = node_args
+from .models import Result
 
 
 class PostgreSQL(DataStorage):
@@ -64,7 +42,7 @@ class PostgreSQL(DataStorage):
             create_database(self.engine.url)
 
         self.session = sessionmaker(bind=self.engine)()
-        _Base.metadata.create_all(self.engine)
+        Result.metadata.create_all(self.engine)
 
     def disconnect(self):  # noqa
         if self.is_connected():
