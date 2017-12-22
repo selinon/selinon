@@ -6,7 +6,6 @@
 # ######################################################################
 """Built-in predicates used as core building blocks to build predicates."""
 
-import abc
 import ast
 from functools import reduce
 
@@ -14,13 +13,11 @@ from .errors import ConfigurationError
 from .predicate import Predicate
 
 
-class BuiltinPredicate(Predicate, metaclass=abc.ABCMeta):  # pylint: disable=abstract-method
+class BuiltinPredicate(Predicate):  # pylint: disable=abstract-method
     """Build in predicate abstract class."""
 
-    pass
 
-
-class NaryPredicate(BuiltinPredicate, metaclass=abc.ABCMeta):  # pylint: disable=abstract-method
+class NaryPredicate(BuiltinPredicate):  # pylint: disable=abstract-method
     """N-ary predicate abstract class."""
 
     def __init__(self, children):
@@ -98,7 +95,7 @@ class NaryPredicate(BuiltinPredicate, metaclass=abc.ABCMeta):  # pylint: disable
         return any(child.requires_message() for child in self._children)
 
 
-class UnaryPredicate(BuiltinPredicate, metaclass=abc.ABCMeta):  # pylint: disable=abstract-method
+class UnaryPredicate(BuiltinPredicate):  # pylint: disable=abstract-method
     """Unary predicate abstract class."""
 
     def __init__(self, child):

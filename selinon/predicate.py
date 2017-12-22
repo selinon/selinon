@@ -11,11 +11,12 @@ import abc
 import codegen
 
 from .errors import ConfigurationError
+from .helpers import ABC
 from .helpers import check_conf_keys
 from .helpers import dict2json
 
 
-class Predicate(metaclass=abc.ABCMeta):
+class Predicate(ABC):
     """An abstract predicate representation."""
 
     @abc.abstractmethod

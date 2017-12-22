@@ -8,8 +8,10 @@
 
 import abc
 
+from .helpers import ABC
 
-class Cache(metaclass=abc.ABCMeta):
+
+class Cache(ABC):
     """Base class for Cache classes."""
 
     @abc.abstractmethod

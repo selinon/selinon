@@ -13,10 +13,11 @@ from .celery import AsyncResult
 from .errors import NoParentNodeError
 from .errors import RequestError
 from .errors import Retry
+from .helpers import ABC
 from .storage_pool import StoragePool
 
 
-class SelinonTask(metaclass=abc.ABCMeta):
+class SelinonTask(ABC):
     """Base class for user-defined tasks."""
 
     def __init__(self, flow_name, task_name, parent, task_id, dispatcher_id):

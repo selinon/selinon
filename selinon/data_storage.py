@@ -8,8 +8,10 @@
 
 import abc
 
+from .helpers import ABC
 
-class DataStorage(object, metaclass=abc.ABCMeta):
+
+class DataStorage(ABC):
     """Abstract Selinon storage adapter that is implemented by a user."""
 
     @abc.abstractmethod
