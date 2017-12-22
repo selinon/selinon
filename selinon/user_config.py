@@ -43,7 +43,11 @@ def style_configuration(style_name):
             style_value = getattr(config_instance, property_name)
 
             if not style_value:
-                style_value = getattr(config_instance, 'DEFAULT_' + func.__name__.upper())
+                style_value = {}
+                # Apply the default style first
+                default_style_value = getattr(config_instance, 'DEFAULT_' + func.__name__.upper())
+                style_value.update(default_style_value)
+                # Overwrite styles based on user's configuration
                 # Style name could be directly determined from function name, but leave it this way for the
                 # sake of readability
                 config_style_value = (config_instance.raw_config.get('style') or {}).get(style_name, {})
