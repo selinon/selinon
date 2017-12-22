@@ -18,10 +18,15 @@ devenv:
 	@echo "Installing latest development requirements"
 	pip3 install -U -r dev_requirements.txt
 
-.PHONY: venv
 venv:
-	virtualenv -p python3 venv && source venv/bin/activate && pip3 install -r requirements.txt
+	virtualenv -p python3 venv && . venv/bin/activate && pip3 install -r requirements.txt
 	@echo "Run 'source venv/bin/activate' to enter virtual environment and 'deactivate' to return from it"
+
+coala-venv:
+	@echo ">>> Preparing virtual environment for coala"
+	@# We need to run coala in a virtual env due to dependency issues
+	virtualenv -p python3 venv-coala
+	. venv-coala/bin/activate && pip3 install -r coala_requirements.txt
 
 .PHONY: clean
 clean:
@@ -42,13 +47,9 @@ pylint:
 	pylint selinon selinon-cli
 
 .PHONY: coala
-coala:
-	@# We need to run coala in a virtual env due to dependency issues
-	@echo ">>> Preparing virtual environment for coala" &&\
-	  # setuptools is pinned due to dependency conflict &&\
-	  [ -d venv-coala ] || virtualenv -p python3 venv-coala && . venv-coala/bin/activate && pip3 install coala-bears "setuptools>=17.0" &&\
-	  echo ">>> Running coala" &&\
-	  venv-coala/bin/python3 venv-coala/bin/coala --non-interactive
+coala: coala-venv
+	@echo ">>> Running coala"
+	venv-coala/bin/python3 venv-coala/bin/coala --non-interactive
 
 .PHONY: pydocstyle
 pydocstyle:
