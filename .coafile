@@ -1,4 +1,16 @@
-[Default]
-bears = PEP8Bear,BanditBear,PyImportSortBear
+[python]
 files = selinon/*.py
+bears = PEP8Bear,BanditBear,PyImportSortBear
+language = Python
 max_line_length = 121
+
+[Makefiles]
+bears = LineLengthBear
+files = Makefile
+max_line_length = 121
+
+[commit]
+bears = GitCommitBear
+shortlog_trailing_period = False
+shortlog_regex = ([^:]*|[^:]+[^ ]: [A-Z0-9*].*)
+
