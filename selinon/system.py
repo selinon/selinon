@@ -11,9 +11,8 @@ import logging
 import os
 import platform
 
-import yaml
-
 import graphviz
+import yaml
 
 from .errors import ConfigurationError
 from .flow import Flow
