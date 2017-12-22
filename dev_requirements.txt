@@ -5,7 +5,7 @@ pytest-cov
 pydocstyle
 pylint
 #coala-bears
-# Storage implementations requirements
+# Optional requirements from extras
 pymongo
 SQLAlchemy
 SQLAlchemy-Utils
