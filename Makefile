@@ -49,7 +49,7 @@ pylint:
 .PHONY: coala
 coala: coala-venv
 	@echo ">>> Running coala"
-	venv-coala/bin/python3 venv-coala/bin/coala --non-interactive
+	. venv-coala/bin/activate && coala --non-interactive
 
 .PHONY: pydocstyle
 pydocstyle:
