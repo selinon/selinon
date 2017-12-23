@@ -13,4 +13,5 @@ max_line_length = 121
 bears = GitCommitBear
 shortlog_trailing_period = False
 shortlog_regex = ([^:]*|[^:]+[^ ]: [A-Z0-9*].*)
+shortlog_length = 95
 
