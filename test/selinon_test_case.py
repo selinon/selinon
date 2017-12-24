@@ -61,7 +61,7 @@ class SelinonTestCase(object):
     Main class for Selinon testing
     """
     # dir for data files for tests
-    DATA_DIR = os.path.join('test', 'data')
+    DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
     def setup_method(self, method):
         """Clean up all class attributes from previous runs."""
@@ -75,6 +75,7 @@ class SelinonTestCase(object):
     def teardown_method(self, method):
         """Clean up resources and configuration after a test."""
         Config.initialized = False
+        Config.migration_dir = None
 
     def init(self, edge_table, **kwargs):
         """

@@ -107,7 +107,8 @@ def _expand_flow_definitions(ctx, _, paths):  # pylint: disable=unused-argument
               help="Suppress colorized logging output.")
 def cli(ctx=None, verbose=0, no_color=True):
     """Selinon command line interface."""
-    ctx.auto_envvar_prefix = 'SELINON'
+    if ctx:
+        ctx.auto_envvar_prefix = 'SELINON'
     _setup_logging(verbose, no_color)
 
 
@@ -207,7 +208,7 @@ def execute(nodes_definition, flow_definitions, flow_name,
                    "directory containing YAML files.")
 @click.option('--no-meta', is_flag=True,
               help="Do not add metadata information to generated migration files.")
-@click.option('m', '--migration-dir', type=click.Path(exists=True, writable=True, file_okay=False),
+@click.option('-m', '--migration-dir', type=click.Path(exists=True, writable=True, file_okay=False),
               help="Path to a directory containing generated migrations, overrides migration dir specified in "
                    "the nodes definition file.")
 @click.option('-g', '--git', 'use_git', is_flag=True,
