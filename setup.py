@@ -21,7 +21,7 @@ def get_version():
 
 
 if sys.version_info[0] != 3:
-    sys.exit("Python3 is required in order to install selinon")
+    sys.exit("Python3 is required in order to install Selinon")
 
 
 with open('README.rst', 'r') as f:
@@ -31,7 +31,9 @@ with open('README.rst', 'r') as f:
 setup(
     name=NAME,
     version=get_version(),
-    scripts=['selinon-cli'],
+    entry_points={
+        'console_scripts': ['selinon-cli=selinon.cli:cli']
+    },
     packages=find_packages(),
     install_requires=get_requirements(),
     author='Fridolin Pokorny',

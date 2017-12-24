@@ -44,7 +44,7 @@ pytest:
 .PHONY: pylint
 pylint:
 	@echo ">>> Running pylint"
-	pylint selinon selinon-cli
+	pylint selinon
 
 .PHONY: coala
 coala: coala-venv
