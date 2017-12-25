@@ -1111,8 +1111,8 @@ class System(object):
                 error_message += ", in file %r" % flow_definition_file_name
             return error_message
 
-        if not isinstance(flow_definitions, list):
-            flow_definitions = [flow_definitions]
+        if not isinstance(flow_definitions, (list, tuple)):
+            flow_definitions = (flow_definitions,)
 
         for content in flow_definitions:
             flow_definitions = content.get('flow-definitions')
@@ -1158,8 +1158,8 @@ class System(object):
 
             cls._setup_nodes(system, nodes_definition, nodes_definition_file)
 
-        if not isinstance(flow_definition_files, list):
-            flow_definition_files = [flow_definition_files]
+        if isinstance(flow_definition_files, str):
+            flow_definition_files = (flow_definition_files,)
 
         for flow_file in flow_definition_files:
             with open(flow_file, 'r') as flow_definition:

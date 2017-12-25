@@ -4,6 +4,7 @@ pytest-timeout
 pytest-cov
 pydocstyle
 pylint
+flexmock
 #coala-bears
 # Optional requirements from extras
 pymongo

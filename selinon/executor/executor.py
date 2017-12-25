@@ -33,7 +33,6 @@ from datetime import timedelta
 import logging
 import traceback
 
-from flexmock import flexmock
 from selinon.celery import Task as CeleryTask
 from selinon import Config
 from selinon import run_flow
@@ -94,7 +93,7 @@ class Executor(object):
     def _prepare():
         """Prepare Selinon for executor run."""
         # We need to assign a custom async result as we are not running Celery but our mocks instead
-        flexmock(SystemState, _get_async_result=SimulateAsyncResult)
+        SystemState._get_async_result = SimulateAsyncResult  # pylint: disable=protected-access
         # Overwrite used Celery functions so we do not rely on Celery logic at all
         CeleryTask.apply_async = simulate_apply_async
         CeleryTask.retry = simulate_retry

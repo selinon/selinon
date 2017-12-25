@@ -17,7 +17,7 @@ from selinon import DataStorage
 class MongoDB(DataStorage):
     """MongoDB database adapter."""
 
-    def __init__(self, db_name, collection_name, host="localhost", port=27017):
+    def __init__(self, db_name, collection_name, host=None, port=27017):
         """Instantiate MongoDB storage adapter.
 
         :param db_name: MongoDB database name
@@ -29,7 +29,7 @@ class MongoDB(DataStorage):
         self.client = None
         self.collection = None
         self.db = None  # pylint: disable=invalid-name
-        self.host = host
+        self.host = host or 'localhost'
         self.port = port
         self.db_name = db_name
         self.collection_name = collection_name

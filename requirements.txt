@@ -1,7 +1,6 @@
-jsonschema
-argcomplete
-graphviz
+click
 codegen
+graphviz
+jsonschema
 pyyaml
-flexmock
 rainbow_logging_handler
