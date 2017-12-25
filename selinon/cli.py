@@ -175,7 +175,7 @@ def execute(nodes_definition, flow_definitions, flow_name,
     if selective_task_names:
         executor.run_flow_selective(
             flow_name,
-            selective_task_names,
+            selective_task_names.split(','),
             node_args,
             follow_subflows=selective_follow_subflows,
             run_subsequent=selective_run_subsequent
