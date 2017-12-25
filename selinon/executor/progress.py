@@ -47,6 +47,9 @@ class Progress(object):
         :param show_progressbar: if True, there is shown a simple ASCII art spinning
         :param info_text: text that is printed on the line (progressbar follows)
         """
-        total_wait_time = ceil(wait_time / sleep_time)
-        for _ in cls.indicate(range(total_wait_time), show_progressbar, info_text=info_text,):
-            sleep(sleep_time)
+        if sleep_time > 0:
+            total_wait_time = int(ceil(wait_time / sleep_time))
+            for _ in cls.indicate(range(total_wait_time), show_progressbar, info_text=info_text,):
+                sleep(sleep_time)
+        elif wait_time > 0:
+            sleep(wait_time)
