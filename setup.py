@@ -48,7 +48,7 @@ setup(
     extras_require={
         'celery': ['celery>=4'],
         'mongodb': ['pymongo'],
-        'postgresql': ['SQLAlchemy' 'SQLAlchemy-Utils'],
+        'postgresql': ['SQLAlchemy', 'SQLAlchemy-Utils'],
         'redis': ['redis'],
         's3': ['boto3'],
         'sentry': ['raven']
