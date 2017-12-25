@@ -20,7 +20,7 @@ Now let's assume that you want to run only `Task2`. The only thing you need to d
 
    run_flow_selective('selective_flow1', ['Task2'], node_args={'foo': 'bar'})
 
-Refer to :func:`run_flow_selective() <selinon.utils.run_flow_selective>` for more information about this function.
+Refer to :func:`run_flow_selective() <selinon.run.run_flow_selective>` for more information about this function.
 
 Selinon will now by default run only `Task1` and `Task2` as that is the computed path to `Task2` (avoiding `Task3` run). Running task `Task1` is also optional - results could be reused from previous runs as well - see selective run function that is discussed in the following sections.
 

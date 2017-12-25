@@ -82,7 +82,7 @@ Flows can be nested as desired. The only limitation is that you cannot now inspe
 Running a flow
 **************
 
-Once you set up Selinon and Selinon does not report any errors in your configuration files, you can run flow simply by calling the ``run_flow`` function (see documentation of :func:`run_flow() <selinon.utils.run_flow>`):
+Once you set up Selinon and Selinon does not report any errors in your configuration files, you can run flow simply by calling the ``run_flow`` function (see documentation of :func:`run_flow() <selinon.run.run_flow>`):
 
 
 .. code-block:: python

@@ -23,6 +23,7 @@ Submodules
    selinon.cache
    selinon.cache_config
    selinon.celery
+   selinon.cli
    selinon.codename
    selinon.config
    selinon.data_storage
@@ -38,6 +39,7 @@ Submodules
    selinon.lock_pool
    selinon.node
    selinon.predicate
+   selinon.run
    selinon.selective
    selinon.selective_run_function
    selinon.selinon_task
@@ -51,7 +53,6 @@ Submodules
    selinon.task_envelope
    selinon.trace
    selinon.user_config
-   selinon.utils
    selinon.version
 
 Module contents
