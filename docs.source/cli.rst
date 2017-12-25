@@ -9,39 +9,34 @@ Most of the sub-commands accept configuration files you use with Selinon so to u
 
 .. code-block:: bash
 
-  usage: selinon-cli [-h] [--verbose] [--no-color]
-                        {execute,migrate,plot,inspect,version} ...
+  Usage: selinon-cli [OPTIONS] COMMAND [ARGS]...
 
-  developer interaction tool for Selinon config files
+    Selinon command line interface.
 
-  optional arguments:
-    -h, --help            show this help message and exit
-    --verbose, -v         be verbose about what's going on (can be supplied
-                          multiple times)
-    --no-color, -n        suppress colorized logging output
+  Options:
+    -v, --verbose  Be verbose about what's going on (can be supplied multiple
+                   times).
+    --version      Print Selinon version and exit.
+    --no-color     Suppress colorized logging output.
+    --help         Show this message and exit.
 
-  sub-commands:
-    {execute,migrate,plot,inspect,version}
-      execute             execute flow locally without Celery
-      migrate             generate config file migration
-      plot                plot graphs from configuration files
-      inspect             collect useful information from configuration files
-      version             get version info and exit
-
-
-.. note::
-
-  These the config files you pass to :class:`Config <selinon.config.Config>` class on Selinon initialization that holds Selinon configuration.
+  Commands:
+    execute  Execute flows based on YAML configuration in a CLI.
+    inspect  Inspect Selinon configuration.
+    migrate  Perform migrations on old and new YAML configuration files in flow changes.
+    plot     Plot graphs of flows based on YAML configuration.
+    version  Get version information.
 
 
 .. note::
 
   If you do queue name expansion based on environment variables, you need to explicitly make sure the environment variable is present. Otherwise parsing configuration files will fail.
 
+
 Inspecting configuration
 ========================
 
-Selinon CLI offers you the ``inspect`` sub-command. This sub-command parses all the config files and outputs requested results.
+Selinon CLI offers you the ``inspect`` sub-command. This sub-command parses all the config files and outputs requested results or just checks your configuration consistency.
 
 You can use the ``inspect`` sub-command for example to list all queues stated in your YAML files or do other stuff for querying parsed and checked configuration files.
 
@@ -130,3 +125,24 @@ Generating migrations of configuration files
 As Selinon offers you a mechanism to do changes in your configuration files and do re-deployment of workers, there needs to be a mechanism that ensures changes done in your configuration files are reflected to already present messages on queue. This lead to migrations design.
 
 You can generate migration files using the ``migrate`` sub-command. Please take a look to the :ref:`section that explains migrations in more detail <migrations>`.
+
+
+Using environment variables to supply options
+=============================================
+
+If you run Selinon CLI in various scripts or you would like to interact with Selinon CLI in different environment, you can explicitly state your options in environment variables:
+
+.. code-block:: bash
+
+  export SELINON_NODES_DEFINITION=/path/to/nodes.yaml
+  export SELINON_NODES_DEFINITION=/path/to/flows/
+  export SELINON_NODE_ARGS_JSON=1
+  # No need to explicitly state YAML configuration files
+  $ selinon-cli execute --flow-name flow1 --node-args '{"foo": "bar"}
+
+  # Always run inspect
+  export SELINON_NODES_DEFINITION=/path/to/nodes.yaml
+  export SELINON_NODES_DEFINITION=/path/to/flows/
+  $ selinon-cli inspect --list-task-queues  # No need to supply --nodes-definition and --flow-definitions explicitly
+
+The schema for constructing environment variables is ``SELINON_<SUBCOMMAND>_<OPTION>`` where <SUBCOMMAND> is Selinon's CLI sub-command in uppercase and OPTION is requested option (converted to uppercase, dashes converted to underscores). The only exception are ``--nodes-definition`` and ``--flow-definitions`` where ``<SUBCOMMAND>`` is omitted.
