@@ -128,6 +128,7 @@ def cli(ctx=None, verbose=0, no_color=True):
 @click.option('-j', '--node-args-json', is_flag=True,
               help="Flow arguments are JSON, parse string representation into a dict.")
 @click.option('-c', '--concurrency', metavar='PROCESS_COUNT', type=click.IntRange(1, None),
+              default=_DEFAULT_CONCURRENCY,
               help="Worker count - number of processes that serve tasks in parallel "
                    "(default: %d)." % _DEFAULT_CONCURRENCY)
 @click.option('-s', '--sleep-time', metavar='SLEEP_TIME', type=click.FLOAT, default=_DEFAULT_SLEEP_TIME,
