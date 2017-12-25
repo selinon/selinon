@@ -8,8 +8,9 @@ python:
 - 'pypy3'
 #- '3.7-dev'
 #- 'nightly'
+before_install:
+- sudo apt-get install -y graphviz
 install:
-- sudo apt-get install graphviz
 - make devenv
 script: make check
 after_success:
