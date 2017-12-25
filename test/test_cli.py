@@ -55,7 +55,8 @@ class TestCli(SelinonTestCase):
                               "--node-args-json --concurrency 1 --sleep-time 0"
                               % (os.path.join(self.DATA_DIR, 'cli', 'execute', 'nodes.yaml'),
                                  os.path.join(self.DATA_DIR, 'cli', 'execute', 'flows')))
-        runner = CliRunner()
+        # Filesystem storage expands path to result directory based on $PWD
+        runner = CliRunner(env={'PWD': os.getenv('PWD', '.')})
 
         with runner.isolated_filesystem():
             result = runner.invoke(execute, options)
@@ -74,7 +75,8 @@ class TestCli(SelinonTestCase):
                               % (os.path.join(self.DATA_DIR, 'cli', 'execute_selective', 'nodes.yaml'),
                                  os.path.join(self.DATA_DIR, 'cli', 'execute_selective', 'flows'),
                                  os.path.join(self.DATA_DIR, 'cli', 'execute_selective', 'node_args.json')))
-        runner = CliRunner()
+        # Filesystem storage expands path to result directory based on $PWD
+        runner = CliRunner(env={'PWD': os.getenv('PWD', '.')})
 
         with runner.isolated_filesystem():
             result = runner.invoke(execute, options)

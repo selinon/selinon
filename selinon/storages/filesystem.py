@@ -15,18 +15,14 @@ from selinon import DataStorage
 class Filesystem(DataStorage):
     """Selinon adapter for storing task results in a directory."""
 
-    def __init__(self, path=None, encoding=None):
+    def __init__(self, path=None):
         """Instantiate Filesystem adapter.
 
         :param path: path to directory to be used
-        :param encoding: encoding to be used
+        :type path: str
         """
         super().__init__()
-        if path is None:
-            self.path = os.getcwd()
-        else:
-            self.path = path.format(**os.environ)
-        self.encoding = encoding or 'utf-8'
+        self.path = (path or '{PWD}').format(**os.environ)
         self._connected = False
 
     def _construct_base_path(self, flow_name, task_name):
