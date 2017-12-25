@@ -1,0 +1,27 @@
+---
+  tasks:
+    - name: Task1
+      storage: Storage1
+      import: testapp.tasks
+    - name: Task2
+      storage: Storage1
+      classname: task2
+      import: testapp.tasks
+    - name: Task3
+      storage: Storage1
+      classname: task3
+      import: testapp.tasks
+
+  flows:
+    - flow1
+
+  storages:
+    - name: Storage1
+      classname: Filesystem
+      import: selinon.storages.filesystem
+      configuration:
+        path: null
+
+  global:
+    trace:
+      - logging: true
