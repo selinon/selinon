@@ -9,8 +9,6 @@
 Classes and functions to make Selinon executor work as a standalone CLI.
 """
 
-from flexmock import flexmock
-
 
 class SimulateRequest(object):
     """Simulate Celery's Task.request.
@@ -112,7 +110,7 @@ def simulate_apply_async(instance, **celery_kwargs):
     """
     from .executor import Executor
 
-    flexmock(instance, request=SimulateRequest(instance))
+    instance.request = SimulateRequest(instance)
     Executor.schedule(instance, celery_kwargs)
     selinon_kwargs = celery_kwargs['kwargs']
     return SimulateAsyncResult(selinon_kwargs.get('task_name', selinon_kwargs['flow_name']),

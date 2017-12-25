@@ -1,8 +1,6 @@
 click
 codegen
-flexmock
 graphviz
 jsonschema
 pyyaml
 rainbow_logging_handler
-
