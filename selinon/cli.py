@@ -51,9 +51,7 @@ def _setup_logging(verbose, no_color):
     :param no_color: do not use colorized output
     """
     level = logging.WARNING
-    if verbose == 0:
-        level = logging.WARNING
-    elif verbose == 1:
+    if verbose == 1:
         level = logging.INFO
     elif verbose > 1:
         level = logging.DEBUG
