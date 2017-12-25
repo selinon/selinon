@@ -4,7 +4,7 @@
 # Copyright (C) 2016-2017  Fridolin Pokorny, fridolin.pokorny@gmail.com
 # This file is part of Selinon project.
 # ######################################################################
-"""Selinon utilities for a user."""
+"""Selinon flow scheduling (entrypoint) for a user."""
 
 import logging
 
