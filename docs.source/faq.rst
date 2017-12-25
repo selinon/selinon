@@ -141,6 +141,32 @@ Selinon uses Celery for queue handling and running, so you have to use broker im
 
 Selinon requires that you messages are delivered - it's okay if messages are delivered more than once (see for example SQS details regarding deliver at least one). You will just end up with multiple tasks executed at the same time. You can tackle that in your application logic.
 
+Why does a flow finishes too early when using AWS SQS?
+******************************************************
+
+Most likely you are using AWS SQS standard queues that can deliver a single message multiple times. If your application logic processes one message but a task fails when the second message is processed (e.g. integrity errors if task ids are unique in PostgreSQL), Celery overwrites task state stored in the result backend. This causes that even if task succeeds (first run) it's state can be tracked as failed.
+
+A solution to this problem is to patch Celery's result backend to restrict only one task, something like:
+
+.. code-block:: diff
+
+    diff --git a/celery/backends/database/__init__.py b/celery/backends/database/__init__.py
+    index 506a4cc69..57d29a6ca 100644
+    --- a/celery/backends/database/__init__.py
+    +++ b/celery/backends/database/__init__.py
+    @@ -110,6 +110,9 @@ class DatabaseBackend(BaseBackend):
+                     task = Task(task_id)
+                     session.add(task)
+                     session.flush()
+    +            elif task.status in states.READY_STATES:
+    +                # Do not overwrite on multiple message delivery (e.g. SQS).
+    +                return task.result
+                 task.result = result
+                 task.status = state
+                 task.traceback = traceback
+
+Or simply to switch to AWS SQS FIFO queues that guarantee exactly once delivery of a message.
+
 What does Selinon mean?
 ***********************
 
