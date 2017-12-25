@@ -19,14 +19,14 @@ from .errors import StorageError
 from .errors import UnknownError
 from .errors import UnknownFlowError
 from .errors import UnknownStorageError
+from .run import run_flow
+from .run import run_flow_selective
 from .selinon_task import SelinonTask
 from .storage import Storage
 from .storage_pool import StoragePool
 from .system_state import SystemState
 from .task import Task
 from .trace import Trace
-from .utils import run_flow
-from .utils import run_flow_selective
 from .version import selinon_version
 
 __version__ = selinon_version
