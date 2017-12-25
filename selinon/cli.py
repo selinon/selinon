@@ -113,10 +113,11 @@ def cli(ctx=None, verbose=0, no_color=True):
 @cli.command()
 @click.option('-n', '--nodes-definition', metavar='NODES.yml',
               type=click.Path(exists=True, dir_okay=False, readable=True), required=True,
+              envvar='SELINON_NODES_DEFINITION',
               help="Path to nodes definition file.")
 @click.option('-f', '--flow-definitions', metavar='FLOW.yml',
               type=click.Path(exists=True, readable=True), multiple=True, required=True,
-              callback=_expand_flow_definitions,
+              callback=_expand_flow_definitions, envvar='SELINON_FLOW_DEFINITIONS',
               help="Path to flow definition file (can be supplied multiple times) or path to a directory containing "
                    "YAML files.")
 @click.option('--flow-name', metavar='FLOW_NAME', required=True,
@@ -191,10 +192,11 @@ def execute(nodes_definition, flow_definitions, flow_name,
 @cli.command()
 @click.option('-n', '--nodes-definition', metavar='NODES.yml',
               type=click.Path(exists=True, dir_okay=False, readable=True), required=True,
+              envvar='SELINON_NODES_DEFINITION',
               help="Path to tasks definition file.")
 @click.option('-f', '--flow-definitions', metavar='FLOW.yml',
               type=click.Path(exists=True, readable=True), multiple=True, required=True,
-              callback=_expand_flow_definitions,
+              callback=_expand_flow_definitions, envvar='SELINON_FLOW_DEFINITIONS',
               help="Path to flow definition file (can be supplied multiple times) or path to a directory containing "
                    "YAML files.")
 @click.option('-N', '--old-nodes-definition', metavar='NODES.yml',
@@ -285,10 +287,11 @@ def migrate(nodes_definition, flow_definitions, old_nodes_definition=None, old_f
 @cli.command()
 @click.option('-n', '--nodes-definition', metavar='NODES.yml',
               type=click.Path(exists=True, dir_okay=False, readable=True), required=True,
+              envvar='SELINON_NODES_DEFINITION',
               help="Path to tasks definition file.")
 @click.option('-f', '--flow-definitions', metavar='FLOW.yml',
               type=click.Path(exists=True, readable=True), multiple=True, required=True,
-              callback=_expand_flow_definitions,
+              callback=_expand_flow_definitions, envvar='SELINON_FLOW_DEFINITIONS',
               help="Path to flow definition file (can be supplied multiple times) or path to a directory containing "
                    "YAML files.")
 @click.option('-c', '--config', metavar='CONFIG.yml', type=click.Path(dir_okay=False, exists=True),
@@ -308,10 +311,11 @@ def plot(nodes_definition, flow_definitions, config=None, output_dir=None, image
 @cli.command()
 @click.option('-n', '--nodes-definition', metavar='NODES.yml',
               type=click.Path(exists=True, dir_okay=False, readable=True), required=True,
+              envvar='SELINON_NODES_DEFINITION',
               help="Path to tasks definition file.")
 @click.option('-f', '--flow-definitions', metavar='FLOW.yml',
               type=click.Path(exists=True, readable=True), multiple=True, required=True,
-              callback=_expand_flow_definitions,
+              callback=_expand_flow_definitions, envvar='SELINON_FLOW_DEFINITIONS',
               help="Path to flow definition file (can be supplied multiple times) or path to a directory containing "
                    "YAML files.")
 @click.option('-d', '--dump', metavar='DUMP.py', type=click.Path(dir_okay=False, writable=True),
