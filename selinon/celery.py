@@ -26,9 +26,8 @@ except ImportError:
     class Task(object):
         """Substitute Celery's task so we do not fail with importing - raise once usage is requested."""
 
-        @property
-        def request(self):
-            return id(self)
+        def __init__(self):
+            self.request = id(self)
 
         @staticmethod
         def apply_async(*args, **kwargs):
