@@ -135,14 +135,13 @@ If you run Selinon CLI in various scripts or you would like to interact with Sel
 .. code-block:: bash
 
   export SELINON_NODES_DEFINITION=/path/to/nodes.yaml
-  export SELINON_NODES_DEFINITION=/path/to/flows/
+  export SELINON_FLOW_DEFINITIONS=/path/to/flows/
   export SELINON_NODE_ARGS_JSON=1
-  # No need to explicitly state YAML configuration files
+  # No need to explicitly state YAML configuration files and option to do JSON parsing.
   $ selinon-cli execute --flow-name flow1 --node-args '{"foo": "bar"}
 
-  # Always run inspect
   export SELINON_NODES_DEFINITION=/path/to/nodes.yaml
-  export SELINON_NODES_DEFINITION=/path/to/flows/
+  export SELINON_FLOW_DEFINITIONS=/path/to/flows/
   $ selinon-cli inspect --list-task-queues  # No need to supply --nodes-definition and --flow-definitions explicitly
 
 The schema for constructing environment variables is ``SELINON_<SUBCOMMAND>_<OPTION>`` where <SUBCOMMAND> is Selinon's CLI sub-command in uppercase and OPTION is requested option (converted to uppercase, dashes converted to underscores). The only exception are ``--nodes-definition`` and ``--flow-definitions`` where ``<SUBCOMMAND>`` is omitted.

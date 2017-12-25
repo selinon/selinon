@@ -146,7 +146,7 @@ Why does a flow finishes too early when using AWS SQS?
 
 Most likely you are using AWS SQS standard queues that can deliver a single message multiple times. If your application logic processes one message but a task fails when the second message is processed (e.g. integrity errors if task ids are unique in PostgreSQL), Celery overwrites task state stored in the result backend. This causes that even if task succeeds (first run) it's state can be tracked as failed.
 
-A solution to this problem is to patch Celery's result backend to restrict only one task, something like:
+A solution to this problem is to patch Celery's result backend to restrict only one task, something like (in case of PosgreSQL as a result backend):
 
 .. code-block:: diff
 
@@ -165,7 +165,7 @@ A solution to this problem is to patch Celery's result backend to restrict only 
                  task.status = state
                  task.traceback = traceback
 
-Or simply to switch to AWS SQS FIFO queues that guarantee exactly once delivery of a message.
+Or simply switch to AWS SQS FIFO queues that guarantee exactly once delivery of a message.
 
 What does Selinon mean?
 ***********************
