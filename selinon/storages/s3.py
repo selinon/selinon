@@ -20,6 +20,7 @@ class S3(DataStorage):
     For credentials configuration see boto3 library configuration
     https://github.com/boto/boto3
     """
+    __slots__ = ['_bucket_name', '_location', '_s3', '_use_ssl', '_endpoint_url', '_session']
 
     def __init__(self, bucket, location, endpoint_url=None, use_ssl=None,
                  aws_access_key_id=None, aws_secret_access_key=None, region_name=None):

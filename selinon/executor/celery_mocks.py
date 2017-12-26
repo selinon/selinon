@@ -16,6 +16,8 @@ class SimulateRequest(object):
     Make possible to query task id right inside task by calling self.request.id
     """
 
+    __slots__ = ['id']
+
     def __init__(self, instance):
         """Instantiate request.
 
@@ -26,6 +28,8 @@ class SimulateRequest(object):
 
 class SimulateAsyncResult(object):
     """Simulate AsyncResult returned by apply_async() or by instantiating AsyncResult by Task id."""
+
+    __slots__ = ['task_id', 'node_id']
 
     task_failures = {}
     task_successes = {}

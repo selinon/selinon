@@ -30,7 +30,7 @@ class GlobalConfig(object):
 
     def __init__(self):
         """Placeholder."""
-        raise NotImplementedError("Cannot instantiate global config")
+        raise NotImplementedError
 
     @classmethod
     def dump_trace(cls, output, config_name, indent_count=0):

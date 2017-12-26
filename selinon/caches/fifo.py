@@ -15,6 +15,8 @@ from selinon.errors import CacheMissError
 class FIFO(Cache):
     """First-In-First-Out cache."""
 
+    __slots__ = ['max_cache_size', '_cache', '_cache_usage']
+
     def __init__(self, max_cache_size):
         """Instantiate cache.
 

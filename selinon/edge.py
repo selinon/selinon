@@ -17,6 +17,8 @@ class Edge(object):
     _DEFAULT_RUN_SUBSEQUENT = False
     _DEFAULT_FOLLOW_SUBFLOWS = False
 
+    __slots__ = ['nodes_from', 'nodes_to', 'predicate', 'flow', 'foreach', 'selective']
+
     def __init__(self, nodes_from, nodes_to, predicate, flow, foreach, selective):
         """Initialize edge definition.
 

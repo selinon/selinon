@@ -20,6 +20,8 @@ class Node(metaclass=abc.ABCMeta):
 
     _NAME_RE = re.compile(r"^[_a-zA-Z][_a-zA-Z0-9]*$")
 
+    __slots__ = ['_name']
+
     def __init__(self, name):
         """Instantiate a node (flow/task)."""
         if not self.check_name(name):

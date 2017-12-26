@@ -52,6 +52,8 @@ from .queue_pool import QueuePool
 class Executor(object):
     """Executor that executes Selinon run in a multi-process environment."""
 
+    __slots__ = ['concurrency', 'sleep_time', 'show_progressbar']
+
     executor_queues = QueuePool()
     _logger = logging.getLogger(__name__)
 

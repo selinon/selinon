@@ -29,6 +29,11 @@ from .trace import Trace
 class SystemState(object):  # pylint: disable=too-many-instance-attributes
     """Main system actions done by Selinon."""
 
+    __slots__ = [
+        '_dispatcher_id', '_flow_name', '_node_args', '_parent', '_selective', '_active_nodes', '_finished_nodes',
+        '_failed_nodes', '_waiting_edges_idx', '_waiting_edges', '_retry'
+    ]
+
     # Throttled nodes in the current worker: node name -> next schedule time
     # Throttle should be safe with concurrency
     _throttle_lock_pool = LockPool()

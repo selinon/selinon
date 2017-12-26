@@ -19,6 +19,8 @@ from .storage_pool import StoragePool
 class SelinonTask(metaclass=abc.ABCMeta):
     """Base class for user-defined tasks."""
 
+    __slots__ = ['flow_name', 'task_name', 'parent', 'task_id', 'dispatcher_id', 'log']
+
     def __init__(self, flow_name, task_name, parent, task_id, dispatcher_id):
         """Initialize SelinonTask (called by SelinonTaskEnvelope).
 
@@ -158,4 +160,4 @@ class SelinonTask(metaclass=abc.ABCMeta):
         :param node_args: arguments passed to flow/node
         :return: tasks's result that will be stored in database as configured
         """
-        pass
+        raise NotImplementedError

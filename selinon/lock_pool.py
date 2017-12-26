@@ -12,6 +12,8 @@ from multiprocessing import Lock
 class LockPool(object):  # pylint: disable=too-few-public-methods
     """Lock pool for shared locks."""
 
+    __slots__ = ['_locks', '_global_lock']
+
     def __init__(self):
         """Initialize lock-pool."""
         self._locks = {}

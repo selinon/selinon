@@ -12,8 +12,12 @@ import heapq
 class TimeQueue(object):
     """A queue that respect timestamps of records that were pushed into it."""
 
+    __slots__ = ['_queue']
+
     class _TimeQueueItem(object):
         """TimeQueue internal item."""
+
+        __slots__ = ['time', 'record']
 
         def __init__(self, time, record):
             """Instantiate item for TimeQueue.

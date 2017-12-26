@@ -17,6 +17,8 @@ from selinon import DataStorage
 class MongoDB(DataStorage):
     """MongoDB database adapter."""
 
+    __slots__ = ['client', 'collection', 'db', 'host', 'port', 'db_name', 'collection_name']
+
     def __init__(self, db_name, collection_name, host=None, port=27017):
         """Instantiate MongoDB storage adapter.
 

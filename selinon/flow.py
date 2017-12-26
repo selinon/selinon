@@ -24,6 +24,13 @@ class Flow(Node):  # pylint: disable=too-many-instance-attributes
     _DEFAULT_RETRY_COUNTDOWN = 0
     _logger = logging.getLogger(__name__)
 
+    __slots__ = [
+        'edges', 'failures', 'nowait_nodes', 'node_args_from_first', 'queue_name', 'strategy', 'propagate_node_args',
+        'propagate_parent', 'propagate_parent_failures', 'propagate_finished', 'propagate_compound_finished',
+        'propagate_failures', 'propagate_compound_failures', 'throttling', 'cache_config', 'max_retry',
+        'retry_countdown', 'eager_failures'
+    ]
+
     def __init__(self, name, **opts):
         """Initialize flow node representation.
 

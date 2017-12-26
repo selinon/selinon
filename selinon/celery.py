@@ -26,6 +26,8 @@ except ImportError:
     class Task(object):
         """Substitute Celery's task so we do not fail with importing - raise once usage is requested."""
 
+        __slots__ = ['request']
+
         def __init__(self):
             self.request = id(self)
 

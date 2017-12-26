@@ -12,8 +12,12 @@ from .time_queue import TimeQueue
 class QueuePool(object):
     """Pool of all queues in the system."""
 
+    __slots__ = ['_queues', '_last_used', '_queue_head', '_queue_tail']
+
     class _QueueWrapper(object):
         """Wrap a queue so we carry additional info needed for QueuePool - cyclic double linked list."""
+
+        __slots__ = ['queue_name', 'queue', 'previous', 'next']
 
         def __init__(self, previous_wrapper, next_wrapper, queue_name):
             """Init QueueWrapper.

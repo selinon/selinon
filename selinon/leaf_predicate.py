@@ -22,6 +22,8 @@ class LeafPredicate(Predicate):
 
     _logger = logging.getLogger(__name__)
 
+    __slots__ = ['node', 'flow', '_func', '_args', '_func_args']
+
     def __init__(self, predicate_func, node, flow, args=None):
         """Instantiate leaf predicate.
 

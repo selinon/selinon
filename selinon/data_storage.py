@@ -19,12 +19,11 @@ class DataStorage(object, metaclass=abc.ABCMeta):
         :param args: storage arguments as stated in YAML configuration file
         :param kwargs: storage key-value arguments as stated in YAML configuration (preferred over args)
         """
-        pass
 
     @abc.abstractmethod
     def connect(self):
         """Connect to a resource, if not needed, should be empty."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @abc.abstractmethod
     def is_connected(self):
@@ -32,12 +31,12 @@ class DataStorage(object, metaclass=abc.ABCMeta):
 
         :return: True if connected to a resource
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @abc.abstractmethod
     def disconnect(self):
         """Disconnect from a resource."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @abc.abstractmethod
     def retrieve(self, flow_name, task_name, task_id):
@@ -48,7 +47,7 @@ class DataStorage(object, metaclass=abc.ABCMeta):
         :param task_id: id of the task that result is going to be retrieved
         :return: task result
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @abc.abstractmethod
     def store(self, node_args, flow_name, task_name, task_id, result):  # pylint: disable=too-many-arguments
@@ -61,7 +60,7 @@ class DataStorage(object, metaclass=abc.ABCMeta):
         :param result: result that should be stored
         :return: unique ID of stored record
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def store_error(self, node_args, flow_name, task_name, task_id, exc_info):  # pylint: disable=too-many-arguments
         """Store information about task error.
@@ -75,7 +74,7 @@ class DataStorage(object, metaclass=abc.ABCMeta):
         """
         # pylint: disable=abstract-method
         # no not mark this method with @abc.abstractmethod as we do not force a user to implement this
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def __del__(self):
         """Clean up."""

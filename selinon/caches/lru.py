@@ -13,6 +13,8 @@ from selinon.errors import CacheMissError
 class _Record(object):
     """Record that is used in a double-linked list in order to track usage."""
 
+    __slots__ = ['item_id', 'item', 'previous', 'next']
+
     def __init__(self, item_id, item):  # noqa
         self.item_id = item_id
         self.item = item

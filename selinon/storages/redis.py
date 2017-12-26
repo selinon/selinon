@@ -20,6 +20,11 @@ except ImportError as exc:
 class Redis(DataStorage):  # pylint: disable=too-many-instance-attributes
     """Selinon adapter for Redis database."""
 
+    __slots__ = [
+        'conn', 'host', 'port', 'db', 'password', 'socket_timeout', 'connection_pool', 'charset', 'errors',
+        'unix_socket_path'
+    ]
+
     def __init__(self, host=None, port=6379, db=0, password=None, socket_timeout=None, connection_pool=None,
                  charset=None, errors=None, unix_socket_path=None):
         """Instantiate Redis database adapter.

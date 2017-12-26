@@ -10,6 +10,8 @@
 class TaskClass(object):
     """Task's class abstraction."""
 
+    __slots__ = ['class_name', 'import_path', 'tasks']
+
     def __init__(self, class_name, import_path):
         """Instantiate task class representation.
 

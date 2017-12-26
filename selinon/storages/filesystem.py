@@ -15,6 +15,8 @@ from selinon import DataStorage
 class Filesystem(DataStorage):
     """Selinon adapter for storing task results in a directory."""
 
+    __slots__ = ['path', '_connected']
+
     def __init__(self, path=None):
         """Instantiate Filesystem adapter.
 

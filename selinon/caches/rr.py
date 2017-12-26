@@ -15,6 +15,8 @@ from selinon.errors import CacheMissError
 class RR(Cache):
     """Random replacement cache."""
 
+    __slots__ = ['max_cache_size', '_cache']
+
     def __init__(self, max_cache_size):
         """Initialize cache.
 

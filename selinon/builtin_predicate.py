@@ -17,11 +17,11 @@ from .predicate import Predicate
 class BuiltinPredicate(Predicate, metaclass=abc.ABCMeta):  # pylint: disable=abstract-method
     """Build in predicate abstract class."""
 
-    pass
-
 
 class NaryPredicate(BuiltinPredicate, metaclass=abc.ABCMeta):  # pylint: disable=abstract-method
     """N-ary predicate abstract class."""
+
+    __slots__ = ['_children']
 
     def __init__(self, children):
         """Instantiate N-ary predicate.
@@ -100,6 +100,8 @@ class NaryPredicate(BuiltinPredicate, metaclass=abc.ABCMeta):  # pylint: disable
 
 class UnaryPredicate(BuiltinPredicate, metaclass=abc.ABCMeta):  # pylint: disable=abstract-method
     """Unary predicate abstract class."""
+
+    __slots__ = ['_child']
 
     def __init__(self, child):
         """Instantiate unary predicate.
@@ -257,6 +259,8 @@ class NotPredicate(UnaryPredicate):
 
 class AlwaysTruePredicate(BuiltinPredicate):
     """Predicate used if condition in config file is omitted."""
+
+    __slots__ = ['flow']
 
     def __init__(self, flow):
         """Instantiate predicate that holds always True.

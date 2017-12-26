@@ -36,6 +36,8 @@ class System(object):
 
     _logger = logging.getLogger(__name__)
 
+    __slots__ = ['flows', 'tasks', 'storages', 'task_classes']
+
     def __init__(self, tasks=None, flows=None, storages=None, task_classes=None):
         """Initialize system info.
 

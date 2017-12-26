@@ -16,6 +16,10 @@ from .helpers import check_conf_keys
 class Failures(object):
     """Node failures and fallback handling."""
 
+    __slots__ = [
+        'waiting_nodes', 'fallback_nodes', 'raw_definition', 'last_allocated', 'starting_nodes', 'predicates', 'flow'
+    ]
+
     def __init__(self, raw_definition, system, flow, last_allocated=None, starting_nodes=None, predicates=None):
         """Construct failures based on definition stated in YAML config files.
 

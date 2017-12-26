@@ -16,6 +16,8 @@ class SelectiveRunFunction(object):
     _DEFAULT_IMPORT_PATH = 'selinon.routines'
     _DEFAULT_FUNCTION_NAME = 'always_run'
 
+    __slots__ = ['name', 'import_path']
+
     def __init__(self, name, import_path):
         """Initialize selective function as stated in YAML configuration file.
 

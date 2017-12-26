@@ -65,6 +65,12 @@ class UserConfig(metaclass=_ConfigSingleton):
     # pylint: disable=too-many-instance-attributes
     """Configuration supplied by user."""
 
+    __slots__ = [
+        'raw_config', 'config_path', '_style_task', '_style_flow', '_style_condition',
+        '_style_condition_foreach', '_style_storage', '_style_edge', '_style_store_edge', '_style_graph',
+        '_style_fallback_edge', '_style_fallback_node', '_style_fallback_true'
+    ]
+
     DEFAULT_STYLE_TASK = {
         'style': 'filled',
         'color': 'black',

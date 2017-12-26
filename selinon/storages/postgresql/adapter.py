@@ -22,6 +22,8 @@ from .models import Result
 class PostgreSQL(DataStorage):
     """Selinon SQL Database adapter - PostgreSQL."""
 
+    __slots__ = ['engine', 'session']
+
     def __init__(self, connection_string, encoding='utf-8', echo=False):
         """Initialize PostgreSQL adapter from YAML configuration file.
 
@@ -72,4 +74,4 @@ class PostgreSQL(DataStorage):
 
     def store_error(self, node_args, flow_name, task_name, task_id, exc_info):  # noqa
         # just to make pylint happy
-        raise NotImplementedError()
+        raise NotImplementedError

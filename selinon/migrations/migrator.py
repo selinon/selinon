@@ -30,6 +30,10 @@ _logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class Migrator(object):
     """Main class for performing configuration file migrations."""
 
+    __slots__ = [
+        'migration_dir', 'old_nodes_definition', 'old_flow_definitions', 'new_nodes_definition', 'new_flow_definitions'
+    ]
+
     def __init__(self, migration_dir=None):
         """Initialize migrator.
 

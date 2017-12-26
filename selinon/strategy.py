@@ -22,6 +22,8 @@ class Strategy(object):
 
     _EXPECTED_STRATEGY_FUNC_ARGS = {'status'}
 
+    __slots__ = ['module', 'function', 'func_args']
+
     def __init__(self, module=None, function=None, func_args=None):
         """Instantiate strategy function representation.
 

@@ -14,6 +14,8 @@ from .helpers import check_conf_keys
 class Storage(object):
     """A storage representation."""
 
+    __slots__ = ['name', 'import_path', 'configuration', 'class_name', 'tasks', 'cache_config']
+
     def __init__(self, name, import_path, configuration, cache_config, class_name=None):
         # pylint: disable=too-many-arguments
         """Instantiate storage representation based on configuration supplied in YAML config files.

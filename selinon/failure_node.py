@@ -58,6 +58,8 @@ from .predicate import Predicate
 class FailureNode(object):
     """A representation of a failure node permutation."""
 
+    __slots__ = ['next', 'flow', 'traversed', 'failure_link', 'fallbacks', 'propagate_failures', 'predicates']
+
     def __init__(self, flow, traversed, failure_link):
         """Instantiate a failure node in the graph of all possible failures (permutations).
 

@@ -21,6 +21,8 @@ class StoragePool(object):
 
     _storage_pool_locks = LockPool()
 
+    __slots__ = ['_id_mapping', '_flow_name']
+
     def __init__(self, id_mapping, flow_name):
         """Initialize storage pool instance based on the current context.
 

@@ -15,6 +15,8 @@ from selinon import DataStorage
 class InMemoryStorage(DataStorage):
     """Storage that stores results in memory without persistence."""
 
+    __slots__ = ['database', 'echo_file']
+
     def __init__(self, echo=False, json=False):
         """Initialize storage, values passed from YAML cofig file.
 

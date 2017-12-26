@@ -29,7 +29,7 @@ class Task(Node):
         :param storage: storage that should be used
         :param opts: additional options for task
         """
-        super(Task, self).__init__(name)
+        super().__init__(name)
 
         self.class_name = opts.pop('classname', name)
         self.storage = storage

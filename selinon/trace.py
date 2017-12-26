@@ -324,7 +324,7 @@ class Trace(object):
 
     def __init__(self):
         """Unused."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @classmethod
     def trace_by_logging(cls, logger=None):
