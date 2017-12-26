@@ -25,7 +25,6 @@ from .selinon_task import SelinonTask
 from .storage import Storage
 from .storage_pool import StoragePool
 from .system_state import SystemState
-from .task import Task
 from .trace import Trace
 from .version import selinon_version
 
