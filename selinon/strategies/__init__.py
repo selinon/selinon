@@ -140,7 +140,7 @@ def random(status, start_retry, max_retry):
 
 
 def constant(status, retry):
-    """Schedule randomly.
+    """Schedule constantly.
 
     :param status: flow status dict
     :param retry: constant retry timeout

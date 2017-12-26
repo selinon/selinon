@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Supportive and handling library for Selinon."""
+"""Selinon - an advanced dynamic task flow management on top of Celery."""
 
 from .cache import Cache
 from .codename import selinon_version_codename
