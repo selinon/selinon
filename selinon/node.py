@@ -18,7 +18,7 @@ from .global_config import GlobalConfig
 class Node(metaclass=abc.ABCMeta):
     """An abstract class for node representation."""
 
-    _NAME_RE = r"^[_a-zA-Z][_a-zA-Z0-9]*$"
+    _NAME_RE = re.compile(r"^[_a-zA-Z][_a-zA-Z0-9]*$")
 
     def __init__(self, name):
         """Instantiate a node (flow/task)."""
@@ -77,8 +77,7 @@ class Node(metaclass=abc.ABCMeta):
         :return: True if name is a correct node name
         :rtype: bool
         """
-        regexp = re.compile(cls._NAME_RE)
-        return regexp.match(name)
+        return cls._NAME_RE.match(name)
 
     def parse_throttling(self, dict_):
         """Parse throttling definition from a dictionary.
