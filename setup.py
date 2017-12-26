@@ -5,7 +5,8 @@ import os
 from setuptools import setup, find_packages
 
 
-NAME = 'selinon'
+if sys.version_info[0] != 3:
+    sys.exit("Python3 is required in order to install Selinon")
 
 
 def get_requirements():
@@ -14,22 +15,19 @@ def get_requirements():
 
 
 def get_version():
-    with open(os.path.join(NAME, 'version.py')) as f:
+    with open(os.path.join('selinon', 'version.py')) as f:
         version = f.readline()
     # dirty, remove trailing and leading chars
     return version.split(' = ')[1][1:-2]
 
 
-if sys.version_info[0] != 3:
-    sys.exit("Python3 is required in order to install Selinon")
-
-
-with open('README.rst', 'r') as f:
-    long_description = f.read()
+def get_long_description():
+    with open('README.rst', 'r') as f:
+        return f.read()
 
 
 setup(
-    name=NAME,
+    name='selinon',
     version=get_version(),
     entry_points={
         'console_scripts': ['selinon-cli=selinon.cli:cli']
@@ -37,14 +35,14 @@ setup(
     packages=find_packages(),
     install_requires=get_requirements(),
     author='Fridolin Pokorny',
-    author_email='fpokorny@redhat.com',
+    author_email='fridolin.pokorny@gmail.com',
     maintainer='Fridolin Pokorny',
-    maintainer_email='fpokorny@redhat.com',
-    description='task flow management for Celery',
-    long_description=long_description,
+    maintainer_email='fridolin.pokorny@gmail.com',
+    description='an advanced dynamic task flow management on top of Celery',
+    long_description=get_long_description(),
     url='https://github.com/selinon/selinon',
     license='BSD',
-    keywords='celery selinon yaml condition flow',
+    keywords='selinon celery yaml flow distributed-computing',
     extras_require={
         'celery': ['celery>=4'],
         'mongodb': ['pymongo'],
