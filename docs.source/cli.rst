@@ -130,13 +130,13 @@ You can generate migration files using the ``migrate`` sub-command. Please take 
 Using environment variables to supply options
 =============================================
 
-If you run Selinon CLI in various scripts or you would like to interact with Selinon CLI in different environment, you can explicitly state your options in environment variables:
+If you run Selinon CLI in various scripts or you would like to interact with Selinon CLI in different environments, you can explicitly state your options in environment variables:
 
 .. code-block:: bash
 
   export SELINON_NODES_DEFINITION=/path/to/nodes.yaml
   export SELINON_FLOW_DEFINITIONS=/path/to/flows/
-  export SELINON_NODE_ARGS_JSON=1
+  export SELINON_EXECUTE_NODE_ARGS_JSON=1
   # No need to explicitly state YAML configuration files and option to do JSON parsing.
   $ selinon-cli execute --flow-name flow1 --node-args '{"foo": "bar"}
 
@@ -144,4 +144,4 @@ If you run Selinon CLI in various scripts or you would like to interact with Sel
   export SELINON_FLOW_DEFINITIONS=/path/to/flows/
   $ selinon-cli inspect --list-task-queues  # No need to supply --nodes-definition and --flow-definitions explicitly
 
-The schema for constructing environment variables is ``SELINON_<SUBCOMMAND>_<OPTION>`` where <SUBCOMMAND> is Selinon's CLI sub-command in uppercase and OPTION is requested option (converted to uppercase, dashes converted to underscores). The only exception are ``--nodes-definition`` and ``--flow-definitions`` where ``<SUBCOMMAND>`` is omitted.
+The schema for constructing environment variables is ``SELINON_<SUBCOMMAND>_<OPTION>`` where ``<SUBCOMMAND>`` is Selinon's CLI sub-command in uppercase and ``<OPTION>`` is requested option (converted to uppercase, dashes converted to underscores). The only exception are ``--nodes-definition`` and ``--flow-definitions`` where ``<SUBCOMMAND>`` is omitted.
