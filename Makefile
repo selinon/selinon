@@ -3,7 +3,6 @@ TEMPFILE := $(shell mktemp -u)
 
 .PHONY: install
 install:
-	sh ./bump-version.sh
 	pip3 install -r requirements.txt
 	python3 setup.py install
 
