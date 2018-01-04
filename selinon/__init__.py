@@ -33,4 +33,4 @@ __version_info__ = __version__.split('.')
 __title__ = 'selinon'
 __author__ = 'Fridolin Pokorny'
 __license__ = 'BSD License 2.0'
-__copyright__ = 'Copyright 2017 Fridolin Pokorny'
+__copyright__ = 'Copyright 2018 Fridolin Pokorny'
