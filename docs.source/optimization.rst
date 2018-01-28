@@ -100,6 +100,11 @@ Now your sampling strategy function will be called each time dispatcher will wan
 
   As the sampling strategy function is executed by dispatcher it **can not raise any exception**! If an exception is raised, the behaviour is undefined.
 
+Dedicating a separate worker for dispatcher  - Cluster segmenation
+##################################################################
+
+Usually, it is a good idea to introduce specific workers for dispatcher task. Usually it resolves in better performance as workers that do actual computational tasks do not necessarily need to check flow status (especially with prefetching taken into account). This means that you can introduce 1-2 workers (based on number of messages that are fed into queues, you can also apply auto-scaling) that listen only on queues dedicated to dispatcher so these workers actually schedule the workload to specific workers based on queue configuration. To find a right balance in number of workers for specific queues can take some time, but the performance impact usually counts.
+
 Storage optimization & Distributed caches
 =========================================
 
