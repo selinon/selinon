@@ -41,7 +41,7 @@ task queue) written in Python3, that allows you to:
    respecting task dependencies
 -  Make your deployment easy to orchestrate using orchestration tools
    such as `Kubernetes <https://kubernetes.io>`__
--  Highly scalable solution for big data processing pipelines
+-  Highly scalable Turing complete solution for big data processing pipelines
 -  And (of course) much more... check
    `docs <https://selinon.readthedocs.io>`__
 
