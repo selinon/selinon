@@ -223,10 +223,10 @@ def migrate(nodes_definition, flow_definitions, old_nodes_definition=None, old_f
             migration_dir=None, use_git=False, no_check=False, tainted_flows=_DEFAULT_TAINTED_FLOW_STRATEGY):
     """Perform migrations on old and new YAML configuration files in flow changes."""
     # pylint: disable=too-many-branches
-    if int(old_flow_definitions is not None) + int(old_nodes_definition is not None) == 1:
+    if int(not old_flow_definitions) + int(not old_nodes_definition) == 1:
         raise RequestError("Please provide all flow and nodes configuration files or use --git")
 
-    use_old_files = old_flow_definitions is not None
+    use_old_files = bool(old_flow_definitions)
     usage_clash = int(use_old_files) + int(use_git)
     if usage_clash == 2:
         raise RequestError("Option --git is disjoint with explicit configuration file specification")
