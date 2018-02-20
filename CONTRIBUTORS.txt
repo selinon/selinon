@@ -1,1 +1,2 @@
 Fridolin Pokorny <fridolin.pokorny@gmail.com>
+Pavel Kajaba <pavel@redhat.com>
