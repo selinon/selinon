@@ -756,7 +756,7 @@ Keep track of actions that are done in flow. See :ref:`trace` for more info with
 
       * ``sentry``  - use Sentry for monitoring task failures (only events of type ``TASK_FAILURE``), configuration options:
 
-        * ``dsn`` - Sentry's DSN to describe target service and Sentry's project to log to
+        * ``dsn`` - Sentry's DSN to describe target service and Sentry's project to log to, can be parametrized based on environment variables similarly as queues - see `queue`_ configuration for more info.
 
       * ``storage`` - use storage adapter to store traced events, configuration options:
 
