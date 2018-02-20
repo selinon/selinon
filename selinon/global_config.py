@@ -130,7 +130,12 @@ class GlobalConfig(object):
         if unknown_conf:
             raise ConfigurationError("Unknown configuration for Sentry trace function supplied: %s" % unknown_conf)
 
-        dsn = trace_def.get('dsn', '').format(**os.environ)
+        dsn = trace_def.get('dsn')
+        if dsn is None or not isinstance(dsn, str):
+            raise ConfigurationError("Configuration of Sentry's dsn has to be a string, "
+                                     "got %r (type: %s) instead" % (dsn, type(dsn)))
+
+        dsn = dsn.format(**os.environ)
         cls._trace_sentry.append(dsn)
 
     @classmethod
