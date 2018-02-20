@@ -8,9 +8,26 @@
 import os
 from selinon import Config
 from selinon_test_case import SelinonTestCase
+from selinon.global_config import GlobalConfig
 
 
 class TestConfig(SelinonTestCase):
+    def test_parse_trace_sentry_without_environ(self):
+        expected_dsn = "https://without_environ:secret@sentry.io/project"
+        dns = {'dsn': expected_dsn}
+        GlobalConfig._parse_trace_sentry(dns)
+        assert expected_dsn == GlobalConfig._trace_sentry[0]
+        GlobalConfig._trace_sentry.pop()
+        
+    def test_parse_trace_sentry_with_environ(self):
+        expected_dsn = "https://from_environ:secret@sentry.io/project"
+        os.environ["DSN"] = expected_dsn
+        dns = {'dsn': '{DSN}'}
+        GlobalConfig._parse_trace_sentry(dns)
+        assert expected_dsn == GlobalConfig._trace_sentry[0]
+        GlobalConfig._trace_sentry.pop()
+
+
     def test_set_config_yaml_simple(self):
         test_file = os.path.join(self.DATA_DIR, 'test_set_config.yaml')
         Config.set_config_yaml(test_file, flow_definition_files=[test_file])
