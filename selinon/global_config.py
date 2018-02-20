@@ -55,7 +55,7 @@ class GlobalConfig(object):
 
         for entry in cls._trace_sentry:
             output.write("%s%s.trace_by_sentry(dsn=%s)\n"
-                         % (indent, config_name, "'%s'" % entry if entry is not True else None))
+                         % (indent, config_name, "'%s'" % entry if entry != '' else None))
 
         if cls._trace_json is True:
             output.write("%s%s.trace_by_json()\n" % (indent, config_name))
@@ -130,7 +130,8 @@ class GlobalConfig(object):
         if unknown_conf:
             raise ConfigurationError("Unknown configuration for Sentry trace function supplied: %s" % unknown_conf)
 
-        cls._trace_sentry.append(trace_def.get('dsn', True))
+        dsn = trace_def.get('dsn', '').format(**os.environ)
+        cls._trace_sentry.append(dsn)
 
     @classmethod
     def _parse_trace_json(cls, trace_def):
