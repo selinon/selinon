@@ -48,7 +48,7 @@ The tracing function has two arguments - ``event`` and ``msg_dict``. Argument ``
 
 .. danger::
 
-  Note that **raising exceptions in the tracing function leads to undefined behaviour**.
+  Note that if any error in tracing function occurs, worker or dispatcher will report this error to standard Python logging and will continue with tracing to other trace functions if configured so.
 
 .. note::
 

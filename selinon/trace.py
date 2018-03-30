@@ -194,6 +194,8 @@ import logging
 import platform
 import sys
 
+_LOGGER = logging.getLogger(__name__)
+
 
 class Trace(object):
     """Trace system flow actions."""
@@ -266,7 +268,7 @@ class Trace(object):
         FLOW_RETRY,
         MIGRATION_SKEW,
         MIGRATION_ERROR,
-        EAGER_FAILURE
+        EAGER_FAILURE,
     )
 
     _event_strings = (
@@ -383,7 +385,11 @@ class Trace(object):
         to_report.update(msg_dict_kwargs)
 
         for trace_func in cls._trace_functions:
-            trace_func(event, to_report)
+            try:
+                trace_func(event, to_report)
+            except Exception as exc:  # pylint: disable=broad-except
+                # To prevent from recursively reporting errors, this error is reported only to standard logging.
+                _LOGGER.exception("Failed to report to trace function %r: %s", trace_func, str(exc))
 
     @classmethod
     def event2str(cls, event):
