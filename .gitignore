@@ -4,6 +4,7 @@ venv/
 venv-coala/
 __pycache__
 build
+.idea/
 selinon.egg-info
 dist
 TODO
