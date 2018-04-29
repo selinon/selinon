@@ -29,12 +29,12 @@ First, let's install Selinon from PyPI:
 
 Selinon comes with extras (also known as bundles in another terminology) to reduce your dependencies. You can select desired bundles from the list bellow:
 
- * celery - needed if you use Celery
- * mongodb - needed for MongoDB `storage adapter <storage>`
- * postgresql - needed for PostgreSQL `storage adapter <storage>`
- * redis - needed for Redis `storage adapter <storage>`
- * s3 - needed for S3 `storage adapter <storage>`
- * sentry - needed for `Sentry support <trace>`
+* celery - needed if you use Celery
+* mongodb - needed for MongoDB :ref:`storage adapter <storage>`
+* postgresql - needed for PostgreSQL :ref:`storage adapter <storage>`
+* redis - needed for Redis :ref:`storage adapter <storage>`
+* s3 - needed for S3 :ref:`storage adapter <storage>`
+* sentry - needed for :ref:`Sentry support <trace>`
 
 To install Selinon with all extras issue the following command:
 
