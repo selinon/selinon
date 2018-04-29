@@ -172,6 +172,24 @@ Installation
 
     $ pip3 install selinon
 
+Available extras:
+
+ * celery - needed if you use Celery
+ * mongodb - needed for MongoDB `storage adapter <http://selinon.readthedocs.io/en/latest/storage.html>`_
+ * postgresql - needed for PostgreSQL `storage adapter <http://selinon.readthedocs.io/en/latest/storage.html>`_
+ * redis - needed for Redis `storage adapter <http://selinon.readthedocs.io/en/latest/storage.html>`_
+ * s3 - needed for S3 `storage adapter <http://selinon.readthedocs.io/en/latest/storage.html>`_
+ * sentry - needed for `Sentry support <http://selinon.readthedocs.io/en/latest/trace.html#sentry-integration>`_
+
+Extras can be installed via:
+
+::
+
+    $ pip3 install selinon[celery,mongodb,postgresql,redis,s3,sentry]
+
+Feel free to select only needed extras for your setup.
+
+
 .. |codecov| image:: https://codecov.io/gh/selinon/selinon/branch/master/graph/badge.svg
 .. |PyPI Current Version| image:: https://img.shields.io/pypi/v/selinon.svg
 .. |PyPI Implementation| image:: https://img.shields.io/pypi/implementation/selinon.svg
