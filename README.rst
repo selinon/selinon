@@ -174,12 +174,12 @@ Installation
 
 Available extras:
 
- * celery - needed if you use Celery
- * mongodb - needed for MongoDB `storage adapter <http://selinon.readthedocs.io/en/latest/storage.html>`_
- * postgresql - needed for PostgreSQL `storage adapter <http://selinon.readthedocs.io/en/latest/storage.html>`_
- * redis - needed for Redis `storage adapter <http://selinon.readthedocs.io/en/latest/storage.html>`_
- * s3 - needed for S3 `storage adapter <http://selinon.readthedocs.io/en/latest/storage.html>`_
- * sentry - needed for `Sentry support <http://selinon.readthedocs.io/en/latest/trace.html#sentry-integration>`_
+* celery - needed if you use Celery
+* mongodb - needed for MongoDB `storage adapter <http://selinon.readthedocs.io/en/latest/storage.html>`_
+* postgresql - needed for PostgreSQL `storage adapter <http://selinon.readthedocs.io/en/latest/storage.html>`_
+* redis - needed for Redis `storage adapter <http://selinon.readthedocs.io/en/latest/storage.html>`_
+* s3 - needed for S3 `storage adapter <http://selinon.readthedocs.io/en/latest/storage.html>`_
+* sentry - needed for `Sentry support <http://selinon.readthedocs.io/en/latest/trace.html#sentry-integration>`_
 
 Extras can be installed via:
 
