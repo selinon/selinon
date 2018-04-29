@@ -21,6 +21,29 @@ In order to use Selinon, you have to :ref:`implement tasks <tasks>` and define y
 Setting up Selinon
 ##################
 
+First, let's install Selinon from PyPI:
+
+.. code-block:: console
+
+  $ pip3 install selinon
+
+Selinon comes with extras (also known as bundles in another terminology) to reduce your dependencies. You can select desired bundles from the list bellow:
+
+ * celery - needed if you use Celery
+ * mongodb - needed for MongoDB `storage adapter <storage>`
+ * postgresql - needed for PostgreSQL `storage adapter <storage>`
+ * redis - needed for Redis `storage adapter <storage>`
+ * s3 - needed for S3 `storage adapter <storage>`
+ * sentry - needed for `Sentry support <trace>`
+
+To install Selinon with all extras issue the following command:
+
+.. code-block:: console
+
+    $ pip3 install selinon[celery,mongodb,postgresql,redis,s3,sentry]
+
+Feel free to select only extras you need in your deployment.
+
 In order to configure Selinon you need to create Celery's ``app`` instance, pass all Celery-related configuration to it. After that you are ready to configure Selinon:
 
 .. code-block:: python
