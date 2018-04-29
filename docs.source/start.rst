@@ -42,6 +42,10 @@ To install Selinon with all extras issue the following command:
 
     $ pip3 install selinon[celery,mongodb,postgresql,redis,s3,sentry]
 
+.. note::
+
+  Some terminals (such as zsh) might require quoting: ``pip3 install "selinon[celery,mongodb,postgresql,redis,s3,sentry]"``
+
 Feel free to select only extras you need in your deployment.
 
 In order to configure Selinon you need to create Celery's ``app`` instance, pass all Celery-related configuration to it. After that you are ready to configure Selinon:
