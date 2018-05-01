@@ -6,6 +6,8 @@
 # ######################################################################
 """Selinon adapter for Amazon S3 storage."""
 
+import json
+
 try:
     import boto3
     import botocore
@@ -22,7 +24,7 @@ class S3(DataStorage):
     """
 
     def __init__(self, bucket, location, endpoint_url=None, use_ssl=None,
-                 aws_access_key_id=None, aws_secret_access_key=None, region_name=None):
+                 aws_access_key_id=None, aws_secret_access_key=None, region_name=None, serialize_json=False):
         """Initialize S3 storage adapter from YAML configuration file.
 
         :param bucket: bucket name to be used
@@ -40,6 +42,7 @@ class S3(DataStorage):
         self._s3 = None
         self._use_ssl = use_ssl
         self._endpoint_url = endpoint_url
+        self._serialize_json = serialize_json
         self._session = boto3.session.Session(aws_access_key_id=aws_access_key_id,
                                               aws_secret_access_key=aws_secret_access_key,
                                               region_name=region_name)
@@ -74,10 +77,19 @@ class S3(DataStorage):
 
     def retrieve(self, flow_name, task_name, task_id):  # noqa
         assert self.is_connected()  # nosec
-        return self._s3.Object(self._bucket_name, task_id).get()['Body'].read()
+
+        blob = self._s3.Object(self._bucket_name, task_id).get()['Body'].read()
+        if not self._serialize_json:
+            return blob
+
+        return json.loads(blob.decode())
 
     def store(self, node_args, flow_name, task_name, task_id, result):  # noqa
         assert self.is_connected()  # nosec
+
+        if self._serialize_json:
+            result = json.dumps(result).encode()
+
         self._s3.Object(self._bucket_name, task_id).put(Body=result)
 
     def store_error(self, node_args, flow_name, task_name, task_id, exc_info):  # noqa
