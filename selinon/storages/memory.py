@@ -54,6 +54,8 @@ class InMemoryStorage(DataStorage):
         except KeyError:
             raise FileNotFoundError("Record not found in database")
 
+        return result
+
     def store(self, node_args, flow_name, task_name, task_id, result):  # noqa
         assert task_id not in self.database  # nosec
 
