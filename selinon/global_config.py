@@ -147,9 +147,6 @@ class GlobalConfig(object):
         if not isinstance(trace_def, bool):
             raise ConfigurationError("Configuration of JSON tracing expects bool, got '%s' instead (type: %s)"
                                      % (trace_def, type(trace_def)))
-        if cls._trace_json is not None:
-            raise ConfigurationError("Configuration of JSON tracing supplied multiple times")
-
         cls._trace_json = trace_def
 
     @classmethod
