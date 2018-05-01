@@ -34,6 +34,7 @@ class S3(DataStorage):
         :param aws_access_key_id: AWS access key
         :param aws_secret_access_key: AWS secret access key
         :param region_name: region to be used
+        :param serialize_json: serialize JSON output (dict or list) to a blob - needed as S3 objects are blobs
         """
         # AWS access key and access id are handled by Boto - place them to config or use env variables
         super().__init__()
