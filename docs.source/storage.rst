@@ -19,7 +19,7 @@ A configuration example:
   storages:
     - name: 'MySqlStorage'
       classname: 'PostgreSQL'
-      import: 'selinon.storage.postgresql'
+      import: 'selinon.storages.postgresql'
       configuration:
         connection_string: 'postgres://postgres:postgres@postgres:5432/postgres'
         encoding: 'utf-8'
@@ -41,14 +41,12 @@ A configuration example:
   storages:
     - name: 'MyRedisStorage'
       classname: 'Redis'
-      import: 'selinon.storage.redis'
+      import: 'selinon.storages.redis'
       configuration:
         host: 'redishost'
         port: 6379
         db: 0
-        password: 'secretpassword'
         charset: 'utf-8'
-        host: 'mongohost'
       port: 27017
 
 The implementation is available in :mod:`selinon.storages.redis`.
@@ -67,7 +65,7 @@ A configuration example:
   storages:
     - name: 'MyMongoStorage'
       classname: 'MongoDB'
-      import: 'selinon.storage.mongodb'
+      import: 'selinon.storages.mongodb'
       configuration:
         db_name: 'database_name'
         collection_name: 'collection_name'
@@ -91,7 +89,7 @@ A configuration example:
   storages:
     - name: 'MyS3Storage'
       classname: 'S3Storage'
-      import: 'selinon.storage.s3'
+      import: 'selinon.storages.s3'
       configuration:
         bucket: 'my-bucket-name'
         aws_access_key_id: 'AAAAAAAAAAAAAAAAAAAA'
@@ -110,7 +108,7 @@ A configuration example:
   storages:
     - name: 'Memory'
       classname: 'InMemoryStorage'
-      import: 'selinon.storage.memory'
+      import: 'selinon.storages.memory'
       configuration:
         echo: false
 
