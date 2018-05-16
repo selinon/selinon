@@ -18,7 +18,7 @@ Check your `result backend configuration for Celery <http://docs.celeryproject.o
 Can I see Selinon in action?
 ****************************
 
-See `Selinon demo <https://github.com/selinon/demo>`_ or `fabric8-analytics project <https://github.com/fabric8-analytics>`_, especially it's `fabric8-analytics-worker <https://github.com/fabric8-analytics/fabric8-analytics-worker>`_.
+See `Selinon demo <https://github.com/selinon/demo-deployment>`_ or `fabric8-analytics project <https://github.com/fabric8-analytics>`_, especially it's `fabric8-analytics-worker <https://github.com/fabric8-analytics/fabric8-analytics-worker>`_.
 
 Can I simulate Selinon run without deploying huge infrastructure?
 *****************************************************************
@@ -29,7 +29,7 @@ Yes, you can. Just use shipped executor:
 
   selinon-cli execute --nodes-definition nodes.yml --flow-definitions flow1.yml flow2.yml --help
 
-This way you can also use Selinon to run your flows from a CLI. You can also explore prepared `containerized demo <http://github.com/selinon/demo>`_.
+This way you can also use Selinon to run your flows from a CLI. You can also explore prepared `containerized demo <http://github.com/selinon/demo-deployment>`_.
 
 I'm getting Python related errors!
 **********************************

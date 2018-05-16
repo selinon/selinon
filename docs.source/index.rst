@@ -40,7 +40,7 @@ Even if you do not plan to run Selinon in a distributed environment, you could s
 Is there available a demo?
 ##########################
 
-You can take a look at `Selinon demo <https://github.com/selinon/demo>`_ so you can see how Selinon works without deep diving into code and configuration. Just run:
+You can take a look at `Selinon demo <https://github.com/selinon/demo-deployment>`_ so you can see how Selinon works without deep diving into code and configuration. Just run:
 
 .. code-block:: console
 
@@ -69,7 +69,7 @@ See also
 
 * `Selinon on GitHub <https://github.com/selinon/selinon/>`_
 * `Selinon organization with various repos on GitHub <https://github.com/selinon>`_
-* `Selinon demo on GitHub <https://github.com/selinon/demo>`_
+* `Selinon demo on GitHub <https://github.com/selinon/demo-deployment>`_
 * `Celery configuration <http://docs.celeryproject.org/en/latest/userguide/configuration.html>`_
 
 Indices and tables

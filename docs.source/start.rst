@@ -62,7 +62,7 @@ In order to configure Selinon you need to create Celery's ``app`` instance, pass
   Config.set_celery_app(app)
   Config.set_config_yaml('path/to/nodes.yaml', ['path/to/flow1.yaml', 'path/to/flow2.yaml'])
 
-Please refer to `Celery configuration <http://docs.celeryproject.org/en/latest/userguide/configuration.html>`_ or `Selinon demo <https://github.com/selinon/demo>`_ for Celery-related pieces. You can also find an example in `Selinon demo configuration <https://github.com/selinon/demo/blob/master/worker/myapp/configuration.py>`_.
+Please refer to `Celery configuration <http://docs.celeryproject.org/en/latest/userguide/configuration.html>`_ or `Selinon demo <https://github.com/selinon/demo-worker>`_ for Celery-related pieces. You can also find an example in `Selinon demo configuration <https://github.com/selinon/demo-worker/blob/master/>`_.
 
 Naming convention
 #################
