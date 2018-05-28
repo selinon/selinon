@@ -45,6 +45,11 @@ task queue) written in Python3, that allows you to:
 -  And (of course) much more... check
    `docs <https://selinon.readthedocs.io>`__
 
+YouTube Video
+-------------
+
+Let's explain Selinon using a `YouTube video (click to redirect to YouTube) <https://www.youtube.com/watch?v=Wwwi8e2wI1w>`_.
+
 About
 -----
 
