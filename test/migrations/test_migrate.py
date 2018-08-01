@@ -183,14 +183,10 @@ class TestPerformMigration(SelinonTestCase):
                                           finished_nodes={'Task1': ['id1'], 'Task2': ['id2']}))
     def test_migration_flow_retry_chained(self, exc_info):
         """The second migration in the chain should raise a failure (tainted edges)."""
-        assert exc_info.value.migration_version == 3
+        assert exc_info.value.migration_version == 2
         assert exc_info.value.latest_migration_version == 3
-        assert exc_info.value.tainting_nodes is None
-        assert exc_info.value.tainted_edge == {
-            'condition_str': {'name': 'alwaysTrue'},
-            'from': ['Task2'],
-            'to': ['Task3']
-        }
+        assert exc_info.value.tainting_nodes == ['Task2']
+        assert exc_info.value.tainted_edge is None
 
     @migrate_message_exception(MigrationFlowFail, 'flow1', 1,
                                state_dict(active_nodes=[{'name': 'Task3', 'id': 'id3'}],
@@ -209,11 +205,7 @@ class TestPerformMigration(SelinonTestCase):
                                           finished_nodes={'Task1': ['id1'], 'Task2': ['id2']}))
     def test_migration_flow_fail_chained(self, exc_info):
         """The second migration in the chain should raise a failure (tainted edges)."""
-        assert exc_info.value.migration_version == 3
+        assert exc_info.value.migration_version == 2
         assert exc_info.value.latest_migration_version == 3
-        assert exc_info.value.tainting_nodes is None
-        assert exc_info.value.tainted_edge == {
-            'condition_str': {'name': 'alwaysTrue'},
-            'from': ['Task2'],
-            'to': ['Task3']
-        }
+        assert exc_info.value.tainting_nodes == ['Task2']
+        assert exc_info.value.tainted_edge is None
