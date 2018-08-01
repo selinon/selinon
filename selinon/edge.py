@@ -11,7 +11,7 @@ from .helpers import check_conf_keys
 from .predicate import Predicate
 
 
-class Edge(object):
+class Edge:
     """Edge representation."""
 
     _DEFAULT_RUN_SUBSEQUENT = False

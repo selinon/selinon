@@ -10,7 +10,7 @@ from .errors import ConfigurationError
 from .helpers import check_conf_keys
 
 
-class CacheConfig(object):
+class CacheConfig:
     """Configuration for Caching."""
 
     _DEFAULT_CACHE_NAME = 'LRU'

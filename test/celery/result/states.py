@@ -6,7 +6,7 @@
 # ######################################################################
 
 
-class states(object):
+class states:
     """
     Task states as defined in Celery (only name conforms)
     """

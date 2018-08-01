@@ -6,7 +6,7 @@
 # ######################################################################
 
 
-class StorageTaskNameMock(object):
+class StorageTaskNameMock:
     """Mock storage_task_name dict from configuration"""
     def __init__(self):
         pass

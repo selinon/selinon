@@ -13,7 +13,7 @@ from .failure_node import FailureNode
 from .helpers import check_conf_keys
 
 
-class Failures(object):
+class Failures:
     """Node failures and fallback handling."""
 
     def __init__(self, raw_definition, system, flow, last_allocated=None, starting_nodes=None, predicates=None):

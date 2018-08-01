@@ -16,7 +16,7 @@ from .lock_pool import LockPool
 from .trace import Trace
 
 
-class StoragePool(object):
+class StoragePool:
     """A pool that carries all database connections for workers."""
 
     _storage_pool_locks = LockPool()

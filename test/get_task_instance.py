@@ -6,7 +6,7 @@
 # ######################################################################
 
 
-class GetTaskInstance(object):
+class GetTaskInstance:
     """
     Task instance factory used in system state to instantiate tasks
     """

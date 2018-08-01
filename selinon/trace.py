@@ -197,7 +197,7 @@ import sys
 _LOGGER = logging.getLogger(__name__)
 
 
-class Trace(object):
+class Trace:
     """Trace system flow actions."""
 
     _trace_functions = []

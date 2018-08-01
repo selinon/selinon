@@ -10,7 +10,7 @@ from .states import states
 
 
 # TODO: rename finished_mapping
-class AsyncResult(object):
+class AsyncResult:
     _finished_mapping = {}
     _result_mapping = {}
 

@@ -10,7 +10,7 @@ from .errors import ConfigurationError
 from .helpers import check_conf_keys
 
 
-class SelectiveRunFunction(object):
+class SelectiveRunFunction:
     """Function that is run on selective flow/task run to ensure whether task/flow should be run."""
 
     _DEFAULT_IMPORT_PATH = 'selinon.routines'
