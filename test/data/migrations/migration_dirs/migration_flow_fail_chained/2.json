@@ -23,5 +23,5 @@
       "translation": {}
     }
   },
-  "tainted_flow_strategy": "IGNORE"
+  "tainted_flow_strategy": "FAIL"
 }

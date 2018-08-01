@@ -31,5 +31,5 @@
       "translation": {}
     }
   },
-  "tainted_flow_strategy": "FAIL"
+  "tainted_flow_strategy": "RETRY"
 }
