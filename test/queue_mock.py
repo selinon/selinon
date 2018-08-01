@@ -6,7 +6,7 @@
 # ######################################################################
 
 
-class QueueMock(object):
+class QueueMock:
     queue_string = 'queue_%s'
 
     def __getitem__(self, item):

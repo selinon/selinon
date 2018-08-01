@@ -6,7 +6,7 @@
 # ######################################################################
 
 
-class RequestMock(object):
+class RequestMock:
     def __getattr__(self, item):
         assert item == 'id'
         return '<id>'

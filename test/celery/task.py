@@ -6,7 +6,7 @@
 # ######################################################################
 
 
-class Task(object):
+class Task:
     def __init__(self):
         # In case of instantiating SelinonTaskEnvelope or Dispatcher, we are not passing any arguments
         self.task_name = None

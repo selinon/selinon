@@ -12,7 +12,7 @@ from .errors import ConfigurationError
 from .helpers import check_conf_keys
 
 
-class GlobalConfig(object):
+class GlobalConfig:
     """User global configuration stated in YAML file."""
 
     DEFAULT_CELERY_QUEUE = 'celery'

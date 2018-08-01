@@ -31,7 +31,7 @@ from .version import selinon_version
 # pylint: disable=too-many-locals,too-many-nested-blocks,too-many-boolean-expressions,too-many-lines
 
 
-class System(object):
+class System:
     """The representation of the whole system."""
 
     _logger = logging.getLogger(__name__)

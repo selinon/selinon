@@ -9,10 +9,10 @@
 from .time_queue import TimeQueue
 
 
-class QueuePool(object):
+class QueuePool:
     """Pool of all queues in the system."""
 
-    class _QueueWrapper(object):
+    class _QueueWrapper:
         """Wrap a queue so we carry additional info needed for QueuePool - cyclic double linked list."""
 
         def __init__(self, previous_wrapper, next_wrapper, queue_name):

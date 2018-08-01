@@ -32,10 +32,12 @@ def expr2str(expr):
     """Convert a Python expression into a Python code."""
     if isinstance(expr, dict):
         return str(expr)
-    elif isinstance(expr, list):
+
+    if isinstance(expr, list):
         # s/'['foo']['bar']'/['foo']['bar']/ (get rid of leading ')
         return "%s" % expr
-    elif isinstance(expr, str):
+
+    if isinstance(expr, str):
         return "'%s'" % expr
 
     # some built-in type such as bool/int/...

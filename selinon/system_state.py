@@ -26,7 +26,7 @@ from .task_envelope import SelinonTaskEnvelope
 from .trace import Trace
 
 
-class SystemState(object):  # pylint: disable=too-many-instance-attributes
+class SystemState:  # pylint: disable=too-many-instance-attributes
     """Main system actions done by Selinon."""
 
     # Throttled nodes in the current worker: node name -> next schedule time
@@ -212,8 +212,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                 throttled_nodes[node_name] = next_run
 
                 return countdown if countdown > 0 else None
-            else:
-                return None
+
+        return None
 
     def _get_successful_and_failed(self, reused):
         """Retrieve info about successful and failed nodes.
@@ -324,9 +324,11 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             }
 
             countdown = self._get_countdown(node_name, is_flow=True)
-            async_result = Dispatcher().apply_async(kwargs=kwargs,
-                                                    queue=Config.dispatcher_queues[node_name],
-                                                    countdown=countdown)
+            async_result = Dispatcher().apply_async(  # pylint: disable=assignment-from-no-return
+                kwargs=kwargs,
+                queue=Config.dispatcher_queues[node_name],
+                countdown=countdown
+            )
 
             Trace.log(Trace.SUBFLOW_SCHEDULE, {
                 'flow_name': self._flow_name,
@@ -353,9 +355,11 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             }
 
             countdown = self._get_countdown(node_name, is_flow=False)
-            async_result = SelinonTaskEnvelope().apply_async(kwargs=kwargs,
-                                                             queue=Config.task_queues[node_name],
-                                                             countdown=countdown)
+            async_result = SelinonTaskEnvelope().apply_async(  # pylint: disable=assignment-from-no-return
+                kwargs=kwargs,
+                queue=Config.task_queues[node_name],
+                countdown=countdown
+            )
 
             Trace.log(Trace.TASK_SCHEDULE, kwargs, {
                 'task_id': async_result.task_id,
@@ -407,8 +411,8 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
             if edge_idx not in self._selective['waiting_edges_subset'][self._flow_name].keys():
                 Trace.log(Trace.SELECTIVE_OMIT_EDGE, trace_msg)
                 return [], []
-            else:
-                nodes2start = self._selective['waiting_edges_subset'][self._flow_name][edge_idx]
+
+            nodes2start = self._selective['waiting_edges_subset'][self._flow_name][edge_idx]
 
         if 'foreach' in edge:
             iterable = edge['foreach'](storage_pool, node_args)
@@ -611,15 +615,15 @@ class SystemState(object):  # pylint: disable=too-many-instance-attributes
                         d[m_k] = {}
                     d = d[m_k]
                 return d
-            else:
-                # If we have compound, the key to list of task is flow name.
-                # This will allow to use conditions as expected.
-                # e.g.:
-                #  {'flow1': {'Task1': ['task1_id1', 'task1_id2'],
-                #            {'Task2': ['task2_id1', 'task2_id2']}
-                if flow_name not in d:
-                    d[flow_name] = {}
-                return d[flow_name]
+
+            # If we have compound, the key to list of task is flow name.
+            # This will allow to use conditions as expected.
+            # e.g.:
+            #  {'flow1': {'Task1': ['task1_id1', 'task1_id2'],
+            #            {'Task2': ['task2_id1', 'task2_id2']}
+            if flow_name not in d:
+                d[flow_name] = {}
+            return d[flow_name]
 
         def push_flow(s, p_n_name, flow_result, k):
             # pylint: disable=invalid-name,missing-docstring

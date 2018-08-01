@@ -10,7 +10,7 @@ Classes and functions to make Selinon executor work as a standalone CLI.
 """
 
 
-class SimulateRequest(object):
+class SimulateRequest:
     """Simulate Celery's Task.request.
 
     Make possible to query task id right inside task by calling self.request.id
@@ -24,7 +24,7 @@ class SimulateRequest(object):
         self.id = str(id(instance))  # pylint: disable=redefined-builtin,invalid-name
 
 
-class SimulateAsyncResult(object):
+class SimulateAsyncResult:
     """Simulate AsyncResult returned by apply_async() or by instantiating AsyncResult by Task id."""
 
     task_failures = {}

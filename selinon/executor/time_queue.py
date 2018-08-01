@@ -9,10 +9,10 @@
 import heapq
 
 
-class TimeQueue(object):
+class TimeQueue:
     """A queue that respect timestamps of records that were pushed into it."""
 
-    class _TimeQueueItem(object):
+    class _TimeQueueItem:
         """TimeQueue internal item."""
 
         def __init__(self, time, record):

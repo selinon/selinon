@@ -14,7 +14,7 @@ def _raise_import_exception():
 try:
     from celery.result import AsyncResult
 except ImportError as exception:
-    class AsyncResult(object):
+    class AsyncResult:
         """Wrap AsyncResult so other parts of Selinon can work (e.g. executor)."""
 
         def __init__(self):
@@ -23,7 +23,7 @@ except ImportError as exception:
 try:
     from celery import Task
 except ImportError:
-    class Task(object):
+    class Task:
         """Substitute Celery's task so we do not fail with importing - raise once usage is requested."""
 
         def __init__(self):

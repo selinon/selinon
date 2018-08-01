@@ -10,7 +10,7 @@ from selinon import Cache
 from selinon.errors import CacheMissError
 
 
-class _Record(object):
+class _Record:
     """Record that is used in a double-linked list in order to track usage."""
 
     def __init__(self, item_id, item):  # noqa

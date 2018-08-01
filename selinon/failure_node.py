@@ -55,7 +55,7 @@ from .errors import ConfigurationError
 from .predicate import Predicate
 
 
-class FailureNode(object):
+class FailureNode:
     """A representation of a failure node permutation."""
 
     def __init__(self, flow, traversed, failure_link):

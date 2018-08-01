@@ -13,7 +13,7 @@ from .helpers import check_conf_keys
 from .helpers import get_function_arguments
 
 
-class Strategy(object):
+class Strategy:
     """Sampling strategy for Dispatcher."""
 
     _DEFAULT_MODULE = 'selinon.strategies'

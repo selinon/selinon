@@ -27,7 +27,7 @@ from .tainted_flow_strategy import TaintedFlowStrategy
 _logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-class Migrator(object):
+class Migrator:
     """Main class for performing configuration file migrations."""
 
     def __init__(self, migration_dir=None):

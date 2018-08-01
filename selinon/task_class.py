@@ -7,7 +7,7 @@
 """A Python class abstraction."""
 
 
-class TaskClass(object):
+class TaskClass:
     """Task's class abstraction."""
 
     def __init__(self, class_name, import_path):

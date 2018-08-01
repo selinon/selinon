@@ -11,7 +11,7 @@ import sys
 from time import sleep
 
 
-class Progress(object):
+class Progress:
     """Indicate progress and sleep for given time."""
 
     _indicators = ('-', '\\', '|', '/')

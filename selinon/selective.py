@@ -122,8 +122,8 @@ def _raise_for_result_check(task_names, path):
     :raises SelectiveNoPathError: there was not found any path to the given node
     """
     visited_marking = dict.fromkeys(task_names, False)
-    for node in visited_marking.keys():
-        for flow in path.keys():
+    for node in visited_marking:
+        for flow in path:
             if any(n == node for n in chain(*path[flow].values())):
                 visited_marking[node] = True
 

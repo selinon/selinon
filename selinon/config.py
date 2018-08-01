@@ -31,36 +31,36 @@ def requires_initialization(func):
     return wrapper
 
 
-class Config(object):
+class Config:
     """All user configurations generated from YAML file."""
 
     _logger = logging.getLogger(__name__)
 
     celery_app = None
 
-    flows = None
-    task_classes = None
-    edge_table = None
-    nowait_nodes = None
+    flows = {}
+    task_classes = {}
+    edge_table = {}
+    nowait_nodes = {}
     eager_failures = None
     max_retry = None
     retry_countdown = None
-    storage2storage_cache = None
-    storage_readonly = None
-    storage_task_name = None
-    propagate_node_args = None
-    propagate_parent = None
-    propagate_finished = None
-    propagate_compound_finished = None
+    storage2storage_cache = {}
+    storage_readonly = {}
+    storage_task_name = {}
+    propagate_node_args = {}
+    propagate_parent = {}
+    propagate_finished = {}
+    propagate_compound_finished = {}
     output_schemas = None
-    async_result_cache = None
+    async_result_cache = {}
     migration_dir = None
 
-    storage_mapping = None
-    task2storage_mapping = None
-    dispatcher_queues = None
-    task_queues = None
-    strategies = None
+    storage_mapping = {}
+    task2storage_mapping = {}
+    dispatcher_queues = {}
+    task_queues = {}
+    strategies = {}
 
     # Called from generated python code to mark that the configuration was correctly set up
     initialized = False

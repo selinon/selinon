@@ -18,7 +18,7 @@ from selinon.system_state import SystemState
 from selinon.trace import Trace
 
 
-class _ThrottleTasks(object):
+class _ThrottleTasks:
     def __init__(self, is_flow, throttle_conf=None):
         self._is_flow = is_flow
         self._throttle_conf = throttle_conf or {}
@@ -29,7 +29,7 @@ class _ThrottleTasks(object):
         return self._throttle_conf.get(item)
 
 
-class _AsyncResultCacheMock(object):
+class _AsyncResultCacheMock:
     def __init__(self, is_flow):
         self.is_flow = is_flow
         self.cache = LRU(max_cache_size=0)
@@ -40,7 +40,7 @@ class _AsyncResultCacheMock(object):
         return self.cache
 
 
-class _TaskResultCacheMock(object):
+class _TaskResultCacheMock:
     def __init__(self):
         self.cache = LRU(max_cache_size=0)
 
@@ -48,7 +48,7 @@ class _TaskResultCacheMock(object):
         return self.cache
 
 
-class _SelectiveRunFunctionMock(object):
+class _SelectiveRunFunctionMock:
     def __getitem__(self, item):
         def func(flow_name, node_name, node_args, task_names, storage_pool):
             # Always return None so we always execute task before the desired one
@@ -56,7 +56,7 @@ class _SelectiveRunFunctionMock(object):
         return func
 
 
-class SelinonTestCase(object):
+class SelinonTestCase:
     """
     Main class for Selinon testing
     """

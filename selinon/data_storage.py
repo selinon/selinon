@@ -9,7 +9,7 @@
 import abc
 
 
-class DataStorage(object, metaclass=abc.ABCMeta):
+class DataStorage(metaclass=abc.ABCMeta):
     """Abstract Selinon storage adapter that is implemented by a user."""
 
     @abc.abstractmethod

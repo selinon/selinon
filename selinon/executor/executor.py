@@ -49,7 +49,7 @@ from .progress import Progress
 from .queue_pool import QueuePool
 
 
-class Executor(object):
+class Executor:
     """Executor that executes Selinon run in a multi-process environment."""
 
     executor_queues = QueuePool()
@@ -165,7 +165,7 @@ class Executor(object):
                 else:
                     # reschedule if there was an exception and we did not hit max_retries when doing retry
                     Executor.schedule(task, selinon_exc.celery_kwargs)
-            except KeyboardInterrupt:
+            except KeyboardInterrupt:  # pylint: disable=try-except-raise
                 raise
             except Exception as exc:
                 raise UnknownError("Ooooops! Congratulations! It looks like you've found a bug! Feel free to open an "

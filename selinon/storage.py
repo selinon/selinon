@@ -11,7 +11,7 @@ from .errors import ConfigurationError
 from .helpers import check_conf_keys
 
 
-class Storage(object):
+class Storage:
     """A storage representation."""
 
     def __init__(self, name, import_path, configuration, cache_config, class_name=None):
