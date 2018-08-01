@@ -17,3 +17,4 @@ coverage.xml
 example/*.png
 *.rej
 *.orig
+*.swp
