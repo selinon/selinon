@@ -20,6 +20,9 @@ Crossroad
    documentation <https://selinon.readthedocs.io/en/latest/development.html>`__
 -  `Travis CI <https://travis-ci.org/selinon/selinon>`__
 
+
+Last stable release: `Selinon 1.0.0 <https://pypi.org/project/selinon/1.0.0/>`_
+
 TLDR;
 -----
 
