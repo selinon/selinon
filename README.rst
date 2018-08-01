@@ -50,7 +50,7 @@ YouTube Video
 
 Let's explain Selinon using a `YouTube video (click to redirect to YouTube) <https://www.youtube.com/watch?v=Wwwi8e2wI1w>`_.
 
-.. figure:: https://raw.githubusercontent.com/selinon/selinon/master/example/ironwoodland.jpeg
+.. figure:: https://raw.githubusercontent.com/selinon/selinon/master/example/ironwood.jpeg
    :alt: Ironwoodland
    :align: center
 
