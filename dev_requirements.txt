@@ -13,4 +13,4 @@ SQLAlchemy-Utils
 boto3
 redis
 celery
-raven
+sentry-sdk
