@@ -19,8 +19,9 @@ class TestTrace(SelinonTestCase):
         test_file = os.path.join(self.DATA_DIR, 'test_trace_setup.yaml')
         Config.set_config_yaml(test_file, flow_definition_files=[test_file])
 
-        # logging, sentry, storage and a custom function - 4 callbacks registered
-        assert len(Trace._trace_functions) == 4
+        # logging, sentry, storage and a custom function - 3 callbacks registered
+        # By default there is configured logging module to be used with Sentry.
+        assert len(Trace._trace_functions) == 3
         assert Trace._logger is not None
 
     @pytest.mark.skip(reason="trace calls are currently not tested")

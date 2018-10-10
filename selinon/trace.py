@@ -188,7 +188,6 @@ A list of events that can be traced:
 """
 
 import datetime
-import functools
 import json
 import logging
 import platform
@@ -346,18 +345,18 @@ class Trace:
         cls._trace_functions.append(cls.json_trace_func)
 
     @classmethod
-    def trace_by_sentry(cls, dsn=None):
+    def trace_by_sentry(cls, dsn):
         """Trace using Sentry (see https://sentry.io).
 
         :param dsn: data source name for connecting to Sentry
         """
         try:
-            from raven import Client
+            import sentry_sdk
         except ImportError as exc:
-            raise ImportError("Failed to import Raven for Sentry logging, install it using `pip3 install raven`")\
+            raise ImportError("Failed to import Sentry-SDK for Sentry logging, install it using `pip3 install sentry-sdk`")\
                 from exc
 
-        cls._trace_functions.append(functools.partial(cls.sentry_trace_func, Client(dsn)))
+        sentry_sdk.init(dsn)
 
     @classmethod
     def trace_by_func(cls, func):
@@ -442,18 +441,3 @@ class Trace:
             print(json.dumps(report_dict, sort_keys=True), file=sys.stderr)
         else:
             print(json.dumps(report_dict, sort_keys=True))
-
-    @classmethod
-    def sentry_trace_func(cls, raven_client, event, msg_dict):
-        """Trace using Sentry - requires Raven to be installed.
-
-        :param raven_client: instantiated Raven client
-        :param event: event that triggered trace point
-        :param msg_dict: a dict holding additional trace information for event
-        """
-        if event is not cls.TASK_FAILURE:
-            # Capture only task failures as they are relevant for end-user
-            return
-
-        # TODO: proper way would be to add exc_info directly to msg_dict and pass exception explicitly in args
-        raven_client.captureException(extra=msg_dict)

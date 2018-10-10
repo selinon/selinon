@@ -49,7 +49,7 @@ setup(
         'postgresql': ['SQLAlchemy', 'SQLAlchemy-Utils'],
         'redis': ['redis'],
         's3': ['boto3'],
-        'sentry': ['raven']
+        'sentry': ['sentry-sdk']
     },
     classifiers=[
         "Development Status :: 4 - Beta",
