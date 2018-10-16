@@ -187,6 +187,7 @@ A list of events that can be traced:
 
 """
 
+import os
 import datetime
 import json
 import logging
@@ -356,7 +357,7 @@ class Trace:
             raise ImportError("Failed to import Sentry-SDK for Sentry logging, install it using `pip3 install sentry-sdk`")\
                 from exc
 
-        sentry_sdk.init(dsn)
+        sentry_sdk.init(dsn.format(**os.environ))
 
     @classmethod
     def trace_by_func(cls, func):
