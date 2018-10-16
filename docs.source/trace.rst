@@ -71,7 +71,7 @@ As you can see, the ``trace`` section consists of list of tracing mechanisms bei
 Sentry integration
 ==================
 
-If you would like to use `Sentry <https://sentry.io>`_ for monitoring, you can use already existing support. Selinon reports all ``TASK_FAILURE`` events to the Sentry instance if you provide the following configuration:
+If you would like to use `Sentry <https://sentry.io>`_ for monitoring, you can use already existing support. Selinon reports all exceptions to the Sentry instance if you provide the following configuration:
 
 
 .. code-block:: yaml
@@ -79,6 +79,8 @@ If you would like to use `Sentry <https://sentry.io>`_ for monitoring, you can u
   global:
     trace:
       - sentry:
+          # You can use environment variables (DSN picked from SENTRY_DSN in this case) using the following notation:
+          # dsn: '{SENTRY_DSN}'
           dsn: 'http://5305e373726b40ca894d8cfd121dea34:78c848fac46040d1a3218cc0bf8ef6a7@sentry:9000/2'
 
 You need to adjust the `Sentry DSN <https://docs.sentry.io/quickstart/#configure-the-dsn>`_ configuration so it points to correctly set up Sentry instance.
