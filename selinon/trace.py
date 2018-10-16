@@ -187,10 +187,10 @@ A list of events that can be traced:
 
 """
 
-import os
 import datetime
 import json
 import logging
+import os
 import platform
 import sys
 
