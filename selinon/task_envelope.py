@@ -82,7 +82,7 @@ class SelinonTaskEnvelope(Task):
                                      'max_retry': max_retry})
         raise self.retry(kwargs=kwargs, countdown=retry_countdown, queue=Config.task_queues[task_name])
 
-    def run(self, task_name, flow_name, parent, node_args, dispatcher_id, retried_count=None):
+    def run(self, task_name, flow_name, parent, node_args, dispatcher_id, retried_count=None, config=None):
         # pylint: disable=arguments-differ,too-many-arguments,too-many-locals
         """Task entry-point called by Celery.
 
@@ -92,8 +92,11 @@ class SelinonTaskEnvelope(Task):
         :param node_args: node arguments within the flow
         :param dispatcher_id: dispatcher id that handles flow
         :param retried_count: number of already attempts that failed so task was retried
+        :param config: used to update the config on before each task
         :rtype: None
         """
+        if config:
+            Config._update_config(config)
         # we are passing args as one argument explicitly for now not to have troubles with *args and **kwargs mapping
         # since we depend on previous task and the result can be anything
         Trace.log(Trace.TASK_START, {'flow_name': flow_name,

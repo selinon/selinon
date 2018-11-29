@@ -19,6 +19,7 @@ from .errors import MigrationSkew
 from .migrations import Migrator
 from .system_state import SystemState
 from .trace import Trace
+import copy
 
 
 class Dispatcher(Task):
@@ -150,7 +151,7 @@ class Dispatcher(Task):
             raise self.selinon_retry(flow_info, adjust_retried_count=False)
 
     def run(self, flow_name, node_args=None, parent=None, retried_count=None, retry=None,
-            state=None, selective=False, migration_version=None):
+            state=None, selective=False, migration_version=None, config=None):
         # pylint: disable=too-many-arguments,arguments-differ,too-many-locals
         """Dispatcher entry-point - run each time a dispatcher is scheduled.
 
@@ -162,8 +163,13 @@ class Dispatcher(Task):
         :param state: the current system state
         :param selective: selective flow information if run in selective flow
         :param migration_version: migration version that was used for the flow
+        :param config: used to update the config on each task run
         :raises: FlowError
         """
+        copyconfig = copy.deepcopy(config)
+        if config:
+            Config._update_config(config)
+
         retried_count = retried_count or 0
         flow_info = {
             'flow_name': flow_name,
@@ -184,7 +190,8 @@ class Dispatcher(Task):
         self.migrate_message(flow_info)
 
         try:
-            system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent, selective)
+            system_state = SystemState(self.request.id, flow_name, node_args, retry, state, parent, selective,
+                                       copyconfig)
             retry = system_state.update()
         except FlowError as exc:
             max_retry = Config.max_retry.get(flow_name, 0)

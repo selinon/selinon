@@ -16,20 +16,32 @@ from .selective import compute_selective_run
 _logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-def run_flow(flow_name, node_args=None):
+def run_flow(flow_name, node_args=None, nodes_definition={}, flow_definitions={}):
     """Run flow by it's name.
 
     :param flow_name: name of the flow to be run
     :param node_args: arguments that will be supplied to flow
+    :param nodes_definition: arguments that will be supplied to flow to update config
+    :param flow_definitions: arguments that will be supplied to flow to update config
     :return: flow ID (dispatcher ID)
     """
+    config_module = {}
+
     if Config.dispatcher_queues is None or flow_name not in Config.dispatcher_queues:
         raise UnknownFlowError("No flow with name '%s' defined" % flow_name)
 
     queue = Config.dispatcher_queues[flow_name]
     _logger.debug("Scheduling flow '%s' with node_args '%s' on queue '%s'", flow_name, node_args, queue)
+
+    # construct config to pass into dispatcher
+    config_module['dispatcher_queues'] = Config.dispatcher_queues
+    config_module['task_queues'] = Config.task_queues
+    config_module['nodes_definition'] = nodes_definition
+    config_module['flow_definitions'] = flow_definitions
+
     return Dispatcher().apply_async(kwargs={'flow_name': flow_name,
-                                            'node_args': node_args},
+                                            'node_args': node_args,
+                                            'config': config_module},
                                     queue=queue)
 
 
