@@ -7,6 +7,7 @@
 """Selinon Dispatcher task implementation."""
 
 import traceback
+import copy
 
 from .celery import Task
 from .config import Config
@@ -19,7 +20,7 @@ from .errors import MigrationSkew
 from .migrations import Migrator
 from .system_state import SystemState
 from .trace import Trace
-import copy
+
 
 
 class Dispatcher(Task):
