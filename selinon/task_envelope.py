@@ -96,7 +96,7 @@ class SelinonTaskEnvelope(Task):
         :rtype: None
         """
         if config:
-            Config._update_config(config)
+            Config.set_config_dict(config['nodes_definition'], config['flow_definitions'])
         # we are passing args as one argument explicitly for now not to have troubles with *args and **kwargs mapping
         # since we depend on previous task and the result can be anything
         Trace.log(Trace.TASK_START, {'flow_name': flow_name,

@@ -66,17 +66,6 @@ class Config:
     initialized = False
 
     @classmethod
-    def _update_config(cls, config_module):
-        """Updates the configuration for each task execution
-
-        :param config_module: dict containing dispatcher_queues, task_queues,
-                              node_definition and flow_definition
-        """
-        cls.dispatcher_queues = config_module['dispatcher_queues']
-        cls.task_queues = config_module['task_queues']
-        cls.set_config_dict(config_module['nodes_definition'], config_module['flow_definitions'])
-
-    @classmethod
     def _set_config(cls, config_module):
         """Set configuration from Python's module.
 

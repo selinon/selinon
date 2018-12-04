@@ -169,7 +169,7 @@ class Dispatcher(Task):
         """
         copyconfig = copy.deepcopy(config)
         if config:
-            Config._update_config(config)
+            Config.set_config_dict(config['nodes_definition'], config['flow_definitions'])
 
         retried_count = retried_count or 0
         flow_info = {
