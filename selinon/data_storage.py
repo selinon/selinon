@@ -19,7 +19,6 @@ class DataStorage(metaclass=abc.ABCMeta):
         :param args: storage arguments as stated in YAML configuration file
         :param kwargs: storage key-value arguments as stated in YAML configuration (preferred over args)
         """
-        pass
 
     @abc.abstractmethod
     def connect(self):

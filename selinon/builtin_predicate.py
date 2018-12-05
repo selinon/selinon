@@ -17,8 +17,6 @@ from .predicate import Predicate
 class BuiltinPredicate(Predicate, metaclass=abc.ABCMeta):  # pylint: disable=abstract-method
     """Build in predicate abstract class."""
 
-    pass
-
 
 class NaryPredicate(BuiltinPredicate, metaclass=abc.ABCMeta):  # pylint: disable=abstract-method
     """N-ary predicate abstract class."""
@@ -282,7 +280,6 @@ class AlwaysTruePredicate(BuiltinPredicate):
 
     def check(self):  # noqa
         """Check predicate for consistency."""
-        pass
 
     def ast(self):
         """Python AST of this predicate (construct transitively for all indirect children as well).
