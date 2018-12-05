@@ -21,7 +21,6 @@ class Predicate(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __init__(self):
         """Instantiate predicate representation."""
-        pass
 
     @abc.abstractmethod
     def __str__(self):
@@ -30,7 +29,6 @@ class Predicate(metaclass=abc.ABCMeta):
         :return: string representation (Python code)
         :rtype: str
         """
-        pass
 
     @abc.abstractclassmethod
     def create(cls, tree, nodes_from, flow, can_inspect_results):
@@ -46,7 +44,6 @@ class Predicate(metaclass=abc.ABCMeta):
         :type can_inspect_results: bool
         :return: Predicate instance
         """
-        pass
 
     @abc.abstractmethod
     def ast(self):
@@ -54,7 +51,6 @@ class Predicate(metaclass=abc.ABCMeta):
 
         :return: AST of describing all children predicates
         """
-        pass
 
     @abc.abstractmethod
     def predicates_used(self):
@@ -63,7 +59,6 @@ class Predicate(metaclass=abc.ABCMeta):
         :return: used predicates by children
         :rtype: List[Predicate]
         """
-        pass
 
     @abc.abstractmethod
     def nodes_used(self):
@@ -72,7 +67,6 @@ class Predicate(metaclass=abc.ABCMeta):
         :return: list of nodes that are used
         :rtype: List[Node]
         """
-        pass
 
     @staticmethod
     def construct_default(flow):
@@ -173,7 +167,6 @@ class Predicate(metaclass=abc.ABCMeta):
 
         :raises ValueError: if predicate is not correct
         """
-        pass
 
     @abc.abstractmethod
     def requires_message(self):
@@ -181,4 +174,3 @@ class Predicate(metaclass=abc.ABCMeta):
 
         :return: True if a result from storage is required
         """
-        pass

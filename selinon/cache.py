@@ -21,7 +21,6 @@ class Cache(metaclass=abc.ABCMeta):
         :param task_name: name of task that result should/shouldn't be cached, unused when caching Celery's AsyncResult
         :param flow_name: name of flow in which task was executed, unused when caching Celery's AsyncResult
         """
-        pass
 
     @abc.abstractmethod
     def get(self, item_id, task_name=None, flow_name=None):
@@ -32,4 +31,3 @@ class Cache(metaclass=abc.ABCMeta):
         :param flow_name: name of flow in which task was executed, unused when caching Celery's AsyncResult
         :return: item itself
         """
-        pass

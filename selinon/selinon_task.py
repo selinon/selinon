@@ -158,4 +158,3 @@ class SelinonTask(metaclass=abc.ABCMeta):
         :param node_args: arguments passed to flow/node
         :return: tasks's result that will be stored in database as configured
         """
-        pass
