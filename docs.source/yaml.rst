@@ -369,7 +369,7 @@ A name of the flow. This name is used to reference the flow.
 propagate_parent
 ################
 
-Propagate parent nodes to sub-flow or sub-flows. Parent nodes will be available in the ``self.parent`` property of the :class:`SelinonTask <selinon.selinon_task.SelinonTask>` class and it will be possible to transparently transparently query results using :class:`SelinonTask <selinon.selinon_task.SelinonTask>` methods.
+Propagate parent nodes to sub-flow or sub-flows. Parent nodes will be available in the ``self.parent`` property of the :class:`SelinonTask <selinon.selinon_task.SelinonTask>` class and it will be possible to transparently query results using :class:`SelinonTask <selinon.selinon_task.SelinonTask>` methods.
 
  * **Possible values:**
 
