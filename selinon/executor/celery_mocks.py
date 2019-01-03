@@ -85,7 +85,7 @@ class SimulateAsyncResult:
 
         :return: retrieve result of the task or exception that was raised
         """
-        return self.task_failures.get(self.task_id, None)
+        return self.task_successes.get(self.task_id, None)
 
 
 class SimulateRetry(Exception):
