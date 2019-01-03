@@ -135,7 +135,8 @@ class SystemState:  # pylint: disable=too-many-instance-attributes
         # Make tests more readable
         return str(self.to_dict())
 
-    def __init__(self, dispatcher_id, flow_name, node_args=None, retry=None, state=None, parent=None, selective=None):
+    def __init__(self, dispatcher_id, flow_name, node_args=None, retry=None, state=None, parent=None, selective=None,
+                 config=None):
         # pylint: disable=too-many-arguments
         """Instantiate system state computation (called from Dispatcher).
 
@@ -146,6 +147,7 @@ class SystemState:  # pylint: disable=too-many-instance-attributes
         :param state: current state (serialized, if any)
         :param parent: information about parent nodes
         :param selective: precomputed information about selective flow, if any
+        :param config: update the config on each task of the flow
         """
         state_dict = state or {}
 
@@ -162,6 +164,7 @@ class SystemState:  # pylint: disable=too-many-instance-attributes
         # Instantiate lazily later if we will know that there is something to process
         self._waiting_edges = []
         self._retry = retry
+        self._config = copy.copy(config)
 
         # TODO: fix this - for some reasons serializer uses strings in keys
         if self._selective:
@@ -323,7 +326,8 @@ class SystemState:  # pylint: disable=too-many-instance-attributes
                 'flow_name': node_name,
                 'node_args': start_node_args,
                 'parent': start_parent,
-                'selective': selective or self.selective
+                'selective': selective or self.selective,
+                'config': self._config
             }
 
             countdown = self._get_countdown(node_name, is_flow=True)
@@ -354,7 +358,8 @@ class SystemState:  # pylint: disable=too-many-instance-attributes
                 'flow_name': self._flow_name,
                 'parent': parent,
                 'node_args': node_args,
-                'dispatcher_id': self._dispatcher_id
+                'dispatcher_id': self._dispatcher_id,
+                'config': self._config
             }
 
             countdown = self._get_countdown(node_name, is_flow=False)
