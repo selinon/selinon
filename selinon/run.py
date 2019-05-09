@@ -12,8 +12,23 @@ from .config import Config
 from .dispatcher import Dispatcher
 from .errors import UnknownFlowError
 from .selective import compute_selective_run
+from .trace import Trace
 
 _logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+
+def _do_run_flow(kwargs, queue):
+    """Actually run the flow, return dispatcher id."""
+    dispatcher_id = Dispatcher().apply_async(kwargs=kwargs, queue=queue)
+    trace_msg = {
+        'flow_name': kwargs["flow_name"],
+        'node_args': kwargs["node_args"],
+        'dispatcher_id': dispatcher_id,
+        'queue': queue,
+        'selective': kwargs.get("selective"),
+    }
+    Trace.log(Trace.FLOW_SCHEDULE, trace_msg)
+    return dispatcher_id
 
 
 def run_flow(flow_name, node_args=None):
@@ -28,9 +43,8 @@ def run_flow(flow_name, node_args=None):
 
     queue = Config.dispatcher_queues[flow_name]
     _logger.debug("Scheduling flow '%s' with node_args '%s' on queue '%s'", flow_name, node_args, queue)
-    return Dispatcher().apply_async(kwargs={'flow_name': flow_name,
-                                            'node_args': node_args},
-                                    queue=queue)
+    kwargs = {'flow_name': flow_name, 'node_args': node_args}
+    return _do_run_flow(kwargs, queue)
 
 
 def run_flow_selective(flow_name, task_names, node_args, follow_subflows=False, run_subsequent=False):
@@ -49,7 +63,5 @@ def run_flow_selective(flow_name, task_names, node_args, follow_subflows=False, 
 
     _logger.debug("Scheduling selective flow '%s' with node_args '%s' on queue '%s', computed selective run state: %s",
                   flow_name, node_args, queue, selective)
-    return Dispatcher().apply_async(kwargs={'flow_name': flow_name,
-                                            'node_args': node_args,
-                                            'selective': selective},
-                                    queue=queue)
+    kwargs = {'flow_name': flow_name, 'node_args': node_args, 'selective': selective}
+    return _do_run_flow(kwargs, queue)

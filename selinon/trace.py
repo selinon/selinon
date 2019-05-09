@@ -13,6 +13,10 @@ A list of events that can be traced:
 +----------------------------+-------------------------------------+-----------------+------------------------------------+
 | Event                      |  Event description                  | Emitter         |  msg_dict.keys()                   |
 +============================+=====================================+=================+====================================+
+|                            | A flow has been scheduled.          |                 |  dispatcher_id, selective,         |
+|   `FLOW_SCHEDULE`          |                                     | Msg producer    |  queue, node_args,                 |
+|                            |                                     |                 |  flow_name                         |
++----------------------------+-------------------------------------+-----------------+------------------------------------+
 |                            | Dispatcher was started and will     |                 |  dispatcher_id, state, selective,  |
 |   `DISPATCHER_WAKEUP`      | check flow status.                  | Dispatcher      |  retry, queue, node_args,          |
 |                            |                                     |                 |  flow_name                         |
@@ -204,6 +208,7 @@ class Trace:
     _logger = None
 
     DISPATCHER_WAKEUP, \
+        FLOW_SCHEDULE, \
         FLOW_START, \
         TASK_SCHEDULE, \
         TASK_START, \
@@ -252,7 +257,7 @@ class Trace:
         MIGRATION_SKEW,\
         MIGRATION_TAINTED_FLOW, \
         MIGRATION_ERROR, \
-        EAGER_FAILURE = range(50)
+        EAGER_FAILURE = range(51)
 
     WARN_EVENTS = (
         NODE_FAILURE,
@@ -273,6 +278,7 @@ class Trace:
 
     _event_strings = (
         'DISPATCHER_WAKEUP',
+        'FLOW_SCHEDULE',
         'FLOW_START',
         'TASK_SCHEDULE',
         'TASK_START',
