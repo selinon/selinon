@@ -121,8 +121,8 @@ class Dispatcher(Task):
                     raise self.selinon_retry(flow_info, adjust_retried_count=False, keep_state=False)
                 elif isinstance(exc, MigrationFlowFail):
                     raise self.flow_failure(flow_info['state'])
-                else:
-                    raise self.flow_failure(flow_info['state'])
+
+                raise self.flow_failure(flow_info['state'])
             except MigrationSkew as exc:
                 Trace.log(Trace.MIGRATION_SKEW, flow_info, available_migration_version=exc.available_migration_version)
                 raise self.selinon_retry(flow_info, adjust_retried_count=False)
