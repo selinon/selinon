@@ -138,8 +138,8 @@ class Predicate(metaclass=abc.ABCMeta):
             return NotPredicate.create(tree['not'], nodes_from, flow, can_inspect_results)
         elif 'and' in tree:
             return AndPredicate.create(tree['and'], nodes_from, flow, can_inspect_results)
-        else:
-            raise ConfigurationError("Unknown predicate:\n%s" % dict2json(tree))
+
+        raise ConfigurationError("Unknown predicate:\n%s" % dict2json(tree))
 
     @staticmethod
     def construct_condition_name(flow_name, idx):

@@ -57,7 +57,8 @@ class MongoDB(DataStorage):
 
         if cursor.count() > 1:
             raise ValueError("Multiple records with same task_id found")
-        elif not cursor:
+
+        if not cursor:
             raise FileNotFoundError("Record not found in database")
 
         record = cursor[0]

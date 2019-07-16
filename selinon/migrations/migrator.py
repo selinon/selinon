@@ -385,7 +385,8 @@ class Migrator:
                                         migration_version=migration_version,
                                         latest_migration_version=latest_migration_version,
                                         **kwargs)
-            elif tainted_flow_strategy == TaintedFlowStrategy.RETRY:
+
+            if tainted_flow_strategy == TaintedFlowStrategy.RETRY:
                 raise MigrationFlowRetry("Migration requested flow to retry",
                                          migration_version=migration_version,
                                          latest_migration_version=latest_migration_version,
