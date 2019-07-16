@@ -3,7 +3,8 @@ python:
 - '3.4'
 - '3.5'
 - '3.6'
-- '3.7-dev'
+- '3.7'
+- '3.8-dev'
 #- 'nightly'
 before_install:
 - sudo apt-get install -y graphviz
