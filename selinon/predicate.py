@@ -132,11 +132,14 @@ class Predicate(metaclass=abc.ABCMeta):
                 raise ConfigurationError("Cannot inspect results of tasks '%s' in predicate '%s' in flow '%s'"
                                          % (nodes_from, tree['name'], flow.name))
             return predicate
-        elif 'or' in tree:
+
+        if 'or' in tree:
             return OrPredicate.create(tree['or'], nodes_from, flow, can_inspect_results)
-        elif 'not' in tree:
+
+        if 'not' in tree:
             return NotPredicate.create(tree['not'], nodes_from, flow, can_inspect_results)
-        elif 'and' in tree:
+
+        if 'and' in tree:
             return AndPredicate.create(tree['and'], nodes_from, flow, can_inspect_results)
 
         raise ConfigurationError("Unknown predicate:\n%s" % dict2json(tree))

@@ -119,7 +119,8 @@ class Dispatcher(Task):
 
                 if isinstance(exc, MigrationFlowRetry):
                     raise self.selinon_retry(flow_info, adjust_retried_count=False, keep_state=False)
-                elif isinstance(exc, MigrationFlowFail):
+
+                if isinstance(exc, MigrationFlowFail):
                     raise self.flow_failure(flow_info['state'])
 
                 raise self.flow_failure(flow_info['state'])
