@@ -6,6 +6,7 @@
 # ######################################################################
 """Selinon adapter for Redis database."""
 
+import os
 import json
 
 from selinon import DataStorage
@@ -36,10 +37,10 @@ class Redis(DataStorage):  # pylint: disable=too-many-instance-attributes
         """
         super().__init__()
         self.conn = None
-        self.host = host or 'localhost'
-        self.port = port
+        self.host = host.format(**os.environ) if host else 'localhost'
+        self.port = int(port.format(**os.environ)) if isinstance(port, str) else port
         self.db = db  # pylint: disable=invalid-name
-        self.password = password
+        self.password = password.format(**os.environ)
         self.socket_timeout = socket_timeout
         self.connection_pool = connection_pool
         self.charset = charset or 'utf-8'
