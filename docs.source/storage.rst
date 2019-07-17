@@ -25,7 +25,7 @@ A configuration example:
         encoding: 'utf-8'
       echo: false
 
-The implementation is available in :mod:`selinon.storages.postgresql`.
+The connection string can be parametrized using environment variables. The implementation is available in :mod:`selinon.storages.postgresql`.
 
 `Redis` - Redis database adapter
 =======================================
@@ -49,7 +49,7 @@ A configuration example:
         charset: 'utf-8'
       port: 27017
 
-The implementation is available in :mod:`selinon.storages.redis`.
+Configuration entries `host`, `port`, `password` and `db` can be parametrized using environment variables. The implementation is available in :mod:`selinon.storages.redis`.
 
 `MongoDB` - MongoDB database adapter
 =========================================
@@ -72,7 +72,7 @@ A configuration example:
         host: 'mongohost'
       port: 27017
 
-The implementation is available in :mod:`selinon.storages.mongodb`.
+Configuration entries `db_name`, `collection_name`, `host` and `port` can be parametrized using environment variables. The implementation is available in :mod:`selinon.storages.mongodb`.
 
 
 `S3` - AWS S3 database adapter
@@ -96,7 +96,11 @@ A configuration example:
         aws_secret_access_key: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'
         region_name: 'us-east-1'
 
-The implementation is available in :mod:`selinon.storages.s3`.
+Configuration entries `bucket`, `aws_access_key_id`, `aws_secret_access_key`, `region_name`, `location`, `use_ssl` and `endpoint_url` can be parametrized using environment variables. The implementation is available in :mod:`selinon.storages.s3`.
+
+.. note::
+
+  You can use awesome projects such as `Ceph Nano <https://github.com/ceph/cn>`_, `Ceph <https://ceph.com/>`_ or `Minio <https://min.io/>`_ to run your application without AWS. You need to adjust `endpoint_url` configuration entry of this adapter to point to your alternative. You can check `Selinon's demo deployment <https://github.com/selinon/demo-deployment>`_ for more info.
 
 In memory storage
 =================
