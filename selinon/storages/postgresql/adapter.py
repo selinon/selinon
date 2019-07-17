@@ -6,6 +6,7 @@
 # ######################################################################
 """Selinon SQL Database adapter - PostgreSQL."""
 
+import os
 from selinon import DataStorage
 
 try:
@@ -25,13 +26,13 @@ class PostgreSQL(DataStorage):
     def __init__(self, connection_string, encoding='utf-8', echo=False):
         """Initialize PostgreSQL adapter from YAML configuration file.
 
-        :param connection_string:
-        :param encoding:
-        :param echo:
+        :param connection_string: connection string to be used to connect to PostgreSQL to
+        :param encoding: encoding to be used
+        :param echo: perform echo on queries
         """
         super().__init__()
 
-        self.engine = create_engine(connection_string, encoding=encoding, echo=echo)
+        self.engine = create_engine(connection_string.format(**os.environ), encoding=encoding, echo=echo)
         self.session = None
 
     def is_connected(self):  # noqa
