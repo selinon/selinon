@@ -6,6 +6,8 @@
 # ######################################################################
 """MongoDB database adapter."""
 
+import os
+
 try:
     from pymongo import MongoClient
 except ImportError as exc:
@@ -29,10 +31,10 @@ class MongoDB(DataStorage):
         self.client = None
         self.collection = None
         self.db = None  # pylint: disable=invalid-name
-        self.host = host or 'localhost'
-        self.port = port
-        self.db_name = db_name
-        self.collection_name = collection_name
+        self.host = (host or 'localhost').format(**os.environ)
+        self.port = int(port.format(**os.environ) if isinstance(port, str) else port)
+        self.db_name = db_name.format(**os.environ)
+        self.collection_name = collection_name.format(**os.environ)
 
     def is_connected(self):  # noqa
         return self.client is not None

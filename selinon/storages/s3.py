@@ -7,6 +7,7 @@
 """Selinon adapter for Amazon S3 storage."""
 
 import json
+import os
 
 try:
     import boto3
@@ -23,7 +24,7 @@ class S3(DataStorage):
     https://github.com/boto/boto3
     """
 
-    def __init__(self, bucket, location, endpoint_url=None, use_ssl=None,
+    def __init__(self, bucket, location=None, endpoint_url=None, use_ssl=None,
                  aws_access_key_id=None, aws_secret_access_key=None, region_name=None, serialize_json=False):
         """Initialize S3 storage adapter from YAML configuration file.
 
@@ -38,12 +39,15 @@ class S3(DataStorage):
         """
         # AWS access key and access id are handled by Boto - place them to config or use env variables
         super().__init__()
-        self._bucket_name = bucket
-        self._location = location
+        self._bucket_name = bucket.format(**os.environ)
+        self._location = location.format(**os.environ) if location else None
         self._s3 = None
-        self._use_ssl = use_ssl
-        self._endpoint_url = endpoint_url
+        self._use_ssl = bool(use_ssl.format(**os.environ) if isinstance(use_ssl, str) else use_ssl)
+        self._endpoint_url = endpoint_url.format(**os.environ) if endpoint_url else None
         self._serialize_json = serialize_json
+        aws_access_key_id = aws_access_key_id.format(**os.environ) if aws_access_key_id else None
+        aws_secret_access_key = aws_secret_access_key.format(**os.environ) if aws_secret_access_key else None
+        region_name = region_name.format(**os.environ) if region_name else None
         self._session = boto3.session.Session(aws_access_key_id=aws_access_key_id,
                                               aws_secret_access_key=aws_secret_access_key,
                                               region_name=region_name)
