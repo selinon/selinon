@@ -23,7 +23,7 @@ def _do_run_flow(kwargs, queue):
     trace_msg = {
         'flow_name': kwargs["flow_name"],
         'node_args': kwargs["node_args"],
-        'dispatcher_id': dispatcher_id,
+        'dispatcher_id': str(dispatcher_id),
         'queue': queue,
         'selective': kwargs.get("selective"),
     }
