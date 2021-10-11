@@ -7,6 +7,7 @@
 """Selinon SQL Database adapter - PostgreSQL."""
 
 import os
+from selinon.data_storage import SelinonMissingDataException
 from selinon import DataStorage
 
 try:
@@ -74,3 +75,11 @@ class PostgreSQL(DataStorage):
     def store_error(self, node_args, flow_name, task_name, task_id, exc_info):  # noqa
         # just to make pylint happy
         raise NotImplementedError()
+
+    def delete(self, flow_name, task_name, task_id):  # noqa
+        assert self.is_connected()  # nosec
+
+        response = self.session.query(Result).filter_by(task_id=task_id).delete()
+
+        if response == 0:
+            raise SelinonMissingDataException("Record not found")

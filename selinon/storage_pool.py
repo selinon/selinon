@@ -144,6 +144,37 @@ class StoragePool:
             return result
 
     @classmethod
+    def delete(cls, flow_name, task_name, task_id):
+        """Delete task's result from database which was configured to be used for desired task.
+
+        :param flow_name: flow in which the retrieval is taking place
+        :param task_name: name of task for which result should be deleted
+        :param task_id: task ID to uniquely identify task results
+        """
+        storage = cls.get_storage_by_task_name(task_name)
+        storage_task_name = Config.storage_task_name[task_name]
+        storage_name = cls.get_storage_name_by_task_name(task_name)
+        trace_msg = {
+            'task_name': task_name,
+            'storage_task_name': storage_task_name,
+            'storage_name': storage_name,
+            'flow_name': flow_name,
+            'task_id': task_id
+        }
+
+        with cls._storage_pool_locks.get_lock(storage):
+            Trace.log(Trace.STORAGE_DELETE, trace_msg)
+            try:
+                storage.delete(flow_name, task_name, task_id)
+            except Exception as exc:
+                error_msg = "Failed to delete result from storage"
+                Trace.log(Trace.STORAGE_ISSUE, trace_msg, what=traceback.format_exc())
+                raise StorageError(error_msg) from exc
+            Trace.log(Trace.STORAGE_DELETED, trace_msg)
+
+        return
+
+    @classmethod
     def set(cls, node_args, flow_name, task_name, task_id, result):
         # pylint: disable=too-many-arguments
         """Store result for task.

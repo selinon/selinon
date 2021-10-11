@@ -257,7 +257,10 @@ class Trace:
         MIGRATION_SKEW,\
         MIGRATION_TAINTED_FLOW, \
         MIGRATION_ERROR, \
-        EAGER_FAILURE = range(51)
+        EAGER_FAILURE,\
+        STORAGE_DELETE, \
+        STORAGE_DELETED, \
+        = range(53)
 
     WARN_EVENTS = (
         NODE_FAILURE,
@@ -327,7 +330,9 @@ class Trace:
         'MIGRATION_SKEW',
         'MIGRATION_TAINTED_FLOW',
         'MIGRATION_ERROR',
-        'EAGER_FAILURE'
+        'EAGER_FAILURE',
+        'STORAGE_DELETE',
+        'STORAGE_DELETED'
     )
 
     def __init__(self):

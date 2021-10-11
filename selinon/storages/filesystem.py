@@ -9,7 +9,7 @@
 import json
 import os
 
-from selinon import DataStorage
+from selinon import DataStorage, SelinonMissingDataException
 
 
 class Filesystem(DataStorage):
@@ -60,3 +60,10 @@ class Filesystem(DataStorage):
     def store_error(self, node_args, flow_name, task_name, task_id, exc_info):  # noqa
         # just to make pylint happy
         raise NotImplementedError()
+
+    def delete(self, flow_name, task_name, task_id):
+        path = self._construct_path(flow_name, task_name, task_id)
+        if os.path.exists(path):
+            os.remove(path)
+        else:
+            raise SelinonMissingDataException
