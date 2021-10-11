@@ -9,6 +9,10 @@
 import abc
 
 
+class SelinonMissingDataException(Exception):
+    """Selinon exception that ressource was not found by storage"""
+    pass
+
 class DataStorage(metaclass=abc.ABCMeta):
     """Abstract Selinon storage adapter that is implemented by a user."""
 
@@ -75,6 +79,15 @@ class DataStorage(metaclass=abc.ABCMeta):
         # pylint: disable=abstract-method
         # no not mark this method with @abc.abstractmethod as we do not force a user to implement this
         raise NotImplementedError()
+
+    def delete(self, flow_name, task_name, task_id):
+        """Delete result stored in storage.
+
+        :param flow_name: flow name in which task was executed
+        :param task_name: task name that result is going to be retrieved
+        :param task_id: id of the task that result is going to be retrieved
+        """
+        raise NotImplementedError("delete method is not implemented")
 
     def __del__(self):
         """Clean up."""

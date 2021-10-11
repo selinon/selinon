@@ -8,6 +8,7 @@
 
 import os
 import json
+from selinon.data_storage import SelinonMissingDataException
 
 from selinon import DataStorage
 
@@ -90,3 +91,12 @@ class Redis(DataStorage):  # pylint: disable=too-many-instance-attributes
     def store_error(self, node_args, flow_name, task_name, task_id, exc_info):  # noqa
         # just to make pylint happy
         raise NotImplementedError()
+
+
+    def delete(self, flow_name, task_name, task_id):  # noqa
+        assert self.is_connected()  # nosec
+
+        ret = self.conn.delete(task_id)
+
+        if ret == 0:
+            raise SelinonMissingDataException("Record not found in database")

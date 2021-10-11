@@ -4,7 +4,7 @@
 from .cache import Cache
 from .codename import selinon_version_codename
 from .config import Config
-from .data_storage import DataStorage
+from .data_storage import DataStorage, SelinonMissingDataException
 from .dispatcher import Dispatcher
 from .errors import CacheMissError
 from .errors import ConfigNotInitializedError

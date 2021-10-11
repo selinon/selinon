@@ -7,6 +7,7 @@
 """MongoDB database adapter."""
 
 import os
+from selinon.data_storage import SelinonMissingDataException
 
 try:
     from pymongo import MongoClient
@@ -88,3 +89,19 @@ class MongoDB(DataStorage):
     def store_error(self, node_args, flow_name, task_name, task_id, exc_info):  # noqa
         # just to make pylint happy
         raise NotImplementedError()
+
+
+    def delete(self, flow_name, task_name, task_id):  # noqa
+        assert self.is_connected()  # nosec
+
+        filtering = {'_id': 0}
+        cursor = self.collection.find({'task_id': task_id}, filtering)
+
+        cursor_count = cursor.count()
+        if cursor_count > 1:
+            raise ValueError("Multiple records with same task_id found")
+
+        if cursor_count == 0:
+            raise SelinonMissingDataException("Record not found in database")
+
+        self.collection.delete_one({'task_id': task_id})

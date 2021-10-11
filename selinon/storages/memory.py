@@ -7,6 +7,7 @@
 """In memory storage implementation."""
 
 import json as jsonlib
+from selinon.data_storage import SelinonMissingDataException
 import sys
 
 from selinon import DataStorage
@@ -79,3 +80,9 @@ class InMemoryStorage(DataStorage):
     def store_error(self, node_args, flow_name, task_name, task_id, exc_info):  # noqa
         # just to make pylint happy
         raise NotImplementedError()
+
+    def delete(self, flow_name, task_name, task_id):
+        try:
+            del self.database[task_id]
+        except KeyError:
+            raise SelinonMissingDataException("Record not found in database")

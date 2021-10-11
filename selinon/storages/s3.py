@@ -14,7 +14,7 @@ try:
     import botocore
 except ImportError as exc:
     raise ImportError("Please install boto3 using `pip3 install selinon[s3]` in order to use S3 storage") from exc
-from selinon import DataStorage
+from selinon import DataStorage, SelinonMissingDataException
 
 
 class S3(DataStorage):
@@ -100,3 +100,17 @@ class S3(DataStorage):
     def store_error(self, node_args, flow_name, task_name, task_id, exc_info):  # noqa
         # just to make pylint happy
         raise NotImplementedError()
+
+    def delete(self, flow_name, task_name, task_id):
+        assert self.is_connected()  # nosec
+
+        s3_object = self._s3.Object(self._bucket_name, task_id)
+
+        try:
+            s3_object.load()
+        except botocore.exceptions.ClientError as e:
+            if e.response['Error']['Code'] == "404":
+                # The object does not exist.
+                raise SelinonMissingDataException from e
+            raise e
+        s3_object.delete()
