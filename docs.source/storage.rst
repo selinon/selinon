@@ -169,6 +169,11 @@ You can define your own storage by inheriting from :class:`DataStorage <selinon.
           # optionally define how to track errors/task failures if you need to
           pass
 
+      def delete(self, flow_name, task_name, task_id):
+          # define how to delete results
+          pass
+
+
 And pass this storage to Selinon in your YAML configuration:
 
 .. code-block:: yaml
