@@ -140,10 +140,9 @@ class Config:
         system = System.from_files(nodes_definition_file, flow_definition_files)
 
         if not config_py:
-            tmp_f = tempfile.NamedTemporaryFile(mode="w", delete=False)
-            cls._logger.debug("Generating config.py file to created temporary file '%s'", tmp_f.name)
-            system.dump2stream(tmp_f)
-            tmp_f.close()
+            with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp_f:
+                cls._logger.debug("Generating config.py file to created temporary file '%s'", tmp_f.name)
+                system.dump2stream(tmp_f)
             config_py = tmp_f.name
         else:
             cls._logger.debug("Generating config.py file to proposed file '%s'", config_py)
