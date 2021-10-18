@@ -21,7 +21,7 @@ class InMemoryStorage(DataStorage):
         :param echo: echo results to stdout/stderr - provide 'stderr' or 'stdout' to echo data retrieval and storing
         :param json: if True a JSON will be printed
         """
-        super(InMemoryStorage, self).__init__()
+        super().__init__()
         self.database = {}
         self.echo_file = None
 
