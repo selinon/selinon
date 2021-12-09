@@ -41,7 +41,7 @@ class Redis(DataStorage):  # pylint: disable=too-many-instance-attributes
         self.host = host.format(**os.environ) if host else 'localhost'
         self.port = int(port.format(**os.environ)) if isinstance(port, str) else port
         self.db = int(db.format(**os.environ) if isinstance(db, str) else db)  # pylint: disable=invalid-name
-        self.password = password.format(**os.environ)
+        self.password = password.format(**os.environ) if password else None
         self.socket_timeout = socket_timeout
         self.connection_pool = connection_pool
         self.charset = charset or 'utf-8'
