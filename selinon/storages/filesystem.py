@@ -36,7 +36,7 @@ class Filesystem(DataStorage):
 
     def connect(self):
         if not os.path.isdir(self.path):
-            os.makedirs(self.path)
+            os.makedirs(self.path, exist_ok=True)
         self._connected = True
 
     def disconnect(self):
