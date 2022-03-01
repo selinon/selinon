@@ -36,7 +36,7 @@ class Filesystem(DataStorage):
 
     def connect(self):
         if not os.path.isdir(self.path):
-            os.makedirs(self.path)
+            os.makedirs(self.path, exist_ok=True)
         self._connected = True
 
     def disconnect(self):
@@ -50,7 +50,7 @@ class Filesystem(DataStorage):
     def store(self, node_args, flow_name, task_name, task_id, result):  # noqa
         base_path = self._construct_base_path(flow_name, task_name)
         if not os.path.isdir(base_path):
-            os.makedirs(base_path)
+            os.makedirs(base_path, exist_ok=True)
 
         path = self._construct_path(flow_name, task_name, task_id)
         with open(path, 'w') as result_file:
