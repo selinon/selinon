@@ -157,9 +157,10 @@ guests may vary so make sure no guest stays hungry. Our
    :align: center
 
 This example demonstrates very simple flows. The whole configuration can
-be found `here </example/dinner.yaml>`__. Just check it out how you can
-easily define your flows! You can find a script that visualises graphs
-based on the YAML configuration in `this repo </example/>`__ as well.
+be found `here <https://github.com/selinon/selinon/blob/master/example/dinner.yaml>`__.
+Just check it out how you can easily define your flows! You can find a script
+that visualises graphs based on the YAML configuration in `this repo
+<https://github.com/selinon/selinon/tree/master/example>`__ as well.
 
 More info
 ---------
