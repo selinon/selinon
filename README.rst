@@ -21,7 +21,7 @@ Crossroad
 -  `Travis CI <https://travis-ci.org/selinon/selinon>`__
 
 
-Last stable release: `Selinon 1.2.1 <https://pypi.org/project/selinon/1.2.1/>`_
+Last stable release: `Selinon 1.3.0 <https://pypi.org/project/selinon/1.3.0/>`_
 
 TLDR;
 -----
