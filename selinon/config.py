@@ -12,9 +12,12 @@ import os
 import runpy
 import tempfile
 
+import celery
+
 from .errors import ConfigNotInitializedError
 from .errors import ConfigurationError
 from .errors import UnknownStorageError
+from .errors import UnsupportedCeleryError
 from .system import System
 from .trace import Trace
 
@@ -211,8 +214,18 @@ class Config:
         cls._logger.debug("Registering Selinon to Celery context")
 
         cls.celery_app = celery_app
-        celery_app.tasks.register(Dispatcher())
-        celery_app.tasks.register(SelinonTaskEnvelope())
+
+        celery_major_version = int(celery.__version__.split(".", maxsplit=1)[0])
+        if celery_major_version == 4:
+            celery_app.tasks.register(Dispatcher())
+            celery_app.tasks.register(SelinonTaskEnvelope())
+        elif celery_major_version == 5:
+            celery_app.register_task(Dispatcher())
+            celery_app.register_task(SelinonTaskEnvelope())
+        else:
+            raise UnsupportedCeleryError(
+                "Unsupported Celery version {}, supported are celery>=4,<6".format(celery.__version__)
+            )
 
     @classmethod
     def init(cls, celery_app, nodes_definition_file, flow_definition_files, config_py=None, keep_config_py=False):

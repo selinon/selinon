@@ -44,7 +44,7 @@ setup(
     license='BSD',
     keywords='selinon celery yaml flow distributed-computing',
     extras_require={
-        'celery': ['celery>=4'],
+        'celery': ['celery>=4,<6'],
         'mongodb': ['pymongo'],
         'postgresql': ['SQLAlchemy', 'SQLAlchemy-Utils'],
         'redis': ['redis'],
