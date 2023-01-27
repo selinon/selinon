@@ -13,6 +13,10 @@ class SelinonException(Exception):
     """Base Selinon exception in exception hierarchy."""
 
 
+class UnsupportedCeleryError(Exception):
+    """An exception raised when using unsupported Celery version."""
+
+
 class FatalTaskError(SelinonException):
     """An exception that is raised by task on fatal error - task will be not retried."""
 

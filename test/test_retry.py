@@ -6,7 +6,7 @@
 # ######################################################################
 
 import pytest
-import flexmock
+from flexmock import flexmock
 from selinon_test_case import SelinonTestCase
 from selinon import SystemState
 from selinon.errors import DispatcherRetry
