@@ -175,7 +175,8 @@ Live Demo
 ---------
 
 A live demo with few examples can be found
-`here <https://github.com/selinon/demo>`__. Feel free to check it out.
+`here <https://github.com/selinon/demo-deployment>`__. Feel free to check
+it out.
 
 Installation
 ------------
