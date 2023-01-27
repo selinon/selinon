@@ -169,7 +169,7 @@ flows, schedule N tasks (where N is a run-time evaluated variable), do
 result caching, placing tasks on separate queues in order to be capable
 of doing fluent system updates, throttle execution of certain tasks in
 time, propagate results of tasks to sub-flows etc. Just check
-`documentation <https://selinon.github.io/selinon>`__ for more info.
+`documentation <https://selinon.readthedocs.io/>`__ for more info.
 
 Live Demo
 ---------
