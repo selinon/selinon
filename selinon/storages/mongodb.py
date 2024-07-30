@@ -96,7 +96,6 @@ class MongoDB(DataStorage):
     def delete(self, flow_name, task_name, task_id):  # noqa
         assert self.is_connected()  # nosec
 
-        filtering = {'_id': 0}
         documents_count = self.collection.count_documents({'task_id': task_id})
 
         if documents_count > 1:
