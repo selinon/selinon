@@ -56,7 +56,6 @@ class MongoDB(DataStorage):
     def retrieve(self, flow_name, task_name, task_id):  # noqa
         assert self.is_connected()  # nosec
 
-        filtering = {'_id': 0}
         documents_count = self.collection.count_documents({'task_id': task_id})
 
         if documents_count > 1:
@@ -66,6 +65,7 @@ class MongoDB(DataStorage):
             raise FileNotFoundError("Record not found in database")
 
         # We perform a find_one after ensuring that there is only one document matching the task
+        filtering = {'_id': 0}
         record = self.collection.find_one({'task_id': task_id}, filtering)
 
         assert task_name == record['task_name']  # nosec
