@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
-import sys
 import os
-from setuptools import setup, find_packages
+import sys
 
+from setuptools import find_packages, setup
 
 if sys.version_info[0] != 3:
     sys.exit("Python3 is required in order to install Selinon")
@@ -45,7 +45,7 @@ setup(
     keywords='selinon celery yaml flow distributed-computing',
     extras_require={
         'celery': ['celery>=4,<6'],
-        'mongodb': ['pymongo'],
+        'mongodb': ['pymongo>=3.7'],
         'postgresql': ['SQLAlchemy', 'SQLAlchemy-Utils'],
         'redis': ['redis'],
         's3': ['boto3'],
