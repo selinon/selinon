@@ -7,6 +7,7 @@
 """MongoDB database adapter."""
 
 import os
+
 from selinon.data_storage import SelinonMissingDataException
 
 try:
@@ -56,15 +57,16 @@ class MongoDB(DataStorage):
         assert self.is_connected()  # nosec
 
         filtering = {'_id': 0}
-        cursor = self.collection.find({'task_id': task_id}, filtering)
+        documents_count = self.collection.count_documents({'task_id': task_id}, filtering)
 
-        if cursor.count() > 1:
+        if documents_count > 1:
             raise ValueError("Multiple records with same task_id found")
 
-        if not cursor:
+        if documents_count == 0:
             raise FileNotFoundError("Record not found in database")
 
-        record = cursor[0]
+        # We perform a find_one after ensuring that there is only one document matching the task
+        record = self.collection.find_one({'task_id': task_id}, filtering)
 
         assert task_name == record['task_name']  # nosec
         return record.get('result')
@@ -81,7 +83,7 @@ class MongoDB(DataStorage):
 
         }
 
-        self.collection.insert(record)
+        self.collection.insert_one(record)
 
         # task_id is unique here
         return task_id
@@ -95,13 +97,12 @@ class MongoDB(DataStorage):
         assert self.is_connected()  # nosec
 
         filtering = {'_id': 0}
-        cursor = self.collection.find({'task_id': task_id}, filtering)
+        documents_count = self.collection.count_documents({'task_id': task_id}, filtering)
 
-        cursor_count = cursor.count()
-        if cursor_count > 1:
+        if documents_count > 1:
             raise ValueError("Multiple records with same task_id found")
 
-        if cursor_count == 0:
+        if documents_count == 0:
             raise SelinonMissingDataException("Record not found in database")
 
         self.collection.delete_one({'task_id': task_id})
