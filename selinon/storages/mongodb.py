@@ -57,7 +57,7 @@ class MongoDB(DataStorage):
         assert self.is_connected()  # nosec
 
         filtering = {'_id': 0}
-        documents_count = self.collection.count_documents({'task_id': task_id}, filtering)
+        documents_count = self.collection.count_documents({'task_id': task_id})
 
         if documents_count > 1:
             raise ValueError("Multiple records with same task_id found")
@@ -97,7 +97,7 @@ class MongoDB(DataStorage):
         assert self.is_connected()  # nosec
 
         filtering = {'_id': 0}
-        documents_count = self.collection.count_documents({'task_id': task_id}, filtering)
+        documents_count = self.collection.count_documents({'task_id': task_id})
 
         if documents_count > 1:
             raise ValueError("Multiple records with same task_id found")
