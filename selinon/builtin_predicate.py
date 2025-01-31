@@ -167,7 +167,7 @@ class AndPredicate(NaryPredicate):
 
         :return: AST of describing all children predicates
         """
-        return ast.BoolOp(ast.And(), [ast.Expr(value=x.ast()) for x in self._children])
+        return ast.BoolOp(ast.And(), [x.ast() for x in self._children])
 
     @staticmethod
     def create(tree, nodes_from, flow, can_inspect_results):
@@ -201,7 +201,7 @@ class OrPredicate(NaryPredicate):
 
         :return: AST of describing all children predicates
         """
-        return ast.BoolOp(ast.Or(), [ast.Expr(value=x.ast()) for x in self._children])
+        return ast.BoolOp(ast.Or(), [x.ast() for x in self._children])
 
     @staticmethod
     def create(tree, nodes_from, flow, can_inspect_results):
@@ -235,7 +235,7 @@ class NotPredicate(UnaryPredicate):
 
         :return: AST of describing all children predicates
         """
-        return ast.UnaryOp(ast.Not(), ast.Expr(value=self._child.ast()))
+        return ast.UnaryOp(ast.Not(), self._child.ast())
 
     @staticmethod
     def create(tree, nodes_from, flow, can_inspect_results):

@@ -43,6 +43,7 @@ setup(
     url='https://github.com/selinon/selinon',
     license='BSD',
     keywords='selinon celery yaml flow distributed-computing',
+    python_requires=">=3.9",
     extras_require={
         'celery': ['celery>=4,<6'],
         'mongodb': ['pymongo>=3.7'],
@@ -54,9 +55,9 @@ setup(
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
