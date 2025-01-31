@@ -1,5 +1,4 @@
 click
-codegen
 graphviz
 jsonschema
 pyyaml

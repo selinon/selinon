@@ -7,12 +7,10 @@
 """Predicate interface - predicate for building conditions."""
 
 import abc
-
-import codegen
+import ast
 
 from .errors import ConfigurationError
-from .helpers import check_conf_keys
-from .helpers import dict2json
+from .helpers import check_conf_keys, dict2json
 
 
 class Predicate(metaclass=abc.ABCMeta):
@@ -98,8 +96,8 @@ class Predicate(metaclass=abc.ABCMeta):
         :type can_inspect_results: bool
         :rtype: Predicate
         """
+        from .builtin_predicate import AndPredicate, NotPredicate, OrPredicate
         from .leaf_predicate import LeafPredicate
-        from .builtin_predicate import OrPredicate, AndPredicate, NotPredicate
 
         if not tree:
             raise ConfigurationError("Bad condition '%s'" % tree)
@@ -162,7 +160,7 @@ class Predicate(metaclass=abc.ABCMeta):
 
         :return: predicate source code
         """
-        return codegen.to_source(self.ast())
+        return ast.unparse(self.ast())
 
     @abc.abstractmethod
     def check(self):
