@@ -226,3 +226,15 @@ class Dispatcher(Task):
             # Always an empty array.
             'active_nodes': state_dict.get('active_nodes', [])
         }
+
+    @property
+    def request(self):
+        return getattr(super(), "request")
+
+    @request.setter
+    def request(self, tid):
+        """Used only by CLI."""
+        from celery.utils.threads import LocalStack
+        if self.request_stack is None:
+            self.request_stack = LocalStack()
+        self.push_request(id=tid)
