@@ -8,8 +8,7 @@ An advanced task flow management on top of
 |Travis CI| |Documentation Status| |GitHub stars| |GitHub license|
 |Twitter|
 
-Is this project helpful? `Send me a simple warm
-message <https://saythanks.io/to/fridex>`__!
+Is this project helpful? `Consider sponsoring it <https://github.com/sponsors/selinon>`__!
 
 Crossroad
 ---------
